@@ -1,25 +1,69 @@
-# CakePHP 3
 
-/vendor/*
-/config/app.php
+# Laravel & Composer
+/vendor/
+/node_modules/
+.env
+.env.*
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+/.vagrant/
+/storage/*.key
 
-/tmp/cache/models/*
-!/tmp/cache/models/empty
-/tmp/cache/persistent/*
-!/tmp/cache/persistent/empty
-/tmp/cache/views/*
-!/tmp/cache/views/empty
-/tmp/sessions/*
-!/tmp/sessions/empty
-/tmp/tests/*
-!/tmp/tests/empty
+# Laravel storage and cache
+/storage/app/public
+/storage/debugbar
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
 
-/logs/*
-!/logs/empty
+# IDEs and editors
+/.idea/
+/*.sublime-workspace
+/*.sublime-project
+/.vscode/
+/nbproject/
 
-# CakePHP 2
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
 
-/app/tmp/*
-/app/Config/core.php
-/app/Config/database.php
-/vendors/*
+# NPM/Yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build
+/public/hot
+/public/storage
+/public/mix-manifest.json
+/public/js/*.map
+/public/css/*.map
+
+# Misc
+*.log
+*.sqlite
+*.sqlite3
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Coverage
+/coverage
+/.nyc_output
+
+# Composer PHAR
+composer.phar
+
+# Laravel Telescope
+storage/telescope
+
+#
+=======

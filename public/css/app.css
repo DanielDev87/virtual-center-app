@@ -1,0 +1,276 @@
+/* Virtual Center - Custom Styles */
+
+:root {
+    --bs-primary: #0d6efd;
+    --bs-secondary: #6c757d;
+    --bs-success: #198754;
+    --bs-info: #0dcaf0;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-light: #f8f9fa;
+    --bs-dark: #212529;
+    
+    /* Custom colors */
+    --vc-primary: #0280AE;
+    --vc-secondary: #6c757d;
+    --vc-accent: #17a2b8;
+    --vc-success: #28a745;
+    --vc-warning: #ffc107;
+    --vc-danger: #dc3545;
+    
+    /* Dark mode colors */
+    --vc-dark-bg: #1a1a1a;
+    --vc-dark-surface: #2d2d2d;
+    --vc-dark-text: #ffffff;
+    --vc-dark-text-secondary: #b0b0b0;
+}
+
+/* Light theme */
+[data-bs-theme="light"] {
+    --bs-body-bg: #ffffff;
+    --bs-body-color: #212529;
+    --vc-bg-primary: var(--vc-primary);
+    --vc-bg-secondary: var(--bs-light);
+    --vc-text-primary: var(--bs-dark);
+    --vc-text-secondary: var(--bs-secondary);
+}
+
+/* Dark theme */
+[data-bs-theme="dark"] {
+    --bs-body-bg: var(--vc-dark-bg);
+    --bs-body-color: var(--vc-dark-text);
+    --vc-bg-primary: var(--vc-dark-surface);
+    --vc-bg-secondary: var(--vc-dark-surface);
+    --vc-text-primary: var(--vc-dark-text);
+    --vc-text-secondary: var(--vc-dark-text-secondary);
+    
+    /* Override Bootstrap dark theme colors */
+    --bs-primary: #0d6efd;
+    --bs-secondary: #6c757d;
+    --bs-success: #198754;
+    --bs-info: #0dcaf0;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-light: #f8f9fa;
+    --bs-dark: #212529;
+}
+
+/* Global styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navbar customization */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    transform: translateY(-1px);
+}
+
+/* Theme toggle button */
+#themeToggle {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+#themeToggle:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.05);
+}
+
+/* Cards */
+.card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: var(--vc-dark-surface);
+    color: var(--vc-dark-text);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background-color: var(--vc-primary);
+    border-color: var(--vc-primary);
+}
+
+.btn-primary:hover {
+    background-color: #0270a0;
+    border-color: #0270a0;
+}
+
+/* Forms */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--vc-primary);
+    box-shadow: 0 0 0 0.2rem rgba(2, 128, 174, 0.25);
+}
+
+[data-bs-theme="dark"] .form-control {
+    background-color: var(--vc-dark-surface);
+    border-color: #495057;
+    color: var(--vc-dark-text);
+}
+
+[data-bs-theme="dark"] .form-control:focus {
+    background-color: var(--vc-dark-surface);
+    border-color: var(--vc-primary);
+    color: var(--vc-dark-text);
+}
+
+/* Tables */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+[data-bs-theme="dark"] .table {
+    color: var(--vc-dark-text);
+}
+
+[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Modals */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .modal-content {
+    background-color: var(--vc-dark-surface);
+    color: var(--vc-dark-text);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+[data-bs-theme="dark"] .alert {
+    color: var(--vc-dark-text);
+}
+
+/* Footer */
+footer {
+    background-color: var(--vc-dark-bg) !important;
+}
+
+[data-bs-theme="light"] footer {
+    background-color: var(--bs-dark) !important;
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Custom utilities */
+.text-vc-primary {
+    color: var(--vc-primary) !important;
+}
+
+.bg-vc-primary {
+    background-color: var(--vc-primary) !important;
+}
+
+.border-vc-primary {
+    border-color: var(--vc-primary) !important;
+}
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .display-5 {
+        font-size: 1.8rem;
+    }
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+
