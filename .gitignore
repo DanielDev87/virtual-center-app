@@ -1,0 +1,67 @@
+# Laravel & Composer
+/vendor/
+/node_modules/
+.env
+.env.*
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+/.vagrant/
+/storage/*.key
+
+# Laravel storage and cache
+/storage/app/public
+/storage/debugbar
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+
+# IDEs and editors
+/.idea/
+/*.sublime-workspace
+/*.sublime-project
+/.vscode/
+/nbproject/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# NPM/Yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build
+/public/hot
+/public/storage
+/public/mix-manifest.json
+/public/js/*.map
+/public/css/*.map
+
+# Misc
+*.log
+*.sqlite
+*.sqlite3
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Coverage
+/coverage
+/.nyc_output
+
+# Composer PHAR
+composer.phar
+
+# Laravel Telescope
+storage/telescope
+
+#
