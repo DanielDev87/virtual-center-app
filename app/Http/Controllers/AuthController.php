@@ -66,15 +66,23 @@ class AuthController extends Controller
     {
         $roleName = strtolower($user->role->role_name ?? '');
         
-        if (str_contains($roleName, 'admin') || str_contains($roleName, 'administrador')) {
-            return redirect()->route('dashboard');
-        } elseif (str_contains($roleName, 'colaborador') || str_contains($roleName, 'contributor')) {
+        // Admin -> Vista de gestión de tickets
+        if (str_contains($roleName, 'admin')) {
+            return redirect()->route('admin.tickets.index');
+        } 
+        // Contributor/Colaborador -> Vista de colaboradores
+        elseif (str_contains($roleName, 'contributor') || str_contains($roleName, 'colaborador')) {
             return redirect()->route('contributors.dashboard');
-        } elseif (str_contains($roleName, 'monitor')) {
+        } 
+        // Monitor -> Vista de monitor
+        elseif (str_contains($roleName, 'monitor')) {
             return redirect()->route('monitor.index');
-        } else {
-            return redirect()->route('home');
+        } 
+        // Default (Requester/Solicitante) -> Mis solicitudes
+        else {
+            return redirect()->route('service-management.index');
         }
     }
 }
+
 

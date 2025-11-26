@@ -310,3 +310,4 @@ function deleteCollaborator(collaboratorId) {
 }
 </script>
 @endpush
+

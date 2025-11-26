@@ -1,56 +1,80 @@
-@extends('layouts.app')
+@extends('layouts.requester')
 
-@section('title', 'Gestión de Servicios - Virtual Center')
+@section('title', 'Mis Solicitudes - Virtual Center')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Gestión de Servicios</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
-                    <i class="fas fa-filter me-1"></i>Filtrar
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary">
-                    <i class="fas fa-download me-1"></i>Exportar
-                </button>
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card stat-card border-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Total</h6>
+                        <h2 class="mb-0">{{ $stats['total'] }}</h2>
+                    </div>
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                </div>
             </div>
-            <a href="{{ route('service-management.create') }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus me-1"></i>Nuevo Servicio
-            </a>
         </div>
     </div>
+    <div class="col-md-3 mb-3">
+        <div class="card stat-card border-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Pendientes</h6>
+                        <h2 class="mb-0">{{ $stats['pending'] }}</h2>
+                    </div>
+                    <div class="stat-icon text-secondary">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card stat-card border-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">En Progreso</h6>
+                        <h2 class="mb-0">{{ $stats['in_progress'] }}</h2>
+                    </div>
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card stat-card border-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Completados</h6>
+                        <h2 class="mb-0">{{ $stats['completed'] }}</h2>
+                    </div>
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <!-- Filters -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <select class="form-select" id="statusFilter">
-                <option value="">Todos los estados</option>
-                <option value="pending">Pendiente</option>
-                <option value="in_progress">En Progreso</option>
-                <option value="completed">Completado</option>
-                <option value="cancelled">Cancelado</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select class="form-select" id="institutionFilter">
-                <option value="">Todas las instituciones</option>
-                @foreach($institutions as $institution)
-                <option value="{{ $institution->institution_id }}">{{ $institution->institution_name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select class="form-select" id="materialFilter">
-                <option value="">Todos los tipos</option>
-                @foreach($materialTypes as $type)
-                <option value="{{ $type->material_type_id }}">{{ $type->material_type_name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-3">
-            <input type="text" class="form-control" id="searchInput" placeholder="Buscar proyectos...">
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Mis Solicitudes</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ route('service-management.create') }}" class="btn btn-gradient">
+                <i class="fas fa-plus me-1"></i>Nueva Solicitud
+            </a>
         </div>
     </div>
 
@@ -61,57 +85,57 @@
                 <table class="table table-bordered table-hover" id="projectsTable">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
-                            <th>Nombre del Proyecto</th>
-                            <th>Institución</th>
-                            <th>Tipo de Material</th>
+                            <th># Ticket</th>
+                            <th>Título</th>
                             <th>Estado</th>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Fin</th>
+                            <th>Fecha Creación</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($projects as $project)
+                        @forelse($tickets as $ticket)
                         <tr>
-                            <td>{{ $project->tracking_id }}</td>
+                            <td>#{{ $ticket->ticket_number }}</td>
                             <td>
-                                <div class="fw-bold">{{ $project->project_name }}</div>
-                                <small class="text-muted">{{ Str::limit($project->project_description, 50) }}</small>
+                                <div class="fw-bold">{{ $ticket->title }}</div>
+                                <small class="text-muted">{{ Str::limit($ticket->requester_info, 50) }}</small>
                             </td>
-                            <td>{{ $project->institution->institution_name }}</td>
-                            <td>{{ $project->materialType->material_type_name }}</td>
                             <td>
-                                <span class="badge bg-{{ $project->project_status === 'completed' ? 'success' : ($project->project_status === 'in_progress' ? 'warning' : ($project->project_status === 'cancelled' ? 'danger' : 'secondary')) }}">
-                                    {{ ucfirst($project->project_status) }}
+                                @php
+                                    $statusColors = [
+                                        1 => 'secondary', // Pending
+                                        2 => 'warning',   // In Progress
+                                        3 => 'success',   // Completed
+                                        4 => 'danger'     // Cancelled
+                                    ];
+                                    $statusNames = [
+                                        1 => 'Pendiente',
+                                        2 => 'En Progreso',
+                                        3 => 'Completado',
+                                        4 => 'Cancelado'
+                                    ];
+                                @endphp
+                                <span class="badge bg-{{ $statusColors[$ticket->status] ?? 'secondary' }}">
+                                    {{ $statusNames[$ticket->status] ?? 'Desconocido' }}
                                 </span>
                             </td>
-                            <td>{{ $project->start_date ? $project->start_date->format('d/m/Y') : '-' }}</td>
-                            <td>{{ $project->end_date ? $project->end_date->format('d/m/Y') : '-' }}</td>
+                            <td>{{ $ticket->created_at->format('d/m/Y H:i') }}</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('service-management.show', $project->tracking_id) }}" 
-                                       class="btn btn-outline-primary" title="Ver">
+                                    <a href="{{ route('service-management.show', $ticket->ticket_id) }}" 
+                                       class="btn btn-outline-primary" title="Ver Detalles">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('service-management.edit', $project->tracking_id) }}" 
-                                       class="btn btn-outline-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-outline-danger" 
-                                            onclick="deleteProject({{ $project->tracking_id }})" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="5" class="text-center text-muted py-4">
                                 <i class="fas fa-inbox fa-3x mb-3"></i>
-                                <p>No hay proyectos registrados</p>
+                                <p>No tienes solicitudes registradas</p>
                                 <a href="{{ route('service-management.create') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>Crear Primer Proyecto
+                                    <i class="fas fa-plus me-2"></i>Crear Primera Solicitud
                                 </a>
                             </td>
                         </tr>
@@ -121,82 +145,11 @@
             </div>
             
             <!-- Pagination -->
-            @if($projects->hasPages())
+            @if($tickets->hasPages())
             <div class="d-flex justify-content-center mt-4">
-                {{ $projects->links() }}
+                {{ $tickets->links() }}
             </div>
             @endif
-        </div>
-    </div>
-</div>
-
-<!-- Filter Modal -->
-<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="filterModalLabel">Filtrar Proyectos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="filterForm">
-                    <div class="mb-3">
-                        <label for="filterStatus" class="form-label">Estado</label>
-                        <select class="form-select" id="filterStatus">
-                            <option value="">Todos</option>
-                            <option value="pending">Pendiente</option>
-                            <option value="in_progress">En Progreso</option>
-                            <option value="completed">Completado</option>
-                            <option value="cancelled">Cancelado</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterInstitution" class="form-label">Institución</label>
-                        <select class="form-select" id="filterInstitution">
-                            <option value="">Todas</option>
-                            @foreach($institutions as $institution)
-                            <option value="{{ $institution->institution_id }}">{{ $institution->institution_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterDateFrom" class="form-label">Fecha Desde</label>
-                        <input type="date" class="form-control" id="filterDateFrom">
-                    </div>
-                    <div class="mb-3">
-                        <label for="filterDateTo" class="form-label">Fecha Hasta</label>
-                        <input type="date" class="form-control" id="filterDateTo">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="applyFilters()">Aplicar Filtros</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar este proyecto?</p>
-                <p class="text-muted">Esta acción no se puede deshacer.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </div>
         </div>
     </div>
 </div>
@@ -205,37 +158,13 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Search functionality
+    // Search functionality (if needed later)
     $('#searchInput').on('keyup', function() {
         const value = $(this).val().toLowerCase();
         $('#projectsTable tbody tr').filter(function() {
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
         });
     });
-
-    // Filter functionality
-    $('#statusFilter, #institutionFilter, #materialFilter').on('change', function() {
-        applyFilters();
-    });
 });
-
-function applyFilters() {
-    const status = $('#statusFilter').val();
-    const institution = $('#institutionFilter').val();
-    const material = $('#materialFilter').val();
-    
-    // Reload page with filters
-    const url = new URL(window.location);
-    if (status) url.searchParams.set('status', status);
-    if (institution) url.searchParams.set('institution', institution);
-    if (material) url.searchParams.set('material', material);
-    
-    window.location.href = url.toString();
-}
-
-function deleteProject(projectId) {
-    $('#deleteForm').attr('action', `/service-management/${projectId}`);
-    $('#deleteModal').modal('show');
-}
 </script>
 @endpush

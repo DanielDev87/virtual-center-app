@@ -27,3 +27,4 @@ $classes .= $block ? ' btn-block w-100' : '';
 <button type="{{ $type }}" class="{{ $classes }}" {{ $disabled ? 'disabled' : '' }} {{ $attributes }}>
     {{ $slot }}
 </button>
+

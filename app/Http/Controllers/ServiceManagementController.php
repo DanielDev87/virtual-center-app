@@ -3,26 +3,35 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\ProjectTracking;
-use App\Models\Institution;
-use App\Models\MaterialType;
-use App\Models\TaskList;
+use App\Models\Ticket;
+use App\Models\RequestType;
+use App\Models\Faculty;
+use App\Models\Program;
+use App\Models\Course;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceManagementController extends Controller
 {
     /**
-     * Mostrar lista de servicios
+     * Mostrar lista de tickets del usuario con estadísticas
      */
     public function index()
     {
-        $projects = ProjectTracking::with(['institution', 'materialType'])
+        $userId = Auth::id();
+        
+        $tickets = Ticket::where('requester_id', $userId)
             ->latest()
             ->paginate(15);
+        
+        // Estadísticas
+        $stats = [
+            'total' => Ticket::where('requester_id', $userId)->count(),
+            'pending' => Ticket::where('requester_id', $userId)->where('status', 1)->count(),
+            'in_progress' => Ticket::where('requester_id', $userId)->where('status', 2)->count(),
+            'completed' => Ticket::where('requester_id', $userId)->where('status', 3)->count(),
+        ];
 
-        $institutions = Institution::where('is_active', true)->get();
-        $materialTypes = MaterialType::where('is_active', true)->get();
-
-        return view('service-management.index', compact('projects', 'institutions', 'materialTypes'));
+        return view('service-management.index', compact('tickets', 'stats'));
     }
 
     /**
@@ -30,88 +39,79 @@ class ServiceManagementController extends Controller
      */
     public function create()
     {
-        $institutions = Institution::where('is_active', true)->get();
-        $materialTypes = MaterialType::where('is_active', true)->get();
-
-        return view('service-management.create', compact('institutions', 'materialTypes'));
+        $requestTypes = RequestType::where('is_active', true)->get();
+        $faculties = Faculty::where('is_active', true)->get();
+        $programs = Program::where('is_active', true)->get();
+        $courses = Course::where('is_active', true)->get();
+        
+        return view('service-management.create', compact('requestTypes', 'faculties', 'programs', 'courses'));
     }
 
     /**
-     * Guardar nuevo servicio
+     * Guardar nuevo ticket
      */
     public function store(Request $request)
     {
         $request->validate([
-            'project_name' => 'required|string|max:255',
-            'project_description' => 'nullable|string',
-            'institution_id' => 'required|exists:institutions,institution_id',
-            'material_type_id' => 'required|exists:material_types,material_type_id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after:start_date'
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'request_type_id' => 'required|exists:request_types,type_id',
+            'faculty_id' => 'nullable|exists:faculties,faculty_id',
+            'program_id' => 'nullable|exists:programs,program_id',
+            'course_id' => 'nullable|exists:courses,course_id',
         ]);
 
-        ProjectTracking::create($request->all());
+        // Generate unique ticket number based on timestamp (numeric only for integer field)
+        $ticketNumber = date('YmdHis'); // Format: 20251126150037
+
+        Ticket::create([
+            'ticket_number' => $ticketNumber,
+            'title' => $request->title,
+            'requester_id' => Auth::id(),
+            'request_type_id' => $request->request_type_id,
+            'status' => 1, // Pending
+            'requester_info' => $request->description,
+            'faculty_id' => $request->faculty_id,
+            'program_id' => $request->program_id,
+            'course_id' => $request->course_id,
+        ]);
 
         return redirect()->route('service-management.index')
-            ->with('success', 'Servicio creado exitosamente.');
+            ->with('success', 'Solicitud creada exitosamente. Número de ticket: ' . $ticketNumber);
     }
 
     /**
-     * Mostrar servicio específico
+     * Mostrar ticket específico
      */
     public function show($id)
     {
-        $project = ProjectTracking::with(['institution', 'materialType', 'comments.user'])
+        $ticket = Ticket::with(['requester', 'mediator', 'faculty', 'program', 'course', 'assignments.mediator', 'assignments.jobPosition'])
+            ->where('requester_id', Auth::id())
             ->findOrFail($id);
 
-        return view('service-management.show', compact('project'));
+        return view('service-management.show', compact('ticket'));
     }
 
     /**
-     * Mostrar formulario de edición
+     * Calificar ticket
      */
-    public function edit($id)
-    {
-        $project = ProjectTracking::findOrFail($id);
-        $institutions = Institution::where('is_active', true)->get();
-        $materialTypes = MaterialType::where('is_active', true)->get();
-
-        return view('service-management.edit', compact('project', 'institutions', 'materialTypes'));
-    }
-
-    /**
-     * Actualizar servicio
-     */
-    public function update(Request $request, $id)
+    public function rate(Request $request, $id)
     {
         $request->validate([
-            'project_name' => 'required|string|max:255',
-            'project_description' => 'nullable|string',
-            'institution_id' => 'required|exists:institutions,institution_id',
-            'material_type_id' => 'required|exists:material_types,material_type_id',
-            'project_status' => 'required|in:pending,in_progress,completed,cancelled',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after:start_date',
-            'project_notes' => 'nullable|string'
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string'
         ]);
 
-        $project = ProjectTracking::findOrFail($id);
-        $project->update($request->all());
+        $ticket = Ticket::where('requester_id', Auth::id())->findOrFail($id);
+        
+        if ($ticket->status != 3) {
+             return back()->with('error', 'Solo se pueden calificar tickets completados.');
+        }
 
-        return redirect()->route('service-management.show', $id)
-            ->with('success', 'Servicio actualizado exitosamente.');
-    }
+        $ticket->update([
+            'rating' => $request->rating,
+        ]);
 
-    /**
-     * Eliminar servicio
-     */
-    public function destroy($id)
-    {
-        $project = ProjectTracking::findOrFail($id);
-        $project->update(['is_active' => false]);
-
-        return redirect()->route('service-management.index')
-            ->with('success', 'Servicio desactivado exitosamente.');
+        return back()->with('success', 'Gracias por tu calificación.');
     }
 }
-
