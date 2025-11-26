@@ -22,3 +22,4 @@ $sizeClasses = [
 <span class="badge {{ $typeClasses[$type] ?? 'bg-primary' }} {{ $sizeClasses[$size] ?? '' }} {{ $pill ? 'rounded-pill' : '' }}">
     {{ $slot }}
 </span>
+

@@ -37,3 +37,4 @@ if (mix.inProduction()) {
     });
 }
 
+

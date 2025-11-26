@@ -42,6 +42,12 @@ class User extends Authenticatable
         return $this->belongsTo(UserRole::class, 'role_id', 'role_id');
     }
 
+    public function jobPositions()
+    {
+        return $this->belongsToMany(JobPosition::class, 'job_position_user', 'user_id', 'job_position_id')
+                    ->withTimestamps();
+    }
+
     public function assignedTasks()
     {
         return $this->hasMany(TaskList::class, 'assigned_to', 'user_id');
@@ -62,4 +68,5 @@ class User extends Authenticatable
         return $this->hasMany(MediationForm::class, 'created_by', 'user_id');
     }
 }
+
 

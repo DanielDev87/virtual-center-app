@@ -271,3 +271,4 @@ Para soporte técnico o preguntas, contacta al equipo de desarrollo.
 **Virtual Center** - Sistema de Gestión y Colaboración Virtual
 Desarrollado con ❤️ por Daniel Agudelo usando Laravel y Bootstrap
 
+

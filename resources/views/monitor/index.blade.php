@@ -406,3 +406,4 @@ function changeChartPeriod(period) {
 }
 </script>
 @endpush
+

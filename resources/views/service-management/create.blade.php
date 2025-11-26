@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.requester')
 
 @section('title', 'Crear Servicio - Virtual Center')
 
@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Crear Nuevo Servicio</h1>
+        <h1 class="h2">Crear Nueva Solicitud</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('service-management.index') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i>Volver
@@ -18,111 +18,108 @@
         <div class="col-lg-8">
             <div class="card shadow">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Información del Proyecto</h5>
+                    <h5 class="card-title mb-0">Información de la Solicitud</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('service-management.store') }}" id="projectForm">
                         @csrf
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="project_name" class="form-label">Nombre del Proyecto <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('project_name') is-invalid @enderror" 
-                                       id="project_name" name="project_name" value="{{ old('project_name') }}" required>
-                                @error('project_name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <!-- Request Type Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Tipo de Solicitud <span class="text-danger">*</span></label>
+                            <div class="row g-3">
+                                @foreach($requestTypes as $type)
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="request_type_id" 
+                                           id="type_{{ $type->type_id }}" value="{{ $type->type_id }}" 
+                                           {{ old('request_type_id') == $type->type_id ? 'checked' : '' }} required>
+                                    <label class="btn btn-outline-primary w-100 text-start p-3" 
+                                           for="type_{{ $type->type_id }}" style="border-width: 2px;">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3" style="font-size: 2rem; color: {{ $type->type_color }}">
+                                                <i class="fas {{ $type->type_icon }}"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ $type->type_name }}</div>
+                                                <small class="text-muted">{{ $type->type_description }}</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                @endforeach
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="institution_id" class="form-label">Institución <span class="text-danger">*</span></label>
-                                <select class="form-select @error('institution_id') is-invalid @enderror" 
-                                        id="institution_id" name="institution_id" required>
-                                    <option value="">Seleccionar institución</option>
-                                    @foreach($institutions as $institution)
-                                    <option value="{{ $institution->institution_id }}" 
-                                            {{ old('institution_id') == $institution->institution_id ? 'selected' : '' }}>
-                                        {{ $institution->institution_name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('institution_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @error('request_type_id')
+                                <div class="text-danger mt-2">{{ $message }}</div>
+                            @enderror
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="material_type_id" class="form-label">Tipo de Material <span class="text-danger">*</span></label>
-                                <select class="form-select @error('material_type_id') is-invalid @enderror" 
-                                        id="material_type_id" name="material_type_id" required>
-                                    <option value="">Seleccionar tipo</option>
-                                    @foreach($materialTypes as $type)
-                                    <option value="{{ $type->material_type_id }}" 
-                                            {{ old('material_type_id') == $type->material_type_id ? 'selected' : '' }}>
-                                        {{ $type->material_type_name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('material_type_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="project_status" class="form-label">Estado Inicial</label>
-                                <select class="form-select @error('project_status') is-invalid @enderror" 
-                                        id="project_status" name="project_status">
-                                    <option value="pending" {{ old('project_status', 'pending') == 'pending' ? 'selected' : '' }}>Pendiente</option>
-                                    <option value="in_progress" {{ old('project_status') == 'in_progress' ? 'selected' : '' }}>En Progreso</option>
-                                    <option value="completed" {{ old('project_status') == 'completed' ? 'selected' : '' }}>Completado</option>
-                                    <option value="cancelled" {{ old('project_status') == 'cancelled' ? 'selected' : '' }}>Cancelado</option>
-                                </select>
-                                @error('project_status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="start_date" class="form-label">Fecha de Inicio</label>
-                                <input type="date" class="form-control @error('start_date') is-invalid @enderror" 
-                                       id="start_date" name="start_date" value="{{ old('start_date') }}">
-                                @error('start_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="end_date" class="form-label">Fecha de Fin</label>
-                                <input type="date" class="form-control @error('end_date') is-invalid @enderror" 
-                                       id="end_date" name="end_date" value="{{ old('end_date') }}">
-                                @error('end_date')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
+                        
                         <div class="mb-3">
-                            <label for="project_description" class="form-label">Descripción del Proyecto</label>
-                            <textarea class="form-control @error('project_description') is-invalid @enderror" 
-                                      id="project_description" name="project_description" rows="4" 
-                                      placeholder="Describe los objetivos y alcance del proyecto...">{{ old('project_description') }}</textarea>
-                            @error('project_description')
+                            <label for="title" class="form-label">Título de la Solicitud <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                                   id="title" name="title" value="{{ old('title') }}" required>
+                            @error('title')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="project_notes" class="form-label">Notas Adicionales</label>
-                            <textarea class="form-control @error('project_notes') is-invalid @enderror" 
-                                      id="project_notes" name="project_notes" rows="3" 
-                                      placeholder="Cualquier información adicional relevante...">{{ old('project_notes') }}</textarea>
-                            @error('project_notes')
+                            <label for="description" class="form-label">Descripción Detallada</label>
+                            <textarea class="form-control @error('description') is-invalid @enderror" 
+                                      id="description" name="description" rows="6" 
+                                      placeholder="Describe lo que necesitas...">{{ old('description') }}</textarea>
+                            @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <!-- Academic Association (Optional) -->
+                        <div class="card mb-3 bg-light">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Asociación Académica (Opcional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="faculty_id" class="form-label">Facultad</label>
+                                        <select class="form-select" id="faculty_id" name="faculty_id">
+                                            <option value="">-- Seleccionar --</option>
+                                            @foreach($faculties as $faculty)
+                                            <option value="{{ $faculty->faculty_id }}" {{ old('faculty_id') == $faculty->faculty_id ? 'selected' : '' }}>
+                                                {{ $faculty->faculty_name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="program_id" class="form-label">Programa</label>
+                                        <select class="form-select" id="program_id" name="program_id">
+                                            <option value="">-- Seleccionar --</option>
+                                            @foreach($programs as $program)
+                                            <option value="{{ $program->program_id }}" data-faculty="{{ $program->faculty_id }}" 
+                                                    {{ old('program_id') == $program->program_id ? 'selected' : '' }}>
+                                                {{ $program->program_name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="course_id" class="form-label">Curso</label>
+                                        <select class="form-select" id="course_id" name="course_id">
+                                            <option value="">-- Seleccionar --</option>
+                                            @foreach($courses as $course)
+                                            <option value="{{ $course->course_id }}" data-program="{{ $course->program_id }}"
+                                                    {{ old('course_id') == $course->course_id ? 'selected' : '' }}>
+                                                {{ $course->course_code }} - {{ $course->course_name }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Asocia tu solicitud con una facultad, programa o curso específico si aplica.
+                                </small>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
@@ -130,7 +127,7 @@
                                 <i class="fas fa-times me-2"></i>Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Crear Proyecto
+                                <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
                             </button>
                         </div>
                     </form>
@@ -145,26 +142,18 @@
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle me-2"></i>Campos Requeridos</h6>
-                        <ul class="mb-0">
-                            <li>Nombre del Proyecto</li>
-                            <li>Institución</li>
-                            <li>Tipo de Material</li>
-                        </ul>
+                        <h6><i class="fas fa-info-circle me-2"></i>Proceso</h6>
+                        <ol class="mb-0 ps-3">
+                            <li>Envía tu solicitud.</li>
+                            <li>Un administrador la revisará.</li>
+                            <li>Se asignará un colaborador.</li>
+                            <li>Podrás ver el avance en "Mis Solicitudes".</li>
+                        </ol>
                     </div>
 
-                    <div class="alert alert-warning">
-                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Consejos</h6>
-                        <ul class="mb-0">
-                            <li>Usa nombres descriptivos para los proyectos</li>
-                            <li>La fecha de fin debe ser posterior a la fecha de inicio</li>
-                            <li>Puedes cambiar el estado después de crear el proyecto</li>
-                        </ul>
-                    </div>
-
-                    <div class="text-center">
-                        <i class="fas fa-lightbulb fa-3x text-warning mb-3"></i>
-                        <p class="text-muted">¿Necesitas ayuda? Contacta al administrador del sistema.</p>
+                    <div class="text-center mt-4">
+                        <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                        <p class="text-muted">¿Dudas? Contacta a soporte.</p>
                     </div>
                 </div>
             </div>
@@ -210,3 +199,4 @@ $(document).ready(function() {
 });
 </script>
 @endpush
+

@@ -3,63 +3,58 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\ProjectTracking;
+use App\Models\Ticket;
 use App\Models\User;
-use App\Models\TaskList;
-use App\Models\Institution;
+use App\Models\UserRole;
+use App\Models\RequestType;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     /**
-     * Mostrar dashboard principal
+     * Mostrar dashboard principal para admin
      */
     public function index()
     {
         // Estadísticas generales
         $stats = [
-            'total_projects' => ProjectTracking::count(),
-            'active_projects' => ProjectTracking::where('is_active', true)->count(),
-            'completed_projects' => ProjectTracking::where('project_status', 'completed')->count(),
+            'total_tickets' => Ticket::count(),
+            'pending_tickets' => Ticket::where('status', 1)->count(),
+            'in_progress_tickets' => Ticket::where('status', 2)->count(),
+            'completed_tickets' => Ticket::where('status', 3)->count(),
             'total_users' => User::where('is_active', true)->count(),
-            'pending_tasks' => TaskList::where('task_status', 'pending')->count(),
-            'total_institutions' => Institution::where('is_active', true)->count()
+            'total_roles' => UserRole::where('is_active', true)->count(),
         ];
 
-        // Proyectos recientes
-        $recentProjects = ProjectTracking::with(['institution', 'materialType'])
+        // Tickets recientes
+        $recentTickets = Ticket::with(['requester', 'mediator', 'requestType'])
             ->latest()
             ->take(10)
             ->get();
 
-        // Tareas pendientes
-        $pendingTasks = TaskList::with(['assignedTo', 'assignedBy'])
-            ->where('task_status', 'pending')
-            ->orderBy('due_date', 'asc')
-            ->take(10)
-            ->get();
+        // Tickets por estado
+        $ticketsByStatus = [
+            'Pendiente' => Ticket::where('status', 1)->count(),
+            'En Progreso' => Ticket::where('status', 2)->count(),
+            'Completado' => Ticket::where('status', 3)->count(),
+            'Cancelado' => Ticket::where('status', 4)->count(),
+        ];
 
-        // Gráfico de proyectos por estado
-        $projectsByStatus = ProjectTracking::select('project_status', DB::raw('count(*) as count'))
-            ->groupBy('project_status')
-            ->get()
-            ->pluck('count', 'project_status');
-
-        // Gráfico de proyectos por institución
-        $projectsByInstitution = ProjectTracking::with('institution')
-            ->select('institution_id', DB::raw('count(*) as count'))
-            ->groupBy('institution_id')
+        // Tickets por tipo
+        $ticketsByType = Ticket::with('requestType')
+            ->select('request_type_id', DB::raw('count(*) as count'))
+            ->whereNotNull('request_type_id')
+            ->groupBy('request_type_id')
             ->get()
             ->mapWithKeys(function($item) {
-                return [$item->institution->institution_name => $item->count];
+                return [$item->requestType->type_name ?? 'Sin tipo' => $item->count];
             });
 
         return view('dashboard.index', compact(
             'stats', 
-            'recentProjects', 
-            'pendingTasks', 
-            'projectsByStatus', 
-            'projectsByInstitution'
+            'recentTickets', 
+            'ticketsByStatus', 
+            'ticketsByType'
         ));
     }
 }

@@ -38,12 +38,20 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Gestión de servicios
+    // Perfil de Usuario (accesible para todos los usuarios autenticados)
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [\App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        Route::delete('/avatar', [\App\Http\Controllers\ProfileController::class, 'deleteAvatar'])->name('avatar.delete');
+    });
+    
+    // Gestión de Servicios (Solicitantes)
     Route::prefix('service-management')->name('service-management.')->group(function () {
         Route::get('/', [ServiceManagementController::class, 'index'])->name('index');
         Route::get('/create', [ServiceManagementController::class, 'create'])->name('create');
         Route::post('/store', [ServiceManagementController::class, 'store'])->name('store');
         Route::get('/{id}', [ServiceManagementController::class, 'show'])->name('show');
+        Route::post('/{id}/rate', [ServiceManagementController::class, 'rate'])->name('rate');
         Route::get('/{id}/edit', [ServiceManagementController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ServiceManagementController::class, 'update'])->name('update');
         Route::delete('/{id}', [ServiceManagementController::class, 'destroy'])->name('destroy');
@@ -58,10 +66,40 @@ Route::middleware(['auth'])->group(function () {
     
     // Colaboradores (área protegida)
     Route::prefix('contributors')->name('contributors.')->group(function () {
-        Route::get('/', [CollaboratorsController::class, 'dashboard'])->name('dashboard');
-        Route::get('/profile', [CollaboratorsController::class, 'profile'])->name('profile');
-        Route::get('/tasks', [CollaboratorsController::class, 'tasks'])->name('tasks');
-        Route::get('/projects', [CollaboratorsController::class, 'projects'])->name('projects');
+        Route::get('/', [\App\Http\Controllers\ContributorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/tickets/{id}', [\App\Http\Controllers\ContributorController::class, 'show'])->name('tickets.show');
+        Route::post('/tickets/{id}/progress', [\App\Http\Controllers\ContributorController::class, 'storeProgress'])->name('tickets.progress');
+    });
+
+    // Rutas de Administrador
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Gestión de Roles
+        Route::resource('roles', \App\Http\Controllers\AdminRoleController::class);
+        
+        // Gestión de Usuarios
+        Route::resource('users', \App\Http\Controllers\AdminUserController::class);
+        
+        // Gestión de Tickets
+        Route::get('tickets', [\App\Http\Controllers\AdminTicketController::class, 'index'])->name('tickets.index');
+        Route::get('tickets/{id}', [\App\Http\Controllers\AdminTicketController::class, 'show'])->name('tickets.show');
+        Route::post('tickets/{id}/assign', [\App\Http\Controllers\AdminTicketController::class, 'assignMediator'])->name('tickets.assign');
+        Route::post('tickets/{id}/priority', [\App\Http\Controllers\AdminTicketController::class, 'setPriority'])->name('tickets.priority');
+        Route::post('tickets/{id}/close', [\App\Http\Controllers\AdminTicketController::class, 'close'])->name('tickets.close');
+        
+        // Multi-Mediator Assignments
+        Route::post('tickets/{id}/assign-mediator', [\App\Http\Controllers\AdminTicketController::class, 'assignMediatorToTicket'])->name('tickets.assign-mediator');
+        Route::delete('tickets/{ticketId}/assignments/{assignmentId}', [\App\Http\Controllers\AdminTicketController::class, 'removeAssignment'])->name('tickets.remove-assignment');
+
+        // Gestión Académica
+        Route::prefix('academic')->name('academic.')->group(function () {
+            Route::resource('institutions', \App\Http\Controllers\Admin\AdminInstitutionController::class);
+            Route::resource('faculties', \App\Http\Controllers\Admin\AdminFacultyController::class);
+            Route::resource('programs', \App\Http\Controllers\Admin\AdminProgramController::class);
+            Route::resource('courses', \App\Http\Controllers\Admin\AdminCourseController::class);
+        });
+        
+        // Job Positions Management
+        Route::resource('job-positions', \App\Http\Controllers\Admin\AdminJobPositionController::class);
     });
 });
 
@@ -76,4 +114,3 @@ Route::prefix('ajax')->name('ajax.')->group(function () {
 Route::fallback(function () {
     return view('errors.404');
 });
-

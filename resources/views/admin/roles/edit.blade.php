@@ -1,0 +1,92 @@
+@extends('layouts.admin')
+
+@section('title', 'Editar Rol - Admin')
+
+@section('content')
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Editar Rol</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ route('admin.roles.index') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Información del Rol</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('admin.roles.update', $role->role_id) }}">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="mb-3">
+                            <label for="role_name" class="form-label">Nombre del Rol <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('role_name') is-invalid @enderror" 
+                                   id="role_name" name="role_name" value="{{ old('role_name', $role->role_name) }}" required>
+                            @error('role_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role_description" class="form-label">Descripción</label>
+                            <textarea class="form-control @error('role_description') is-invalid @enderror" 
+                                      id="role_description" name="role_description" rows="3">{{ old('role_description', $role->role_description) }}</textarea>
+                            @error('role_description')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role_color" class="form-label">Color del Rol</label>
+                            <input type="color" class="form-control @error('role_color') is-invalid @enderror" 
+                                   id="role_color" name="role_color" value="{{ old('role_color', $role->role_color) }}" 
+                                   style="width: 100px; height: 40px;">
+                            @error('role_color')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                   {{ old('is_active', $role->is_active) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_active">
+                                Rol Activo
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Actualizar Rol
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Información del Rol</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID:</strong> {{ $role->role_id }}</p>
+                    <p><strong>Usuarios con este rol:</strong> {{ $role->users()->count() }}</p>
+                    <p><strong>Creado:</strong> {{ $role->created_at->format('d/m/Y H:i') }}</p>
+                    <p><strong>Última actualización:</strong> {{ $role->updated_at->format('d/m/Y H:i') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

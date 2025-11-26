@@ -18,3 +18,4 @@ class TrimStrings extends Middleware
     ];
 }
 
+
