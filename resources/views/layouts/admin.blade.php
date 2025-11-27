@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin - Virtual Center')</title>
+    <title>@yield('title', 'Admin - A-DDIE')</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -170,13 +170,19 @@
                 </li>
             </ul>
             
-            <h6 class="sidebar-heading">Sistema</h6>
+            <h6 class="sidebar-heading">Reportes</h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('home') }}">
-                        <i class="fas fa-home"></i>
-                        Ir al Sitio
+                    <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" 
+                       href="{{ route('admin.reports.index') }}">
+                        <i class="fas fa-file-export"></i>
+                        Módulo de Reportes
                     </a>
+                </li>
+            </ul>
+            
+            <h6 class="sidebar-heading">Sistema</h6>
+            <ul class="nav flex-column">
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">

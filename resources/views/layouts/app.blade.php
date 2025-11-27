@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Virtual Center')</title>
+    <title>@yield('title', 'A-DDIE')</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,11 +17,10 @@
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ route('home') }}">
-                <img src="{{ asset('img/logo-virtual-center.png') }}" alt="Virtual Center" height="40" class="me-2">
-                <span class="fw-bold">Virtual Center</span>
+                <img src="{{ asset('img/logo-virtual-center.png') }}" alt="A-DDIE" height="40">
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -30,21 +29,6 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
-                            <i class="fas fa-home me-1"></i>Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('collaborators') ? 'active' : '' }}" href="{{ route('collaborators') }}">
-                            <i class="fas fa-users me-1"></i>Colaboradores
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('radio-station') ? 'active' : '' }}" href="{{ route('radio-station') }}" target="_blank">
-                            <i class="fas fa-radio me-1"></i>Emisora
-                        </a>
-                    </li>
                 </ul>
                 
                 <ul class="navbar-nav">
@@ -61,12 +45,22 @@
                                 <i class="fas fa-user-circle me-1"></i>{{ auth()->user()->user_name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ route('dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ route('service-management.index') }}">
-                                    <i class="fas fa-cogs me-2"></i>Gestión de Servicios
-                                </a></li>
+                                @php
+                                    $userRole = auth()->user()->role->role_name ?? null;
+                                @endphp
+                                
+                                @if(in_array($userRole, ['Admin', 'Monitor', 'Contributor']))
+                                    <li><a class="dropdown-item" href="{{ route('dashboard') }}">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </a></li>
+                                @endif
+                                
+                                @if($userRole === 'Requester')
+                                    <li><a class="dropdown-item" href="{{ route('service-management.index') }}">
+                                        <i class="fas fa-cogs me-2"></i>Gestión de Servicios
+                                    </a></li>
+                                @endif
+                                
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
@@ -100,11 +94,12 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Virtual Center</h5>
+                    <h5>A-DDIE</h5>
                     <p class="mb-0">Sistema de gestión y colaboración virtual</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">&copy; {{ date('Y') }} Virtual Center. Todos los derechos reservados.</p>
+                    <p class="mb-0">&copy; {{ date('Y') }} A-DDIE. Todos los derechos reservados.</p>
+                    <p class="mb-0 small">Diseñado y desarrollado por: <a href="https://github.com/DanielDev87" target="_blank" class="text-light text-decoration-none"><i class="fab fa-github me-1"></i>DanielDev87</a></p>
                 </div>
             </div>
         </div>

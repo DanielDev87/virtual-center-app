@@ -119,19 +119,7 @@ class ContributorController extends Controller
             $ticket->update(['status' => $request->status_update]);
         }
 
-        return redirect()->route('contributors.show', $id)
+        return redirect()->route('contributors.tickets.show', $id)
             ->with('success', 'Avance registrado exitosamente.');
-    }
-            'progress_percentage' => $request->progress_percentage,
-        ]);
-
-        // Update ticket status to "In Progress" if it was pending
-        if ($ticket->status == 1) {
-            $ticket->update(['status' => 2]);
-        }
-
-        // TODO: Notify requester of progress update
-
-        return back()->with('success', 'Avance registrado exitosamente.');
     }
 }

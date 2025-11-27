@@ -90,12 +90,30 @@ Route::middleware(['auth'])->group(function () {
         Route::post('tickets/{id}/assign-mediator', [\App\Http\Controllers\AdminTicketController::class, 'assignMediatorToTicket'])->name('tickets.assign-mediator');
         Route::delete('tickets/{ticketId}/assignments/{assignmentId}', [\App\Http\Controllers\AdminTicketController::class, 'removeAssignment'])->name('tickets.remove-assignment');
 
+        // Project Management (ADDIE + SCRUM)
+        Route::prefix('projects')->name('projects.')->group(function () {
+            Route::get('/{ticketId}/dashboard', [\App\Http\Controllers\ProjectManagementController::class, 'index'])->name('dashboard');
+            Route::patch('/{ticketId}/phase', [\App\Http\Controllers\ProjectManagementController::class, 'updatePhase'])->name('update-phase');
+            Route::post('/{ticketId}/sprints', [\App\Http\Controllers\ProjectManagementController::class, 'storeSprint'])->name('store-sprint');
+            Route::patch('/sprints/{sprintId}/status', [\App\Http\Controllers\ProjectManagementController::class, 'updateSprintStatus'])->name('update-sprint-status');
+            Route::post('/{ticketId}/tasks', [\App\Http\Controllers\ProjectManagementController::class, 'storeTask'])->name('store-task');
+            Route::patch('/tasks/{taskId}/update-status', [\App\Http\Controllers\ProjectManagementController::class, 'updateTaskStatus'])->name('update-task-status');
+        });
+
         // Gestión Académica
         Route::prefix('academic')->name('academic.')->group(function () {
             Route::resource('institutions', \App\Http\Controllers\Admin\AdminInstitutionController::class);
             Route::resource('faculties', \App\Http\Controllers\Admin\AdminFacultyController::class);
             Route::resource('programs', \App\Http\Controllers\Admin\AdminProgramController::class);
             Route::resource('courses', \App\Http\Controllers\Admin\AdminCourseController::class);
+        });
+        
+        // Reports Module
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\ReportsController::class, 'index'])->name('index');
+            Route::get('/tickets', [\App\Http\Controllers\ReportsController::class, 'ticketsReport'])->name('tickets');
+            Route::get('/collaborators', [\App\Http\Controllers\ReportsController::class, 'collaboratorsReport'])->name('collaborators');
+            Route::get('/progress', [\App\Http\Controllers\ReportsController::class, 'progressReport'])->name('progress');
         });
         
         // Job Positions Management

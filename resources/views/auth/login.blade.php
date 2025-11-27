@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Iniciar Sesión - Virtual Center')
+@section('title', 'Iniciar Sesión - A-DDIE')
 
 @section('content')
 <div class="container">
@@ -9,9 +9,9 @@
             <div class="card shadow-lg border-0 mt-5">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('img/logo-virtual-center.png') }}" alt="Virtual Center" height="60" class="mb-3">
+                        <img src="{{ asset('img/logo-virtual-center.png') }}" alt="A-DDIE" height="60" class="mb-3">
                         <h3 class="fw-bold text-primary">Iniciar Sesión</h3>
-                        <p class="text-muted">Accede a tu cuenta de Virtual Center</p>
+                        <p class="text-muted">Accede a tu cuenta de A-DDIE</p>
                     </div>
 
                     @if ($errors->any())

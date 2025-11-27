@@ -24,6 +24,8 @@ class DashboardController extends Controller
             'completed_tickets' => Ticket::where('status', 3)->count(),
             'total_users' => User::where('is_active', true)->count(),
             'total_roles' => UserRole::where('is_active', true)->count(),
+            'avg_progress' => Ticket::where('status', '!=', 4)->avg('progress_percentage') ?? 0,
+            'high_priority' => Ticket::where('priority', 'high')->whereIn('status', [1, 2])->count(),
         ];
 
         // Tickets recientes
@@ -50,11 +52,50 @@ class DashboardController extends Controller
                 return [$item->requestType->type_name ?? 'Sin tipo' => $item->count];
             });
 
+        // Tickets por fase ADDIE
+        $ticketsByPhase = Ticket::select('current_phase', DB::raw('count(*) as count'))
+            ->groupBy('current_phase')
+            ->get()
+            ->mapWithKeys(function($item) {
+                $phaseNames = [
+                    'Analysis' => 'Análisis',
+                    'Design' => 'Diseño',
+                    'Development' => 'Desarrollo',
+                    'Implementation' => 'Implementación',
+                    'Evaluation' => 'Evaluación'
+                ];
+                return [$phaseNames[$item->current_phase] ?? $item->current_phase => $item->count];
+            });
+
+        // Top colaboradores
+        $topCollaborators = User::select('users.user_id', 'users.user_name', 'users.user_email', 'users.user_avatar')
+            ->join('ticket_assignments', 'users.user_id', '=', 'ticket_assignments.user_id')
+            ->join('tickets', 'ticket_assignments.ticket_id', '=', 'tickets.ticket_id')
+            ->where('tickets.status', 3)
+            ->whereHas('role', function($query) {
+                $query->where('role_name', 'Contributor');
+            })
+            ->groupBy('users.user_id', 'users.user_name', 'users.user_email', 'users.user_avatar')
+            ->selectRaw('COUNT(tickets.ticket_id) as completed_count')
+            ->orderBy('completed_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Tickets urgentes
+        $urgentTickets = Ticket::where('priority', 'high')
+            ->whereIn('status', [1, 2])
+            ->with(['requester', 'requestType'])
+            ->take(5)
+            ->get();
+
         return view('dashboard.index', compact(
             'stats', 
             'recentTickets', 
             'ticketsByStatus', 
-            'ticketsByType'
+            'ticketsByType',
+            'ticketsByPhase',
+            'topCollaborators',
+            'urgentTickets'
         ));
     }
 }

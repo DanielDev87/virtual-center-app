@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Mis Solicitudes - Virtual Center')</title>
+    <title>@yield('title', 'Mis Solicitudes - A-DDIE')</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -91,7 +91,7 @@
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ route('service-management.index') }}">
-                <i class="fas fa-ticket-alt me-2"></i>Virtual Center
+                <i class="fas fa-ticket-alt me-2"></i>A-DDIE
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -109,14 +109,15 @@
                            href="{{ route('service-management.create') }}">
                             <i class="fas fa-plus-circle"></i>Nueva Solicitud
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('home') }}">
-                            <i class="fas fa-home"></i>Inicio
-                        </a>
-                    </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <!-- Theme Toggle -->
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm me-2" id="themeToggle" title="Cambiar tema">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </button>
+                    </li>
+                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" 
                            data-bs-toggle="dropdown">

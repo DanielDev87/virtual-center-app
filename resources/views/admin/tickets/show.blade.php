@@ -8,6 +8,9 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Ticket #{{ $ticket->ticket_number }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{{ route('admin.projects.dashboard', $ticket->ticket_id) }}" class="btn btn-sm btn-primary me-2">
+                <i class="fas fa-tasks me-1"></i>Ver Tablero de Proyecto
+            </a>
             <a href="{{ route('admin.tickets.index') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i>Volver
             </a>
@@ -55,6 +58,18 @@
                         </span>
                     </div>
                     @endif
+
+                    <div class="mb-3">
+                        <label class="form-label d-block text-muted small mb-1">Progreso General</label>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                 style="width: {{ $ticket->progress_percentage ?? 0 }}%;" 
+                                 aria-valuenow="{{ $ticket->progress_percentage ?? 0 }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ $ticket->progress_percentage ?? 0 }}%
+                            </div>
+                        </div>
+                    </div>
                     
                     <p class="text-muted">{{ $ticket->requester_info }}</p>
                     
