@@ -59,10 +59,10 @@ class ReportsController extends Controller
             ->withCount([
                 'assignedTickets as total_tickets',
                 'assignedTickets as completed_tickets' => function($query) {
-                    $query->where('status', 3);
+                    $query->where('tickets.status', 3);
                 },
                 'assignedTickets as in_progress_tickets' => function($query) {
-                    $query->where('status', 2);
+                    $query->where('tickets.status', 2);
                 }
             ])
             ->get();

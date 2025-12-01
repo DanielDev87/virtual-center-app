@@ -32,10 +32,15 @@ class Ticket extends Model
         'faculty_id',
         'program_id',
         'course_id',
+        'resource_link',
+        'is_reopened',
+        'reopened_at',
+        'feedback',
     ];
 
     protected $casts = [
         'current_phase' => 'string',
+        'reopened_at' => 'datetime',
     ];
 
     public function requester()
@@ -100,4 +105,5 @@ class Ticket extends Model
     {
         return $this->hasMany(ProjectTask::class, 'ticket_id', 'ticket_id');
     }
+
 }

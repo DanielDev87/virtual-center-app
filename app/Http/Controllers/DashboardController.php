@@ -31,8 +31,7 @@ class DashboardController extends Controller
         // Tickets recientes
         $recentTickets = Ticket::with(['requester', 'mediator', 'requestType'])
             ->latest()
-            ->take(10)
-            ->get();
+            ->paginate(10);
 
         // Tickets por estado
         $ticketsByStatus = [
@@ -81,12 +80,44 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+
         // Tickets urgentes
         $urgentTickets = Ticket::where('priority', 'high')
             ->whereIn('status', [1, 2])
             ->with(['requester', 'requestType'])
             ->take(5)
             ->get();
+
+        // Mejores tiempos de resolución (tickets completados más rápido)
+        $fastestTickets = Ticket::where('status', 3)
+            ->whereNotNull('updated_at')
+            ->with(['requester', 'requestType'])
+            ->select('*', DB::raw('TIMESTAMPDIFF(HOUR, created_at, updated_at) as completion_hours'))
+            ->orderBy('completion_hours', 'asc')
+            ->take(5)
+            ->get();
+
+        // Promedio de calificaciones
+        $averageRating = Ticket::where('status', 3)
+            ->whereNotNull('rating')
+            ->avg('rating') ?? 0;
+
+        // Distribución de calificaciones
+        $ratingDistribution = Ticket::where('status', 3)
+            ->whereNotNull('rating')
+            ->select('rating', DB::raw('count(*) as count'))
+            ->groupBy('rating')
+            ->get()
+            ->mapWithKeys(function($item) {
+                return [$item->rating . ' Estrellas' => $item->count];
+            });
+
+        // Tiempo promedio de resolución por estado
+        $avgCompletionTime = Ticket::where('status', 3)
+            ->whereNotNull('updated_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) as avg_hours')
+            ->first()
+            ->avg_hours ?? 0;
 
         return view('dashboard.index', compact(
             'stats', 
@@ -95,7 +126,11 @@ class DashboardController extends Controller
             'ticketsByType',
             'ticketsByPhase',
             'topCollaborators',
-            'urgentTickets'
+            'urgentTickets',
+            'fastestTickets',
+            'averageRating',
+            'ratingDistribution',
+            'avgCompletionTime'
         ));
     }
 }

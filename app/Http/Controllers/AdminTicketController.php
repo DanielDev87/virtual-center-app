@@ -23,7 +23,7 @@ class AdminTicketController extends Controller
             $query->where('status', $request->status);
         }
 
-        $tickets = $query->latest()->paginate(15);
+        $tickets = $query->latest()->paginate(10);
         
         return view('admin.tickets.index', compact('tickets'));
     }
@@ -33,7 +33,7 @@ class AdminTicketController extends Controller
      */
     public function show($id)
     {
-        $ticket = Ticket::with(['requester', 'mediator', 'assignments.mediator', 'assignments.jobPosition'])
+        $ticket = Ticket::with(['requester', 'mediator', 'assignments.mediator', 'assignments.jobPosition', 'progress.user'])
             ->findOrFail($id);
         
         // Get available mediators (users with Contributor or Monitor role)
@@ -92,17 +92,92 @@ class AdminTicketController extends Controller
     {
         $request->validate([
             'status' => 'required|in:3,4', // 3 = Completed, 4 = Cancelled
-            'admin_notes' => 'nullable|string'
+            'admin_notes' => 'nullable|string',
+            'resource_link' => 'nullable|url'
         ]);
 
         $ticket = Ticket::findOrFail($id);
         
-        $ticket->update([
-            'status' => $request->status,
-        ]);
+        if ($request->status == 3) {
+            // Strict validation for closing
+            if ($ticket->progress_percentage < 100) {
+                return back()->with('error', 'No se puede cerrar el ticket. El progreso debe estar al 100%.');
+            }
+
+            // Check ADDIE phases - assuming Implementation is the last phase before Evaluation/Closing
+            // If current_phase is not Implementation or Evaluation, prevent closing
+            if (!in_array($ticket->current_phase, ['Implementation', 'Evaluation'])) {
+                return back()->with('error', 'No se puede cerrar el ticket. Debe completar todas las fases de ADDIE (Análisis, Diseño, Desarrollo, Implementación).');
+            }
+
+            if (empty($request->resource_link)) {
+                return back()->with('error', 'Para marcar como terminado, debe proporcionar el enlace al recurso generado.');
+            }
+
+            $ticket->update([
+                'status' => $request->status,
+                'resource_link' => $request->resource_link
+            ]);
+        } else {
+            $ticket->update([
+                'status' => $request->status
+            ]);
+        }
 
         $statusText = $request->status == 3 ? 'completado' : 'cancelado';
         return back()->with('success', "Ticket {$statusText} exitosamente.");
+    }
+
+    /**
+     * Reopen a ticket
+     */
+    public function reopen(Request $request, $id)
+    {
+        $ticket = Ticket::findOrFail($id);
+        
+        if ($ticket->status != 3 && $ticket->status != 4) {
+            return back()->with('error', 'Solo se pueden reabrir tickets cerrados o cancelados.');
+        }
+
+        $ticket->update([
+            'status' => 2, // In Progress
+            'is_reopened' => true,
+            'reopened_at' => now(),
+            'progress_percentage' => 0,
+            'rating' => null, // Reset rating to allow new evaluation
+            'feedback' => null, // Reset feedback
+        ]);
+        
+        // Reset progress to 0 for the reopening phase
+        $ticket->progress_percentage = 0;
+        $ticket->save();
+
+        return back()->with('success', 'Ticket reabierto exitosamente. Se ha habilitado la sección de avances adicionales y la opción de calificar nuevamente.');
+    }
+
+    /**
+     * Rate a ticket (ADDIE Evaluation)
+     */
+    public function rate(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'feedback' => 'nullable|string'
+        ]);
+
+        $ticket = Ticket::findOrFail($id);
+
+        if ($ticket->status != 3) {
+            return back()->with('error', 'Solo se pueden calificar tickets completados.');
+        }
+
+        $ticket->update([
+            'rating' => $request->rating,
+            'feedback' => $request->feedback,
+            'current_phase' => 'Evaluation' // Mark as Evaluation phase
+        ]);
+
+        return back()->with('success', 'Evaluación registrada exitosamente.');
     }
 
     /**

@@ -93,10 +93,11 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-sticky">
-            <div class="px-3 py-2 mb-3 border-bottom border-secondary">
-                <h5 class="text-white mb-0">
-                    <i class="fas fa-user-shield me-2"></i>Panel Admin
-                </h5>
+            <div class="px-3 py-3 mb-3 border-bottom border-secondary">
+                <h4 class="text-white mb-1 fw-bold">
+                    <i class="fas fa-graduation-cap me-2"></i>A-DDIE
+                </h4>
+                <small class="text-white">Panel Administrativo</small>
             </div>
             
             <ul class="nav flex-column">

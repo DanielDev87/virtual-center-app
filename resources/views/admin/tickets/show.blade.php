@@ -59,17 +59,31 @@
                     </div>
                     @endif
 
-                    <div class="mb-3">
-                        <label class="form-label d-block text-muted small mb-1">Progreso General</label>
-                        <div class="progress" style="height: 25px;">
-                            <div class="progress-bar bg-info" role="progressbar" 
-                                 style="width: {{ $ticket->progress_percentage ?? 0 }}%;" 
-                                 aria-valuenow="{{ $ticket->progress_percentage ?? 0 }}" 
-                                 aria-valuemin="0" aria-valuemax="100">
-                                {{ $ticket->progress_percentage ?? 0 }}%
-                            </div>
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-muted small">Progreso General</span>
+                            <span class="fw-bold {{ $ticket->progress_percentage == 100 ? 'text-success' : 'text-primary' }}">
+                                {{ $ticket->progress_percentage }}%
+                            </span>
                         </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar {{ $ticket->progress_percentage == 100 ? 'bg-success' : 'bg-primary' }}" 
+                                 role="progressbar" 
+                                 style="width: {{ $ticket->progress_percentage }}%" 
+                                 aria-valuenow="{{ $ticket->progress_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100"></div>
+                        </div>
+                        @if($ticket->is_reopened)
+                            <div class="mt-1 text-end">
+                                <span class="badge bg-info text-white small">
+                                    <i class="fas fa-redo me-1"></i>Ticket Reabierto
+                                </span>
+                            </div>
+                        @endif
                     </div>
+
                     
                     <p class="text-muted">{{ $ticket->requester_info }}</p>
                     
@@ -217,6 +231,78 @@
             </div>
         </div>
 
+        <!-- Progress History -->
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history me-2"></i>Historial de Avances</h6>
+                </div>
+                <div class="card-body">
+                    @if($ticket->is_reopened)
+                        <h6 class="text-info border-bottom pb-2 mb-3">Avances de Reapertura (Desde {{ $ticket->reopened_at ? $ticket->reopened_at->format('d/m/Y H:i') : '' }})</h6>
+                        @php
+                            $reopenedProgress = $ticket->progress->where('created_at', '>=', $ticket->reopened_at)->sortByDesc('created_at');
+                            $originalProgress = $ticket->progress->where('created_at', '<', $ticket->reopened_at)->sortByDesc('created_at');
+                        @endphp
+
+                        @if($reopenedProgress->count() > 0)
+                            <div class="timeline mb-4">
+                                @foreach($reopenedProgress as $progress)
+                                    <div class="timeline-item ps-3 border-start border-info mb-3">
+                                        <p class="text-muted small mb-1">
+                                            {{ $progress->created_at->format('d/m/Y H:i') }} - 
+                                            <span class="fw-bold">{{ $progress->user->user_name ?? 'Usuario' }}</span>
+                                            <span class="badge bg-info ms-2">{{ $progress->progress_percentage }}%</span>
+                                        </p>
+                                        <p class="mb-0">{{ $progress->progress_description }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-muted fst-italic mb-4">No hay avances registrados desde la reapertura.</p>
+                        @endif
+
+                        <h6 class="text-secondary border-bottom pb-2 mb-3">Avances Anteriores</h6>
+                        @if($originalProgress->count() > 0)
+                            <div class="timeline">
+                                @foreach($originalProgress as $progress)
+                                    <div class="timeline-item ps-3 border-start border-secondary mb-3 opacity-75">
+                                        <p class="text-muted small mb-1">
+                                            {{ $progress->created_at->format('d/m/Y H:i') }} - 
+                                            <span class="fw-bold">{{ $progress->user->user_name ?? 'Usuario' }}</span>
+                                            <span class="badge bg-secondary ms-2">{{ $progress->progress_percentage }}%</span>
+                                        </p>
+                                        <p class="mb-0">{{ $progress->progress_description }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-muted fst-italic">No hay avances anteriores.</p>
+                        @endif
+
+                    @else
+                        <!-- Standard Progress View -->
+                        @if($ticket->progress->count() > 0)
+                            <div class="timeline">
+                                @foreach($ticket->progress->sortByDesc('created_at') as $progress)
+                                    <div class="timeline-item ps-3 border-start border-primary mb-3">
+                                        <p class="text-muted small mb-1">
+                                            {{ $progress->created_at->format('d/m/Y H:i') }} - 
+                                            <span class="fw-bold">{{ $progress->user->user_name ?? 'Usuario' }}</span>
+                                            <span class="badge bg-primary ms-2">{{ $progress->progress_percentage }}%</span>
+                                        </p>
+                                        <p class="mb-0">{{ $progress->progress_description }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-muted text-center py-3">No hay avances registrados para este ticket.</p>
+                        @endif
+                    @endif
+                </div>
+            </div>
+        </div>
+
         <!-- Admin Actions -->
         <div class="col-lg-4">
             <!-- Assign Mediator -->
@@ -283,19 +369,34 @@
                     <h5 class="card-title mb-0"><i class="fas fa-check-circle me-2"></i>Cerrar Ticket</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.tickets.close', $ticket->ticket_id) }}" method="POST">
+                    <form action="{{ route('admin.tickets.close', $ticket->ticket_id) }}" method="POST" id="closeTicketForm">
                         @csrf
                         <div class="mb-3">
                             <label for="status" class="form-label">Estado Final</label>
-                            <select class="form-select" id="status" name="status" required>
+                            <select class="form-select" id="status" name="status" required onchange="toggleResourceLink()">
                                 <option value="3">Completado</option>
                                 <option value="4">Cancelado</option>
                             </select>
                         </div>
+                        
+                        <div id="resourceLinkField" class="mb-3">
+                            <label for="resource_link" class="form-label">Enlace al Recurso Generado <span class="text-danger">*</span></label>
+                            <input type="url" class="form-control" id="resource_link" name="resource_link" placeholder="https://...">
+                            <div class="form-text text-muted">Obligatorio para marcar como completado.</div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="admin_notes" class="form-label">Notas (Opcional)</label>
                             <textarea class="form-control" id="admin_notes" name="admin_notes" rows="3"></textarea>
                         </div>
+                        
+                        @if($ticket->progress_percentage < 100)
+                        <div class="alert alert-warning small mb-3" id="progressWarning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            El progreso es del {{ $ticket->progress_percentage }}%. Debe estar al 100% para completar.
+                        </div>
+                        @endif
+
                         <div class="d-grid">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-flag-checkered me-2"></i>Cerrar Ticket
@@ -305,6 +406,107 @@
                 </div>
             </div>
             @endif
+
+            <!-- Reopen Ticket -->
+            @if($ticket->status == 3 || $ticket->status == 4)
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-redo me-2"></i>Reabrir Ticket</h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Si el solicitante requiere cambios adicionales, puede reabrir el ticket. Esto habilitará una nueva sección de seguimiento.</p>
+                    <form action="{{ route('admin.tickets.reopen', $ticket->ticket_id) }}" method="POST">
+                        @csrf
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-info text-white" onclick="return confirm('¿Está seguro de reabrir este ticket?')">
+                                <i class="fas fa-redo me-2"></i>Reabrir Ticket
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
+
+            <!-- Rate Service (ADDIE Evaluation) -->
+            @if($ticket->status == 3)
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-star me-2"></i>Evaluación ADDIE</h5>
+                </div>
+                <div class="card-body">
+                    @if($ticket->rating)
+                        <div class="text-center mb-3">
+                            <div class="display-6 text-warning mb-2">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="fas fa-star {{ $i <= $ticket->rating ? '' : 'text-muted opacity-25' }}"></i>
+                                @endfor
+                            </div>
+                            <p class="fw-bold mb-1">Calificación: {{ $ticket->rating }}/5</p>
+                            @if($ticket->feedback)
+                                <p class="text-muted small fst-italic">"{{ $ticket->feedback }}"</p>
+                            @endif
+                        </div>
+                    @else
+                        <form action="{{ route('admin.tickets.rate', $ticket->ticket_id) }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label">Calificación</label>
+                                <div class="rating-input d-flex justify-content-center gap-2 fs-3 text-warning cursor-pointer">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="far fa-star" data-rating="{{ $i }}" onclick="setRating({{ $i }})"></i>
+                                    @endfor
+                                </div>
+                                <input type="hidden" name="rating" id="ratingInput" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="feedback" class="form-label">Retroalimentación</label>
+                                <textarea class="form-control" id="feedback" name="feedback" rows="3" placeholder="Comentarios sobre el servicio..."></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Guardar Evaluación
+                                </button>
+                            </div>
+                        </form>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            <script>
+            function toggleResourceLink() {
+                const status = document.getElementById('status').value;
+                const field = document.getElementById('resourceLinkField');
+                const warning = document.getElementById('progressWarning');
+                
+                if (status == '3') {
+                    field.style.display = 'block';
+                    if(warning) warning.style.display = 'block';
+                } else {
+                    field.style.display = 'none';
+                    if(warning) warning.style.display = 'none';
+                }
+            }
+            
+            function setRating(rating) {
+                document.getElementById('ratingInput').value = rating;
+                const stars = document.querySelectorAll('.rating-input i');
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.remove('far');
+                        star.classList.add('fas');
+                    } else {
+                        star.classList.remove('fas');
+                        star.classList.add('far');
+                    }
+                });
+            }
+
+            // Init
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleResourceLink();
+            });
+            </script>
         </div>
     </div>
 </div>

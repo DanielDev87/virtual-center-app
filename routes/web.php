@@ -85,6 +85,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('tickets/{id}/assign', [\App\Http\Controllers\AdminTicketController::class, 'assignMediator'])->name('tickets.assign');
         Route::post('tickets/{id}/priority', [\App\Http\Controllers\AdminTicketController::class, 'setPriority'])->name('tickets.priority');
         Route::post('tickets/{id}/close', [\App\Http\Controllers\AdminTicketController::class, 'close'])->name('tickets.close');
+        Route::post('tickets/{id}/reopen', [\App\Http\Controllers\AdminTicketController::class, 'reopen'])->name('tickets.reopen');
+        Route::post('tickets/{id}/rate', [\App\Http\Controllers\AdminTicketController::class, 'rate'])->name('tickets.rate');
         
         // Multi-Mediator Assignments
         Route::post('tickets/{id}/assign-mediator', [\App\Http\Controllers\AdminTicketController::class, 'assignMediatorToTicket'])->name('tickets.assign-mediator');

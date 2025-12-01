@@ -30,7 +30,7 @@ class ContributorController extends Controller
                 $q->where('user_id', $userId);
             }])
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
         
         // Helper for stats query
         $statsQuery = function($status = null) use ($userId) {

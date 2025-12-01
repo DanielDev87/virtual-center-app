@@ -21,7 +21,7 @@ class ServiceManagementController extends Controller
         
         $tickets = Ticket::where('requester_id', $userId)
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
         
         // Estadísticas
         $stats = [

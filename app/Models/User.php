@@ -63,6 +63,13 @@ class User extends Authenticatable
         return $this->hasMany(ProjectComment::class, 'user_id', 'user_id');
     }
 
+    public function assignedTickets()
+    {
+        return $this->belongsToMany(Ticket::class, 'ticket_assignments', 'user_id', 'ticket_id')
+                    ->wherePivot('status', 'active')
+                    ->withPivot('job_position_id', 'assigned_at', 'notes');
+    }
+
     public function mediationForms()
     {
         return $this->hasMany(MediationForm::class, 'created_by', 'user_id');
