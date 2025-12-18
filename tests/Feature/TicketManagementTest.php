@@ -230,4 +230,40 @@ class TicketManagementTest extends TestCase
         $this->assertEquals(0, $freshTicket->progress_percentage);
         $this->assertTrue((bool)$freshTicket->is_reopened);
     }
+    /** @test */
+    public function requester_can_see_resource_link_when_ticket_is_closed()
+    {
+        // 1. Setup: Create ticket and user
+        $requestType = RequestType::firstOrCreate(['type_name' => 'Test Type']);
+        $requesterRole = UserRole::firstOrCreate(['role_name' => 'Requester'], ['is_active' => true]);
+        
+        $requester = User::create([
+            'user_name' => 'Requester Link User',
+            'user_email' => 'req_link_'.time().'@test.com',
+            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+            'role_id' => $requesterRole->role_id,
+            'is_active' => true
+        ]);
+
+        $ticket = Ticket::create([
+            'title' => 'Ticket with Resource',
+            'ticket_number' => time() . rand(100,999),
+            'status' => 3, // Completed
+            'type' => 1,
+            'request_type_id' => $requestType->type_id,
+            'requester_id' => $requester->user_id,
+            'resume_number' => 0,
+            'progress_percentage' => 100,
+            'resource_link' => 'http://final-resource-link.com'
+        ]);
+
+        // 2. Act: Requester views the ticket
+        $response = $this->actingAs($requester)
+                         ->get(route('service-management.show', $ticket->ticket_id));
+
+        // 3. Assert
+        $response->assertStatus(200);
+        $response->assertSee('Resultado del Servicio');
+        $response->assertSee('http://final-resource-link.com');
+    }
 }

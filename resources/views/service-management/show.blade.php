@@ -46,6 +46,22 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Resource Link (Only if Completed and has link) -->
+            @if($ticket->status == 3 && $ticket->resource_link)
+            <div class="card shadow mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-check-circle me-2"></i>Resultado del Servicio</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">¡Su solicitud ha sido completada!</h5>
+                    <p class="card-text">Su recurso ha sido generado y está disponible para descarga o visualización.</p>
+                    <a href="{{ $ticket->resource_link }}" target="_blank" class="btn btn-primary btn-lg mt-2">
+                        <i class="fas fa-external-link-alt me-2"></i>Acceder al Recurso
+                    </a>
+                </div>
+            </div>
+            @endif
 
             <!-- Rating Section (Only if Completed) -->
             @if($ticket->status == 3)
