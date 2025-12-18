@@ -110,7 +110,25 @@ class ServiceManagementController extends Controller
 
         $ticket->update([
             'rating' => $request->rating,
+            'feedback' => $request->comment // Mapping 'comment' input to 'feedback' column
         ]);
+
+        // Send email to Admins
+        try {
+            $adminRole = \App\Models\UserRole::where('role_name', 'Admin')->first();
+            if ($adminRole) {
+                // Get all active admins
+                $admins = \App\Models\User::where('role_id', $adminRole->role_id)->where('is_active', true)->get();
+                
+                foreach ($admins as $admin) {
+                    if ($admin->user_email) {
+                        \Illuminate\Support\Facades\Mail::to($admin->user_email)->send(new \App\Mail\ServiceRated($ticket));
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+             \Illuminate\Support\Facades\Log::error('Error sending rating email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Gracias por tu calificación.');
     }

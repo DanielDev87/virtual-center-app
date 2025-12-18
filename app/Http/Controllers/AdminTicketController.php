@@ -118,6 +118,15 @@ class AdminTicketController extends Controller
                 'status' => $request->status,
                 'resource_link' => $request->resource_link
             ]);
+
+            // Send email to requester
+            try {
+                if ($ticket->requester && $ticket->requester->user_email) {
+                    \Illuminate\Support\Facades\Mail::to($ticket->requester->user_email)->send(new \App\Mail\TicketClosed($ticket));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error sending closure email: ' . $e->getMessage());
+            }
         } else {
             $ticket->update([
                 'status' => $request->status
