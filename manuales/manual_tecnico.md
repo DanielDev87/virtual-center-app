@@ -49,6 +49,7 @@ Sistema de gestión de servicios educativos que integra la metodología ADDIE co
 - ✅ Dashboard con métricas y gráficos (Chart.js)
 - ✅ Paginación de 10 items por página
 - ✅ Roles y permisos (Admin, Monitor, Contributor, Requester)
+    - ✅ **Notificaciones por Correo** (Cierre de ticket y Reporte de calificación)
 
 ---
 
@@ -183,6 +184,16 @@ DB_PORT=3306
 DB_DATABASE=addie_db
 DB_USERNAME=root
 DB_PASSWORD=tu_contraseña
+    
+    # Configuración de Correo (SMTP)
+    MAIL_MAILER=smtp
+    MAIL_HOST=smtp.gmail.com # o tu proveedor
+    MAIL_PORT=587
+    MAIL_USERNAME=tu_correo@gmail.com
+    MAIL_PASSWORD=tu_contraseña_aplicacion
+    MAIL_ENCRYPTION=tls
+    MAIL_FROM_ADDRESS="no-reply@addie.edu"
+    MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 ### 5. Crear Base de Datos
