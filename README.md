@@ -288,7 +288,7 @@ Para soporte técnico, preguntas o reportar errores, por favor contacta al equip
 
 - Desarrollador Principal: Daniel Agudelo
 - Repositorio Oficial: https://github.com/DanielDev87
-- Reportar Issues: [Link a la sección de Issues de tu GitHub]
+- Reportar Issues: https://github.com/DanielDev87/virtual-center-app/issues
 
 ---
 
