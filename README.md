@@ -43,7 +43,7 @@ A-DDIE no es solo una herramienta, es una plataforma para la **transformación d
 ### 1. Clonar el Proyecto
 
 ```bash
-git clone <repository-url> virtual-center-app
+git clone https://github.com/DanielDev87/virtual-center-app
 cd virtual-center-app
 ```
 
