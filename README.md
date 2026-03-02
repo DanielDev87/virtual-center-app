@@ -287,7 +287,7 @@ No se proporciona garantía alguna, tal como estipula la licencia. Para más det
 Para soporte técnico, preguntas o reportar errores, por favor contacta al equipo de desarrollo:
 
 - Desarrollador Principal: Daniel Agudelo
-- Repositorio Oficial: [URL de tu repositorio de GitHub]
+- Repositorio Oficial: https://github.com/DanielDev87
 - Reportar Issues: [Link a la sección de Issues de tu GitHub]
 
 ---
