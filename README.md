@@ -1,22 +1,36 @@
-# Virtual Center - Sistema de Gestión y Colaboración Virtual
+# 🚀 A-DDIE - Sistema de Gestión y Colaboración Virtual para Centros de Producción y Medios
 
-## Descripción
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) <!-- Reemplaza con tu DOI real -->
+[![Laravel 10](https://img.shields.io/badge/Laravel-10-FF2D20?style=flat&logo=laravel)](https://laravel.com)
+[![Bootstrap 5](https://img.shields.io/badge/Bootstrap-5-7952B3?style=flat&logo=bootstrap)](https://getbootstrap.com)
 
-Virtual Center es un sistema moderno de gestión y colaboración virtual para la centros de produccion y medios en instituciones educativas desarrollado con Laravel 10, Bootstrap 5 y características avanzadas como modo oscuro/claro. 
+## 📋 Descripción
 
-## Características Principales
+**A-DDIE** es un sistema moderno de código abierto diseñado para la **gestión integral y colaboración virtual** en centros de producción y medios educativos. Desarrollado bajo los principios de la **Ciencia Abierta**, este software busca optimizar el flujo de trabajo en instituciones educativas, facilitando el seguimiento de proyectos, la gestión de colaboradores y la producción de contenido multimedia.
 
-- ✅ **Laravel 10** - Framework PHP moderno y robusto
-- ✅ **Bootstrap 5** - Interfaz de usuario moderna y responsive
-- ✅ **Modo Oscuro/Claro** - Tema personalizable con persistencia
-- ✅ **Base de Datos Renombrada** - Estructura limpia sin referencias UCC/UCN
-- ✅ **Autenticación Integrada** - Sistema de login seguro
-- ✅ **Gestión de Proyectos** - Seguimiento completo de proyectos
-- ✅ **Sistema de Colaboradores** - Gestión de usuarios y roles
-- ✅ **API REST** - Endpoints para funcionalidades AJAX
-- ✅ **Responsive Design** - Compatible con dispositivos móviles
+A-DDIE no es solo una herramienta, es una plataforma para la **transformación digital** de los entornos educativos, permitiendo una administración centralizada, eficiente y accesible. 
 
-## Requisitos del Sistema
+
+### Características Principales
+
+-   🏢 **Gestión de Centros de Producción:** Administra recursos, proyectos y equipos en un solo lugar.
+-   👥 **Colaboración Virtual:** Sistema de roles y permisos para equipos multidisciplinarios (docentes, estudiantes, productores).
+-   📊 **Seguimiento de Proyectos:** Control de estado, tareas y cronogramas para producciones audiovisuales o multimedia.
+-   🎨 **Interfaz Moderna y Accesible:** Desarrollado con Laravel 10 y Bootstrap 5, con soporte nativo para **modo oscuro/claro**.
+-   🔌 **API REST:** Endpoints para integración con otras herramientas institucionales.
+-   📱 **Responsive Design:** Accesible desde cualquier dispositivo, promoviendo la movilidad en los campus.
+
+
+## 🛠️ Tecnologías Clave
+
+-   **Backend:** Laravel 10 (PHP 8.1+)
+-   **Frontend:** Bootstrap 5, JavaScript, AJAX
+-   **Base de Datos:** MySQL
+-   **Autenticación:** Laravel Sanctum
+
+
+## Requisitos del Sistema 📦
 
 - PHP 8.1 o superior
 - Composer
@@ -24,7 +38,7 @@ Virtual Center es un sistema moderno de gestión y colaboración virtual para la
 - MySQL 5.7 o superior
 - Servidor web (Apache/Nginx)
 
-## Instalación
+## Instalación ⚙️
 
 ### 1. Clonar el Proyecto
 
@@ -125,7 +139,7 @@ location / {
 }
 ```
 
-## Estructura del Proyecto
+## Estructura del Proyecto 📁
 
 ```
 virtual-center-app/
@@ -167,7 +181,7 @@ Para migrar datos desde el sistema anterior, ejecuta:
 php artisan migrate:from-legacy
 ```
 
-## Uso del Sistema
+## Uso del Sistema 💻
 
 ### Acceso Principal
 
@@ -187,7 +201,7 @@ php artisan migrate:from-legacy
 
 El sistema incluye un botón de toggle en la barra de navegación para cambiar entre modo claro y oscuro. La preferencia se guarda en la sesión del usuario.
 
-## Desarrollo
+## Desarrollo 🧑‍💻
 
 ### Comandos Útiles
 
@@ -224,7 +238,7 @@ Las vistas utilizan el sistema de plantillas Blade de Laravel con un layout prin
 - `GET /ajax/project-details/{id}` - Detalles de proyecto
 - `POST /ajax/send-status` - Actualizar estado de proyecto
 
-## Personalización
+## Personalización 🎨
 
 ### Colores y Temas
 
@@ -242,7 +256,7 @@ Los colores principales se definen en `resources/css/app.css`:
 
 Los roles de usuario se configuran en la tabla `user_roles` y se pueden personalizar según las necesidades del proyecto.
 
-## Seguridad
+## Seguridad 🔒
 
 - Autenticación con Laravel Sanctum
 - Protección CSRF en formularios
@@ -250,7 +264,7 @@ Los roles de usuario se configuran en la tabla `user_roles` y se pueden personal
 - Sanitización de salida
 - Rate limiting en API
 
-## Contribución
+## Contribución 🤝
 
 1. Fork el proyecto
 2. Crear una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
@@ -258,25 +272,28 @@ Los roles de usuario se configuran en la tabla `user_roles` y se pueden personal
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Crear un Pull Request
 
-## Licencia
+## Licencia ⚖️ 
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo los principios de la Ciencia Abierta y utiliza la licencia Apache 2.0. Esto significa que eres libre de:
 
-## Soporte
+✅ Usarlo para fines comerciales y académicos.
+✅ Modificarlo y adaptarlo a tus necesidades.
+✅ Distribuir copias.
+✅ Usar sus patentes (si las hubiera).
+No se proporciona garantía alguna, tal como estipula la licencia. Para más detalles, consulta el archivo LICENSE en la raíz del proyecto.
 
-Para soporte técnico o preguntas, contacta al equipo de desarrollo.
+## Soporte Y Contacto📞
+
+Para soporte técnico, preguntas o reportar errores, por favor contacta al equipo de desarrollo:
+
+- Desarrollador Principal: Daniel Agudelo
+- Repositorio Oficial: [URL de tu repositorio de GitHub]
+- Reportar Issues: [Link a la sección de Issues de tu GitHub]
 
 ---
 
-**Virtual Center** - Sistema de Gestión y Colaboración Virtual
-Desarrollado con ❤️ por Daniel Agudelo usando Laravel y Bootstrap
+**A-DDIE** - Sistema de Gestión y Colaboración Virtual
+Impulsando la Ciencia Abierta y la transformación digital en la educación.
+Desarrollado con ❤️ por Daniel Agudelo usando Laravel y Bootstrap.
 
-----------------------------------
-cuando un administrador quiera marcar como terminado un servicio, deberá relacionar un enlace al recurso generado, sino no podrá marcarlo como cerrado, adicionalmente un servicio podrá ser reabierto por el administrador a solicitud del solicitante y volverse a registar avances en ua nueva seccion que solo se mostrará cuando un servicio haya sido reabierto, al completarlo nuevamente se habilitará la opcion de calificar. Que representa la evaluación de ADDIE. Ningun ticket podrá cerrarse hasta que la barra de vance se halla completado al 100% y halla pasado ´por todas las fases de ADDIE.
-
-Se rompio la opcion de actualiar contraseñas de un usuario desde administrador
-
-Hashear las rutas en el navegador para que no se pueda acceder a ellas directamente
-
-crear un api para que una app movil pueda acceder a los datos del sistema
 
