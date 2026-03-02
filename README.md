@@ -1,7 +1,7 @@
 # 🚀 A-DDIE - Sistema de Gestión y Colaboración Virtual para Centros de Producción y Medios
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX) <!-- Reemplaza con tu DOI real -->
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18841367.svg)](https://doi.org/10.5281/zenodo.18841367) <!-- Reemplaza con tu DOI real -->
 [![Laravel 10](https://img.shields.io/badge/Laravel-10-FF2D20?style=flat&logo=laravel)](https://laravel.com)
 [![Bootstrap 5](https://img.shields.io/badge/Bootstrap-5-7952B3?style=flat&logo=bootstrap)](https://getbootstrap.com)
 
