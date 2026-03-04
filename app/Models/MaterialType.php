@@ -32,3 +32,4 @@ class MaterialType extends Model
 }
 
 
+

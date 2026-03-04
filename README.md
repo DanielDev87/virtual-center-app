@@ -272,11 +272,12 @@ Para soporte técnico o preguntas, contacta al equipo de desarrollo.
 Desarrollado con ❤️ por Daniel Agudelo usando Laravel y Bootstrap
 
 ----------------------------------
-cuando un administrador quiera marcar como terminado un servicio, deberá relacionar un enlace al recurso generado, sino no podrá marcarlo como cerrado, adicionalmente un servicio podrá ser reabierto por el administrador a solicitud del solicitante y volverse a registar avances en ua nueva seccion que solo se mostrará cuando un servicio haya sido reabierto, al completarlo nuevamente se habilitará la opcion de calificar. Que representa la evaluación de ADDIE. Ningun ticket podrá cerrarse hasta que la barra de vance se halla completado al 100% y halla pasado ´por todas las fases de ADDIE.
+cuando un administrador quiera marcar como terminado un servicio, deberá relacionar un enlace al recurso generado, sino no podrá marcarlo como cerrado, adicionalmente un servicio podrá ser reabierto por el administrador a solicitud del solicitante y volverse a registar avances en una nueva seccion que solo se mostrará cuando un servicio haya sido reabierto, al completarlo nuevamente se habilitará la opcion de calificar. Que representa la evaluación de ADDIE. Ningun ticket podrá cerrarse hasta que la barra de vance se halla completado al 100% y halla pasado ´por todas las fases de ADDIE.
 
 Se rompio la opcion de actualiar contraseñas de un usuario desde administrador
 
 Hashear las rutas en el navegador para que no se pueda acceder a ellas directamente
 
 crear un api para que una app movil pueda acceder a los datos del sistema
+
 

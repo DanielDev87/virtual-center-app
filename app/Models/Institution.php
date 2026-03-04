@@ -36,3 +36,4 @@ class Institution extends Model
         return $this->hasMany(Ticket::class, 'institution_id', 'institution_id');
     }
 }
+

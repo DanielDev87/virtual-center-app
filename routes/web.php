@@ -134,3 +134,4 @@ Route::prefix('ajax')->name('ajax.')->group(function () {
 Route::fallback(function () {
     return view('errors.404');
 });
+
