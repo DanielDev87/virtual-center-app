@@ -18,16 +18,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Theme API
-Route::post('/theme', function (Request $request) {
-    $request->validate([
-        'theme' => 'required|in:light,dark'
-    ]);
-    
-    session(['theme' => $request->theme]);
-    
-    return response()->json(['success' => true]);
-});
+// Theme API (Moved to web.php for session support)
+// Route::post('/theme', ...);
+
 
 
 

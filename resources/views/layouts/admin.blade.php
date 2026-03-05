@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="{{ session('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,12 +78,21 @@
             right: 0;
             left: 250px;
             z-index: 99;
-            background-color: #fff;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
         
         .content-wrapper {
             padding-top: 56px;
+        }
+
+        /* Adjustments for dark mode in admin panel */
+        [data-bs-theme="dark"] .navbar {
+            background-color: var(--vc-dark-surface) !important;
+        }
+        
+        [data-bs-theme="dark"] body {
+            background-color: var(--vc-dark-bg);
+            color: var(--vc-dark-text);
         }
     </style>
     
@@ -205,18 +214,25 @@
     </nav>
 
     <!-- Top Navbar -->
-    <nav class="navbar navbar-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <span class="navbar-text d-flex align-items-center">
-                @if(Auth::user()->user_avatar)
-                    <img src="{{ asset('storage/' . Auth::user()->user_avatar) }}" 
-                         alt="Avatar" class="rounded-circle me-2" 
-                         style="width: 32px; height: 32px; object-fit: cover;">
-                @else
-                    <i class="fas fa-user-circle me-2" style="font-size: 32px;"></i>
-                @endif
-                {{ Auth::user()->user_name }}
-            </span>
+            <div class="ms-auto d-flex align-items-center">
+                <!-- Theme Toggle -->
+                <button class="btn btn-outline-secondary btn-sm me-3" id="themeToggle" title="Cambiar tema">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+
+                <span class="navbar-text d-flex align-items-center">
+                    @if(Auth::user()->user_avatar)
+                        <img src="{{ asset('storage/' . Auth::user()->user_avatar) }}" 
+                             alt="Avatar" class="rounded-circle me-2" 
+                             style="width: 32px; height: 32px; object-fit: cover;">
+                    @else
+                        <i class="fas fa-user-circle me-2" style="font-size: 32px;"></i>
+                    @endif
+                    {{ Auth::user()->user_name }}
+                </span>
+            </div>
         </div>
     </nav>
 
@@ -228,7 +244,9 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ asset('js/app.js') }}"></script>
     
     @stack('scripts')
 </body>

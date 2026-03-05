@@ -128,6 +128,14 @@ Route::prefix('ajax')->name('ajax.')->group(function () {
     Route::get('/search', [HomeController::class, 'search'])->name('search');
     Route::get('/project-details/{id}', [HomeController::class, 'projectDetails'])->name('project-details');
     Route::post('/send-status', [HomeController::class, 'sendStatus'])->name('send-status');
+    
+    // Theme persistence
+    Route::post('/theme', function (\Illuminate\Http\Request $request) {
+        $request->validate(['theme' => 'required|in:light,dark']);
+        session(['theme' => $request->theme]);
+        session()->save(); // Explicitly save session for AJAX
+        return response()->json(['success' => true]);
+    })->name('theme');
 });
 
 // Ruta de fallback para páginas no encontradas
