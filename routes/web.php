@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [\App\Http\Controllers\ContributorController::class, 'dashboard'])->name('dashboard');
         Route::get('/tickets/{id}', [\App\Http\Controllers\ContributorController::class, 'show'])->name('tickets.show');
         Route::post('/tickets/{id}/progress', [\App\Http\Controllers\ContributorController::class, 'storeProgress'])->name('tickets.progress');
+        Route::patch('/tasks/{taskId}/update-status', [\App\Http\Controllers\ContributorController::class, 'updateTaskStatus'])->name('tasks.update-status');
     });
 
     // Rutas de Administrador

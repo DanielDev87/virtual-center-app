@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\TicketProgress;
+use App\Models\ProjectTask;
+use App\Models\Sprint;
 use Illuminate\Support\Facades\Auth;
 
 class ContributorController extends Controller
@@ -62,7 +64,7 @@ class ContributorController extends Controller
     {
         $userId = Auth::id();
 
-        $ticket = Ticket::with(['requester', 'requestType', 'progress.user', 'assignments.mediator', 'assignments.jobPosition'])
+        $ticket = Ticket::with(['requester', 'requestType', 'progress.user', 'assignments.mediator', 'assignments.jobPosition', 'sprints.tasks', 'projectTasks.assignee'])
             ->where(function($query) use ($userId) {
                 $query->where('mediator_id', $userId)
                       ->orWhereHas('assignments', function($q) use ($userId) {
@@ -71,7 +73,18 @@ class ContributorController extends Controller
             })
             ->findOrFail($id);
 
-        return view('contributors.show', compact('ticket'));
+        // Get active sprint or selected sprint
+        $activeSprint = null;
+        if (request('sprint_id')) {
+            $activeSprint = $ticket->sprints->where('sprint_id', request('sprint_id'))->first();
+        } else {
+            $activeSprint = $ticket->sprints()->where('status', 'active')->first();
+        }
+        
+        // Get backlog tasks (tasks not assigned to any sprint or assigned to future sprints)
+        $backlogTasks = $ticket->projectTasks()->whereNull('sprint_id')->get();
+
+        return view('contributors.show', compact('ticket', 'activeSprint', 'backlogTasks'));
     }
 
     /**
@@ -121,5 +134,37 @@ class ContributorController extends Controller
 
         return redirect()->route('contributors.tickets.show', $id)
             ->with('success', 'Avance registrado exitosamente.');
+    }
+
+    /**
+     * Update task status (Kanban drag & drop)
+     */
+    public function updateTaskStatus(Request $request, $taskId)
+    {
+        $request->validate([
+            'status' => 'required|in:todo,in_progress,review,done',
+        ]);
+
+        $task = ProjectTask::findOrFail($taskId);
+
+        $userId = Auth::id();
+        $ticketId = $task->ticket_id;
+
+        // Verify user has access to this ticket
+        $hasAccess = Ticket::where('ticket_id', $ticketId)
+            ->where(function($query) use ($userId) {
+                $query->where('mediator_id', $userId)
+                      ->orWhereHas('assignments', function($q) use ($userId) {
+                          $q->where('user_id', $userId)->where('status', 'active');
+                      });
+            })->exists();
+
+        if (!$hasAccess) {
+            return response()->json(['success' => false, 'message' => 'No tienes permiso para actualizar esta tarea.'], 403);
+        }
+
+        $task->update(['status' => $request->status]);
+
+        return response()->json(['success' => true, 'message' => 'Estado de la tarea actualizado.']);
     }
 }
