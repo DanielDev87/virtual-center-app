@@ -11,6 +11,8 @@
 
 A-DDIE no es solo una herramienta, es una plataforma para la **transformación digital** de los entornos educativos, permitiendo una administración centralizada, eficiente y accesible. 
 
+### Diagrama del proyecto
+![Diagrama principal del app a-ddie](manuales/diagram.png)
 
 ### Características Principales
 
