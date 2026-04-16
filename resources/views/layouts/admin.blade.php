@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="{{ session('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin - Virtual Center')</title>
+    <title>@yield('title', 'Admin - A-DDIE')</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -78,12 +78,21 @@
             right: 0;
             left: 250px;
             z-index: 99;
-            background-color: #fff;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
         
         .content-wrapper {
             padding-top: 56px;
+        }
+
+        /* Adjustments for dark mode in admin panel */
+        [data-bs-theme="dark"] .navbar {
+            background-color: var(--vc-dark-surface) !important;
+        }
+        
+        [data-bs-theme="dark"] body {
+            background-color: var(--vc-dark-bg);
+            color: var(--vc-dark-text);
         }
     </style>
     
@@ -93,10 +102,11 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-sticky">
-            <div class="px-3 py-2 mb-3 border-bottom border-secondary">
-                <h5 class="text-white mb-0">
-                    <i class="fas fa-user-shield me-2"></i>Panel Admin
-                </h5>
+            <div class="px-3 py-3 mb-3 border-bottom border-secondary">
+                <h4 class="text-white mb-1 fw-bold">
+                    <i class="fas fa-graduation-cap me-2"></i>A-DDIE
+                </h4>
+                <small class="text-white">Panel Administrativo</small>
             </div>
             
             <ul class="nav flex-column">
@@ -170,13 +180,19 @@
                 </li>
             </ul>
             
-            <h6 class="sidebar-heading">Sistema</h6>
+            <h6 class="sidebar-heading">Reportes</h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('home') }}">
-                        <i class="fas fa-home"></i>
-                        Ir al Sitio
+                    <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" 
+                       href="{{ route('admin.reports.index') }}">
+                        <i class="fas fa-file-export"></i>
+                        Módulo de Reportes
                     </a>
+                </li>
+            </ul>
+            
+            <h6 class="sidebar-heading">Sistema</h6>
+            <ul class="nav flex-column">
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
@@ -198,18 +214,25 @@
     </nav>
 
     <!-- Top Navbar -->
-    <nav class="navbar navbar-light">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <span class="navbar-text d-flex align-items-center">
-                @if(Auth::user()->user_avatar)
-                    <img src="{{ asset('storage/' . Auth::user()->user_avatar) }}" 
-                         alt="Avatar" class="rounded-circle me-2" 
-                         style="width: 32px; height: 32px; object-fit: cover;">
-                @else
-                    <i class="fas fa-user-circle me-2" style="font-size: 32px;"></i>
-                @endif
-                {{ Auth::user()->user_name }}
-            </span>
+            <div class="ms-auto d-flex align-items-center">
+                <!-- Theme Toggle -->
+                <button class="btn btn-outline-secondary btn-sm me-3" id="themeToggle" title="Cambiar tema">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+
+                <span class="navbar-text d-flex align-items-center">
+                    @if(Auth::user()->user_avatar)
+                        <img src="{{ asset('storage/' . Auth::user()->user_avatar) }}" 
+                             alt="Avatar" class="rounded-circle me-2" 
+                             style="width: 32px; height: 32px; object-fit: cover;">
+                    @else
+                        <i class="fas fa-user-circle me-2" style="font-size: 32px;"></i>
+                    @endif
+                    {{ Auth::user()->user_name }}
+                </span>
+            </div>
         </div>
     </nav>
 
@@ -221,7 +244,9 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ asset('js/app.js') }}"></script>
     
     @stack('scripts')
 </body>

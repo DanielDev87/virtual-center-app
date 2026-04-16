@@ -43,6 +43,7 @@
                             <th>Solicitante</th>
                             <th>Mediador</th>
                             <th>Estado</th>
+                            <th>Progreso</th>
                             <th>Fecha</th>
                             <th>Acciones</th>
                         </tr>
@@ -68,6 +69,16 @@
                                 <span class="badge bg-{{ $statusColors[$ticket->status] ?? 'secondary' }}">
                                     {{ $statusNames[$ticket->status] ?? 'Desconocido' }}
                                 </span>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-info" role="progressbar" 
+                                         style="width: {{ $ticket->progress_percentage ?? 0 }}%;" 
+                                         aria-valuenow="{{ $ticket->progress_percentage ?? 0 }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ $ticket->progress_percentage ?? 0 }}%
+                                    </div>
+                                </div>
                             </td>
                             <td>{{ $ticket->created_at->format('d/m/Y') }}</td>
                             <td>

@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "Si usas este software en tu investigación o proyecto, por favor cítalo como:"
+authors:
+- family-names: "Agudelo"
+  given-names: "Daniel"
+  orcid: "https://orcid.org/0009-0008-4140-4358"
+title: "A-DDIE: Sistema de Gestión y Colaboración Virtual para Centros Educativos"
+version: 1.0.0
+doi: 10.5281/zenodo.18841367
+date-released: 2026-03-02
+url: "https://github.com/DanielDev87/virtual-center-app"
+repository-code: "https://github.com/DanielDev87/virtual-center-app"
+license: "Apache-2.0"
+keywords:
+  - "gestión educativa"
+  - "colaboración virtual"
+  - "centros de producción"
+  - "Laravel"
+  - "ciencia abierta"
+  - "open source"

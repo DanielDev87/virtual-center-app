@@ -47,10 +47,22 @@ function initializeThemeToggle() {
   var themeIcon = $('#themeIcon');
   var html = $('html');
 
-  // Get current theme from session or default to light
-  var currentTheme = $('html').attr('data-bs-theme') || 'light';
+  // Sync theme between session (via attribute) and localStorage
+  var currentTheme = localStorage.getItem('theme');
+  var sessionTheme = $('html').attr('data-bs-theme');
 
-  // Update icon based on current theme
+  // If we have a theme in localStorage but session is default/different, sync them
+  if (currentTheme && currentTheme !== sessionTheme) {
+    $('html').attr('data-bs-theme', currentTheme);
+  } else if (!currentTheme && sessionTheme) {
+    currentTheme = sessionTheme;
+    localStorage.setItem('theme', currentTheme);
+  } else if (!currentTheme && !sessionTheme) {
+    currentTheme = 'light';
+    localStorage.setItem('theme', currentTheme);
+  }
+
+  // Update icon based on final theme
   updateThemeIcon(currentTheme);
 
   // Theme toggle click handler
@@ -86,17 +98,17 @@ function initializeThemeToggle() {
 
     // Send to server to save in session
     $.ajax({
-      url: '/api/theme',
+      url: '/ajax/theme',
       method: 'POST',
       data: {
         theme: theme,
         _token: $('meta[name="csrf-token"]').attr('content')
       },
       success: function success(response) {
-        console.log('Theme saved successfully');
+        console.log('Theme saved to session successfully');
       },
       error: function error(xhr, status, _error) {
-        console.log('Error saving theme:', _error);
+        console.error('Error saving theme to session:', _error);
       }
     });
   }
@@ -319,6 +331,13 @@ window.VirtualCenter = {
   confirmAction: confirmAction,
   copyToClipboard: copyToClipboard
 };
+
+// Initialize DataTable for tables with data-table class
+$(document).ready(function () {
+  $('.data-table').each(function () {
+    new DataTable(this);
+  });
+});
 
 /***/ })
 

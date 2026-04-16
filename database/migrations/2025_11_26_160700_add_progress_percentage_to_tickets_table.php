@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table) {
-            //
+            $table->integer('progress_percentage')->default(0)->after('priority');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tickets', function (Blueprint $table) {
-            //
+            $table->dropColumn('progress_percentage');
         });
     }
 };

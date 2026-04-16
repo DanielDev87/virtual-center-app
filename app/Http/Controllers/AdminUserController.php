@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\JobPosition;
+use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {

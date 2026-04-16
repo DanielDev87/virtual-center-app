@@ -28,9 +28,19 @@ class Ticket extends Model
         'rating',
         'priority',
         'progress_percentage',
+        'current_phase',
         'faculty_id',
         'program_id',
         'course_id',
+        'resource_link',
+        'is_reopened',
+        'reopened_at',
+        'feedback',
+    ];
+
+    protected $casts = [
+        'current_phase' => 'string',
+        'reopened_at' => 'datetime',
     ];
 
     public function requester()
@@ -85,4 +95,15 @@ class Ticket extends Model
                     ->wherePivot('status', 'active')
                     ->withPivot('job_position_id', 'assigned_at', 'notes', 'assignment_id');
     }
+
+    public function sprints()
+    {
+        return $this->hasMany(Sprint::class, 'ticket_id', 'ticket_id');
+    }
+
+    public function projectTasks()
+    {
+        return $this->hasMany(ProjectTask::class, 'ticket_id', 'ticket_id');
+    }
+
 }

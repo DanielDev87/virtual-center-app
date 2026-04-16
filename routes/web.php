@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [\App\Http\Controllers\ContributorController::class, 'dashboard'])->name('dashboard');
         Route::get('/tickets/{id}', [\App\Http\Controllers\ContributorController::class, 'show'])->name('tickets.show');
         Route::post('/tickets/{id}/progress', [\App\Http\Controllers\ContributorController::class, 'storeProgress'])->name('tickets.progress');
+        Route::patch('/tasks/{taskId}/update-status', [\App\Http\Controllers\ContributorController::class, 'updateTaskStatus'])->name('tasks.update-status');
     });
 
     // Rutas de Administrador
@@ -85,10 +86,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('tickets/{id}/assign', [\App\Http\Controllers\AdminTicketController::class, 'assignMediator'])->name('tickets.assign');
         Route::post('tickets/{id}/priority', [\App\Http\Controllers\AdminTicketController::class, 'setPriority'])->name('tickets.priority');
         Route::post('tickets/{id}/close', [\App\Http\Controllers\AdminTicketController::class, 'close'])->name('tickets.close');
+        Route::post('tickets/{id}/reopen', [\App\Http\Controllers\AdminTicketController::class, 'reopen'])->name('tickets.reopen');
+        Route::post('tickets/{id}/rate', [\App\Http\Controllers\AdminTicketController::class, 'rate'])->name('tickets.rate');
         
         // Multi-Mediator Assignments
         Route::post('tickets/{id}/assign-mediator', [\App\Http\Controllers\AdminTicketController::class, 'assignMediatorToTicket'])->name('tickets.assign-mediator');
         Route::delete('tickets/{ticketId}/assignments/{assignmentId}', [\App\Http\Controllers\AdminTicketController::class, 'removeAssignment'])->name('tickets.remove-assignment');
+
+        // Project Management (ADDIE + SCRUM)
+        Route::prefix('projects')->name('projects.')->group(function () {
+            Route::get('/{ticketId}/dashboard', [\App\Http\Controllers\ProjectManagementController::class, 'index'])->name('dashboard');
+            Route::patch('/{ticketId}/phase', [\App\Http\Controllers\ProjectManagementController::class, 'updatePhase'])->name('update-phase');
+            Route::post('/{ticketId}/sprints', [\App\Http\Controllers\ProjectManagementController::class, 'storeSprint'])->name('store-sprint');
+            Route::patch('/sprints/{sprintId}/status', [\App\Http\Controllers\ProjectManagementController::class, 'updateSprintStatus'])->name('update-sprint-status');
+            Route::post('/{ticketId}/tasks', [\App\Http\Controllers\ProjectManagementController::class, 'storeTask'])->name('store-task');
+            Route::patch('/tasks/{taskId}/update-status', [\App\Http\Controllers\ProjectManagementController::class, 'updateTaskStatus'])->name('update-task-status');
+        });
 
         // Gestión Académica
         Route::prefix('academic')->name('academic.')->group(function () {
@@ -96,6 +109,14 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('faculties', \App\Http\Controllers\Admin\AdminFacultyController::class);
             Route::resource('programs', \App\Http\Controllers\Admin\AdminProgramController::class);
             Route::resource('courses', \App\Http\Controllers\Admin\AdminCourseController::class);
+        });
+        
+        // Reports Module
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\ReportsController::class, 'index'])->name('index');
+            Route::get('/tickets', [\App\Http\Controllers\ReportsController::class, 'ticketsReport'])->name('tickets');
+            Route::get('/collaborators', [\App\Http\Controllers\ReportsController::class, 'collaboratorsReport'])->name('collaborators');
+            Route::get('/progress', [\App\Http\Controllers\ReportsController::class, 'progressReport'])->name('progress');
         });
         
         // Job Positions Management
@@ -108,9 +129,18 @@ Route::prefix('ajax')->name('ajax.')->group(function () {
     Route::get('/search', [HomeController::class, 'search'])->name('search');
     Route::get('/project-details/{id}', [HomeController::class, 'projectDetails'])->name('project-details');
     Route::post('/send-status', [HomeController::class, 'sendStatus'])->name('send-status');
+    
+    // Theme persistence
+    Route::post('/theme', function (\Illuminate\Http\Request $request) {
+        $request->validate(['theme' => 'required|in:light,dark']);
+        session(['theme' => $request->theme]);
+        session()->save(); // Explicitly save session for AJAX
+        return response()->json(['success' => true]);
+    })->name('theme');
 });
 
 // Ruta de fallback para páginas no encontradas
 Route::fallback(function () {
     return view('errors.404');
 });
+
