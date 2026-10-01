@@ -8,15 +8,15 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     /**
-     * Define the application's command schedule.
+     * Definir el horario de comandos de la aplicación.
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('tickets:notify-overdue')->hourly()->withoutOverlapping();
     }
 
     /**
-     * Register the commands for the application.
+     * Registrar los comandos de la aplicación.
      */
     protected function commands(): void
     {

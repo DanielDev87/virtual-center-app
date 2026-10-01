@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Route;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
+| Aquí puede registrar las rutas de la API de la aplicación. Estas rutas son
+| cargadas por el RouteServiceProvider y todas se asignarán al grupo de
+| middleware "api".
 |
 */
 
@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Theme API (Moved to web.php for session support)
+// API de Tema (Movida a web.php para soporte de sesión)
 // Route::post('/theme', ...);
 
 

@@ -8,9 +8,19 @@ use Illuminate\Http\Request;
 
 class AdminJobPositionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jobPositions = JobPosition::latest()->paginate(15);
+        $query = JobPosition::query();
+
+        if ($request->filled('search')) {
+            $query->where('position_name', 'like', "%{$request->search}%");
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $jobPositions = $query->orderBy('position_name')->paginate(15)->withQueryString();
         return view('admin.job-positions.index', compact('jobPositions'));
     }
 

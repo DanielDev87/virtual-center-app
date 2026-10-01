@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Iniciar Sesión - A-DDIE')
+@section('title', 'Iniciar Sesión - ' . ($branding['app_name'] ?? 'Sistema de Soporte Universitario'))
 
 @section('content')
 <div class="container">
@@ -9,9 +9,9 @@
             <div class="card shadow-lg border-0 mt-5">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('img/logo-virtual-center.png') }}" alt="A-DDIE" height="60" class="mb-3">
+                        <img src="{{ $branding['logo_url'] ?? asset('img/logomsula.png') }}" alt="{{ $branding['app_name'] ?? 'Sistema de Soporte Universitario' }}" height="72" class="mb-3 img-fluid">
                         <h3 class="fw-bold text-primary">Iniciar Sesión</h3>
-                        <p class="text-muted">Accede a tu cuenta de A-DDIE</p>
+                        <p class="text-muted">Accede a tu cuenta de {{ $branding['app_name'] ?? 'Sistema de Soporte Universitario' }}</p>
                     </div>
 
                     @if ($errors->any())
@@ -85,26 +85,31 @@
                     <div class="text-center mt-4">
                         <p class="text-muted">
                             ¿No tienes cuenta? 
-                            <a href="#" class="text-primary">Contacta al administrador</a>
+                            <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#contactAdminModal">Contacta al administrador</a>
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Access Links -->
-            <div class="text-center mt-4">
-                <div class="row g-2">
-                    <div class="col-6">
-                        <a href="{{ route('contributors.dashboard') }}" class="btn btn-outline-primary btn-sm w-100">
-                            <i class="fas fa-users me-1"></i>Colaboradores
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-success btn-sm w-100">
-                            <i class="fas fa-tachometer-alt me-1"></i>Líderes
-                        </a>
-                    </div>
-                </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="contactAdminModal" tabindex="-1" aria-labelledby="contactAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="contactAdminModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>Información de Acceso
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Para obtener acceso al sistema debes estar vinculado con la institución.</p>
+                <p class="mb-0">Realiza el proceso de solicitud de forma interna con tu jefe inmediato.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
             </div>
         </div>
     </div>

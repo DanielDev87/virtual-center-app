@@ -26,9 +26,9 @@ class ResetUserPassword extends Command
         $user->password = Hash::make($password);
         $user->save();
 
-        $this->info("✅ Contraseña actualizada para: {$user->user_name} ({$user->user_email})");
-        $this->info("🔑 Nueva contraseña: {$password}");
-        $this->info("👤 Rol ID: {$user->role_id}");
+        $this->info("Contraseña actualizada para: {$user->user_name} ({$user->user_email})");
+        $this->info("Nueva contraseña: {$password}");
+        $this->info("Rol ID: {$user->role_id}");
 
         return 0;
     }

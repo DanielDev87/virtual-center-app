@@ -8,16 +8,26 @@ use App\Models\UserRole;
 class AdminRoleController extends Controller
 {
     /**
-     * Display a listing of roles
+     * Mostrar el listado de roles
      */
-    public function index()
+    public function index(Request $request)
     {
-        $roles = UserRole::paginate(15);
+        $query = UserRole::query();
+
+        if ($request->filled('search')) {
+            $query->where('role_name', 'like', "%{$request->search}%");
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $roles = $query->orderBy('role_name')->paginate(15)->withQueryString();
         return view('admin.roles.index', compact('roles'));
     }
 
     /**
-     * Show the form for creating a new role
+     * Mostrar el formulario para crear un nuevo rol
      */
     public function create()
     {
@@ -25,7 +35,7 @@ class AdminRoleController extends Controller
     }
 
     /**
-     * Store a newly created role
+     * Almacenar un nuevo rol recién creado
      */
     public function store(Request $request)
     {
@@ -47,7 +57,7 @@ class AdminRoleController extends Controller
     }
 
     /**
-     * Show the form for editing a role
+     * Mostrar el formulario para editar un rol
      */
     public function edit($id)
     {
@@ -56,7 +66,7 @@ class AdminRoleController extends Controller
     }
 
     /**
-     * Update the specified role
+     * Actualizar el rol especificado
      */
     public function update(Request $request, $id)
     {
@@ -80,13 +90,13 @@ class AdminRoleController extends Controller
     }
 
     /**
-     * Remove the specified role
+     * Eliminar el rol especificado
      */
     public function destroy($id)
     {
         $role = UserRole::findOrFail($id);
         
-        // Check if role is in use
+        // Verificar si el rol está en uso
         if ($role->users()->count() > 0) {
             return redirect()->route('admin.roles.index')
                 ->with('error', 'No se puede eliminar un rol que está asignado a usuarios.');

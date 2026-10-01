@@ -3,7 +3,7 @@
 @section('title', 'Contacto - Virtual Center')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid home-public-page">
     <!-- Hero Section -->
     <div class="row bg-primary text-white py-5">
         <div class="col-12 text-center">
@@ -83,7 +83,7 @@
             <!-- Contact Information -->
             <div class="col-lg-4">
                 <div class="card shadow mb-4">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header vc-accent-bg text-white">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-info-circle me-2"></i>
                             Información de Contacto
@@ -101,7 +101,7 @@
                         </div>
                         
                         <div class="d-flex align-items-center mb-3">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <div class="vc-accent-bg text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
                                 <i class="fas fa-phone"></i>
                             </div>
                             <div>
@@ -147,7 +147,7 @@
                                 Acerca de Nosotros
                             </a>
                             <a href="#" class="list-group-item list-group-item-action">
-                                <i class="fas fa-question-circle text-success me-2"></i>
+                                <i class="fas fa-question-circle vc-accent-icon me-2"></i>
                                 Preguntas Frecuentes
                             </a>
                             <a href="#" class="list-group-item list-group-item-action">
@@ -166,7 +166,7 @@
     </div>
 
     <!-- Map Section -->
-    <div class="bg-light py-5">
+    <div class="section-surface py-5">
         <div class="container">
             <div class="row text-center mb-4">
                 <div class="col-12">
@@ -250,6 +250,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')

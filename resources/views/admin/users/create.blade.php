@@ -48,12 +48,32 @@
                                     id="role_id" name="role_id" required>
                                 <option value="">Seleccionar rol</option>
                                 @foreach($roles as $role)
-                                <option value="{{ $role->role_id }}" {{ old('role_id') == $role->role_id ? 'selected' : '' }}>
+                                <option value="{{ $role->role_id }}"
+                                        data-role-name="{{ mb_strtolower($role->role_name, 'UTF-8') }}"
+                                        data-role-description="{{ $role->role_description }}"
+                                        {{ old('role_id') == $role->role_id ? 'selected' : '' }}>
                                     {{ $role->role_name }}
                                 </option>
                                 @endforeach
                             </select>
+                            <div id="role-description" class="form-text">Seleccione el rol que tendrá este usuario.</div>
                             @error('role_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3" id="area-container" style="display: none;">
+                            <label for="area_id" class="form-label" id="area-label">Área</label>
+                            <select class="form-select @error('area_id') is-invalid @enderror" 
+                                    id="area_id" name="area_id">
+                                <option value="">Seleccionar área</option>
+                                @foreach($areas as $area)
+                                <option value="{{ $area->area_id }}" {{ old('area_id') == $area->area_id ? 'selected' : '' }}>
+                                    {{ $area->area_name }}
+                                </option>
+                                @endforeach
+                            </select>
+                            @error('area_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -129,4 +149,48 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('role_id');
+        const areaContainer = document.getElementById('area-container');
+        const areaInput = document.getElementById('area_id');
+        const areaLabel = document.getElementById('area-label');
+        const roleDescription = document.getElementById('role-description');
+
+        function normalizeRoleName(roleName) {
+            return (roleName || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        function toggleAreaContainer() {
+            const selected = roleSelect.options[roleSelect.selectedIndex];
+            const roleName = normalizeRoleName(selected?.dataset.roleName || selected?.text);
+            roleDescription.textContent = selected?.dataset.roleDescription || 'Seleccione el rol que tendrá este usuario.';
+            const isContributorOrGestor = roleName === 'contributor' || roleName === 'gestor';
+            const isAreaAdmin = roleName === 'admin area';
+
+            if (isContributorOrGestor || isAreaAdmin) {
+                areaContainer.style.display = 'block';
+                areaInput.required = isAreaAdmin;
+                areaLabel.innerHTML = isAreaAdmin
+                    ? 'Área <span class="text-danger">*</span> (obligatoria para Admin Área)'
+                    : 'Área';
+            } else {
+                areaContainer.style.display = 'none';
+                areaInput.required = false;
+                areaInput.value = '';
+                areaLabel.textContent = 'Área';
+            }
+        }
+
+        roleSelect.addEventListener('change', toggleAreaContainer);
+        toggleAreaContainer(); // Ejecutar on load
+    });
+</script>
+@endpush
 @endsection

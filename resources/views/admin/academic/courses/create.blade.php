@@ -3,6 +3,10 @@
 @section('title', 'Nuevo Curso - Admin')
 
 @section('content')
+@php
+    $oldProgramIds = collect(old('program_ids', []))->map(fn ($id) => (int) $id)->filter()->values();
+    $primaryProgramId = (int) old('program_id', $oldProgramIds->first() ?? 0);
+@endphp
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
         <h1 class="h2"><i class="fas fa-book me-2"></i>Nuevo Curso</h1>
@@ -17,17 +21,21 @@
                 @csrf
                 
                 <div class="mb-3">
-                    <label for="program_id" class="form-label">Programa <span class="text-danger">*</span></label>
-                    <select class="form-select @error('program_id') is-invalid @enderror" 
-                            id="program_id" name="program_id" required>
-                        <option value="">-- Seleccionar --</option>
+                    <label for="program_ids" class="form-label">Programas <span class="text-danger">*</span></label>
+                    <input type="hidden" id="program_id" name="program_id" value="{{ $primaryProgramId ?: '' }}">
+                    <select class="form-select @error('program_id') is-invalid @enderror @error('program_ids') is-invalid @enderror" 
+                            id="program_ids" name="program_ids[]" multiple size="8" required>
                         @foreach($programs as $program)
-                        <option value="{{ $program->program_id }}" {{ old('program_id') == $program->program_id ? 'selected' : '' }}>
+                        <option value="{{ $program->program_id }}" {{ $oldProgramIds->contains((int) $program->program_id) || (!$oldProgramIds->count() && $primaryProgramId === (int) $program->program_id) ? 'selected' : '' }}>
                             {{ $program->program_name }} ({{ $program->faculty->faculty_name ?? 'N/A' }})
                         </option>
                         @endforeach
                     </select>
+                    <small class="text-muted d-block mt-2">Busca y selecciona uno o varios programas. Puedes eliminar selecciones desde las etiquetas.</small>
                     @error('program_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    @error('program_ids')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -79,3 +87,62 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .ts-control {
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+    (function () {
+        const programIdsSelect = document.getElementById('program_ids');
+        const primaryProgramInput = document.getElementById('program_id');
+
+        if (!programIdsSelect || !primaryProgramInput) {
+            return;
+        }
+
+        function getSelectedValues() {
+            return Array.from(programIdsSelect.selectedOptions).map(option => option.value).filter(Boolean);
+        }
+
+        function syncPrimaryProgram() {
+            const selectedValues = getSelectedValues();
+
+            primaryProgramInput.value = selectedValues.length > 0 ? selectedValues[0] : '';
+        }
+
+        if (window.TomSelect) {
+            const selectControl = new TomSelect(programIdsSelect, {
+                plugins: {
+                    remove_button: {
+                        title: 'Quitar'
+                    }
+                },
+                create: false,
+                hideSelected: true,
+                closeAfterSelect: false,
+                maxOptions: 500,
+                placeholder: 'Selecciona programas...',
+                render: {
+                    no_results: function (data, escape) {
+                        return '<div class="no-results">Sin resultados para "' + escape(data.input) + '"</div>';
+                    }
+                }
+            });
+
+            selectControl.on('change', syncPrimaryProgram);
+        } else {
+            programIdsSelect.addEventListener('change', syncPrimaryProgram);
+        }
+
+        syncPrimaryProgram();
+    })();
+</script>
+@endpush

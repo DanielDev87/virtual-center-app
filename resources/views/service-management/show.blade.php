@@ -1,12 +1,12 @@
-@extends('layouts.requester')
+@extends(Auth::user()->role->role_name == 'Requester' ? 'layouts.requester' : 'layouts.contributor')
 
-@section('title', 'Detalles del Proyecto - Virtual Center')
+@section('title', 'Detalles de la Solicitud - Virtual Center')
 
 @section('content')
 <div class="container-fluid">
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Detalles de la Solicitud #{{ $ticket->ticket_number }}</h1>
+    <div class="d-flex justify-content-between flex-wrap align-items-center pt-3 pb-2 mb-3 border-bottom gap-2">
+        <h1 class="h2 mb-0">Detalles de la Solicitud #{{ $ticket->ticket_number }}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('service-management.index') }}" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i>Volver
@@ -30,20 +30,75 @@
                 </div>
                 <div class="card-body">
                     <h5 class="fw-bold">{{ $ticket->title }}</h5>
-                    <p class="text-muted">{{ $ticket->requester_info }}</p>
+                    <div class="text-muted">{!! $ticket->requester_info !!}</div>
+
+                    @php $visibleEvidences = $ticket->evidences->where('storage_disk', '!=', 'richtext_filesystem'); @endphp
+
+                    @if($ticket->requester_url || $visibleEvidences->count())
+                    <div class="mt-3">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-paperclip me-1"></i>Evidencias Adjuntas</h6>
+                        @if($ticket->requester_url)
+                        <a href="{{ $ticket->requester_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary me-2 mb-2">
+                            <i class="fab fa-google-drive me-1"></i>Carpeta de Google Drive
+                        </a>
+                        @endif
+
+                        @foreach($visibleEvidences as $evidence)
+                            @if($evidence->public_url)
+                            <a href="{{ $evidence->public_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary me-2 mb-2">
+                                <i class="fas fa-file-alt me-1"></i>{{ $evidence->file_name }}
+                            </a>
+                            @endif
+                        @endforeach
+                    </div>
+                    @endif
                     
                     <hr>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">Solicitado el:</small>
                             <strong>{{ $ticket->created_at->format('d/m/Y H:i') }}</strong>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <small class="text-muted d-block">Última actualización:</small>
                             <strong>{{ $ticket->updated_at->format('d/m/Y H:i') }}</strong>
                         </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Prioridad:</small>
+                            <strong>
+                                @php
+                                    $priorities = [1 => 'Baja', 2 => 'Media', 3 => 'Alta (Afecta operación)', 4 => 'Urgente (Suspende operación)'];
+                                    $priorityColors = [1 => 'success', 2 => 'info', 3 => 'warning text-dark', 4 => 'danger'];
+                                @endphp
+                                <span class="badge bg-{{ $priorityColors[$ticket->priority] ?? 'secondary' }}">
+                                    {{ $priorities[$ticket->priority] ?? 'No asignada' }}
+                                </span>
+                            </strong>
+                        </div>
                     </div>
+
+                    @if($ticket->priority_sla_hours)
+                    <hr>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Tiempo objetivo (SLA)</small>
+                            <strong>{{ $ticket->priority_sla_hours }} horas</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Fecha límite de respuesta</small>
+                            <strong>{{ $ticket->response_deadline->format('d/m/Y H:i') }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Estado del tiempo</small>
+                            @if($ticket->is_response_overdue)
+                                <span class="badge bg-danger">Vencido</span>
+                            @else
+                                <span class="badge bg-success">Dentro del tiempo</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
             
@@ -59,6 +114,55 @@
                     <a href="{{ $ticket->resource_link }}" target="_blank" class="btn btn-primary btn-lg mt-2">
                         <i class="fas fa-external-link-alt me-2"></i>Acceder al Recurso
                     </a>
+                </div>
+            </div>
+            @endif
+
+            @php
+                $finalResponse = $ticket->progress
+                    ->whereIn('status_update', ['service_closed', 'service_closed_admin', 'service_closed_area_admin', 'operario_completion_approved'])
+                    ->sortByDesc('created_at')
+                    ->first();
+                $finalResponseText = $finalResponse?->progress_description;
+                foreach ([
+                    'Cierre del servicio: ',
+                    'Cierre administrativo del servicio: ',
+                    'Cierre por admin de área: ',
+                    'Auditoría aprobada por admin de área: ',
+                ] as $prefix) {
+                    $finalResponseText = $finalResponseText !== null
+                        ? preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $finalResponseText)
+                        : null;
+                }
+            @endphp
+            @if($ticket->status == 3 && $finalResponseText)
+            <div class="card shadow mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-comment-check me-2"></i>Respuesta final del servicio</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ $finalResponseText }}</p>
+                </div>
+            </div>
+            @endif
+
+            @php
+                $cancellationLog = $ticket->progress
+                    ->whereIn('status_update', ['service_cancelled_admin', 'service_cancelled_area_admin'])
+                    ->sortByDesc('created_at')
+                    ->first();
+                $cancellationReason = $cancellationLog?->progress_description;
+                $cancellationReason = $cancellationReason !== null
+                    ? preg_replace('/^Cancelación (administrativa del ticket|por admin de área)\. Motivo: /', '', $cancellationReason)
+                    : null;
+            @endphp
+            @if($ticket->status == 4 && $cancellationReason)
+            <div class="card shadow mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-times-circle me-2"></i>Motivo de cancelación</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ $cancellationReason }}</p>
                 </div>
             </div>
             @endif
@@ -81,7 +185,7 @@
                             <p class="text-muted">Calificaste este servicio con {{ $ticket->rating }} estrellas.</p>
                         </div>
                     @else
-                        <form action="{{ route('service-management.rate', $ticket->ticket_id) }}" method="POST">
+                        <form id="service-management-rate-form" action="{{ route('service-management.rate', $ticket->ticket_id) }}" method="POST">
                             @csrf
                             <div class="text-center mb-4">
                                 <p class="lead">¿Qué tan satisfecho estás con el resultado?</p>
@@ -95,8 +199,12 @@
                                 <input type="hidden" name="rating" id="ratingValue" required>
                             </div>
                             <div class="mb-3">
-                                <label for="comment" class="form-label">Comentario (Opcional)</label>
-                                <textarea class="form-control" name="comment" rows="3" placeholder="Cuéntanos más sobre tu experiencia..."></textarea>
+                                <label for="ratingComment" class="form-label">Observación <span id="commentHint" class="text-muted">(Opcional)</span></label>
+                                <textarea class="form-control @error('comment') is-invalid @enderror" id="ratingComment" name="comment" rows="3" placeholder="Cuéntanos qué se puede mejorar..." minlength="15">{{ old('comment') }}</textarea>
+                                @error('comment')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted d-block mt-1">Si calificas con 1 a 4 estrellas, la observación es obligatoria.</small>
                             </div>
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-success btn-lg">Enviar Calificación</button>
@@ -112,43 +220,27 @@
         <div class="col-lg-4">
             <div class="card shadow mb-4">
                 <div class="card-header bg-info text-white">
-                    <h5 class="card-title mb-0"><i class="fas fa-users me-2"></i>Equipo de Trabajo</h5>
+                    <h5 class="card-title mb-0"><i class="fas fa-sitemap me-2"></i>Seguimiento del Caso</h5>
                 </div>
                 <div class="card-body">
-                    @if($ticket->assignments->where('status', 'active')->count() > 0)
-                        <ul class="list-group list-group-flush">
-                            @foreach($ticket->assignments->where('status', 'active') as $assignment)
-                            <li class="list-group-item px-0">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                            {{ strtoupper(substr($assignment->mediator->user_name, 0, 1)) }}
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-0">{{ $assignment->mediator->user_name }}</h6>
-                                        <span class="badge" style="background-color: {{ $assignment->jobPosition->position_color }}">
-                                            {{ $assignment->jobPosition->position_name }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </li>
-                            @endforeach
-                        </ul>
-                    @elseif($ticket->mediator)
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    {{ strtoupper(substr($ticket->mediator->user_name, 0, 1)) }}
-                                </div>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0">{{ $ticket->mediator->user_name }}</h6>
-                                <small class="text-muted">Mediador Principal</small>
-                            </div>
+                    @if($ticket->requestType)
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Tópico actual</small>
+                            <strong>{{ $ticket->requestType->type_name }}</strong>
                         </div>
+
+                        @if($ticket->requestType->area)
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Área responsable</small>
+                            <strong>{{ $ticket->requestType->area->area_name }}</strong>
+                        </div>
+                        @endif
+
+                        <p class="text-muted mb-0">
+                            Tu solicitud está siendo atendida internamente por el área responsable según el tópico asignado.
+                        </p>
                     @else
-                        <p class="text-muted mb-0">Aún no se ha asignado un equipo de trabajo.</p>
+                        <p class="text-muted mb-0">Aún no se ha definido el área responsable para este caso.</p>
                     @endif
                 </div>
             </div>
@@ -172,7 +264,18 @@ $(document).ready(function() {
         const rating = $(this).data('rating');
         $('#ratingValue').val(rating);
         updateStars(rating);
+        updateCommentRequirement(rating);
     });
+
+    function updateCommentRequirement(rating) {
+        const comment = $('#ratingComment');
+        const hint = $('#commentHint');
+        const numericRating = parseInt(rating || 0, 10);
+        const required = numericRating > 0 && numericRating < 5;
+
+        comment.prop('required', required);
+        hint.text(required ? '(Obligatoria. Mínimo 15 caracteres)' : '(Opcional)');
+    }
 
     function updateStars(rating) {
         $('.rating-input i').each(function() {
@@ -184,6 +287,19 @@ $(document).ready(function() {
             }
         });
     }
+
+    updateCommentRequirement($('#ratingValue').val());
+
+    $('#service-management-rate-form').on('submit', function(e) {
+        const rating = parseInt($('#ratingValue').val() || '0', 10);
+        const comment = ($('#ratingComment').val() || '').trim();
+        const meaningful = (comment.match(/[\p{L}\p{N}]/gu) || []).length;
+
+        if (rating > 0 && rating < 5 && (comment.length < 15 || meaningful < 10)) {
+            e.preventDefault();
+            VirtualCenter.showAlert('La observación es obligatoria y debe tener mínimo 15 caracteres con contenido descriptivo.', 'warning');
+        }
+    });
 });
 </script>
 @endpush
@@ -254,6 +370,21 @@ $(document).ready(function() {
 .timeline-content h6 {
     margin-bottom: 5px;
     font-weight: 600;
+}
+
+@media (max-width: 767.98px) {
+    .card-header .badge.fs-6 {
+        font-size: 0.8rem !important;
+    }
+
+    .card-body .btn.btn-sm {
+        width: 100%;
+        margin-right: 0 !important;
+    }
+
+    .rating-input.display-4 {
+        font-size: 2rem !important;
+    }
 }
 </style>
 @endpush

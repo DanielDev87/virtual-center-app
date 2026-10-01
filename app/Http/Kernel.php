@@ -7,9 +7,9 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 class Kernel extends HttpKernel
 {
     /**
-     * The application's global HTTP middleware stack.
+     * Pila de middleware HTTP global de la aplicación.
      *
-     * These middleware are run during every request to your application.
+     * Estos middlewares se ejecutan en cada petición a la aplicación.
      *
      * @var array<int, class-string|string>
      */
@@ -24,7 +24,7 @@ class Kernel extends HttpKernel
     ];
 
     /**
-     * The application's route middleware groups.
+     * Grupos de middleware de rutas de la aplicación.
      *
      * @var array<string, array<int, class-string|string>>
      */
@@ -46,9 +46,9 @@ class Kernel extends HttpKernel
     ];
 
     /**
-     * The application's middleware aliases.
+     * Alias de middleware de la aplicación.
      *
-     * Aliases may be used instead of class names to conveniently assign middleware to routes and groups.
+     * Los alias pueden usarse en lugar de nombres de clase para asignar middleware a rutas y grupos.
      *
      * @var array<string, class-string|string>
      */
@@ -64,6 +64,7 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'role' => \App\Http\Middleware\CheckRole::class,
     ];
 }
 

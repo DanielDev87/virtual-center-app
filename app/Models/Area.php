@@ -27,4 +27,20 @@ class Area extends Model
     {
         return $this->belongsTo(Faculty::class, 'faculty_id', 'faculty_id');
     }
+
+    /**
+     * Get the users associated with this area
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class, 'area_id', 'area_id');
+    }
+
+    /**
+     * Get the request types (topics) associated with this area
+     */
+    public function requestTypes()
+    {
+        return $this->hasMany(RequestType::class, 'area_id', 'area_id');
+    }
 }

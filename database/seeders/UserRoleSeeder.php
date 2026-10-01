@@ -48,6 +48,24 @@ class UserRoleSeeder extends Seeder
                 'role_color' => '#28a745',
                 'is_active' => true,
             ],
+            [
+                'role_name' => 'Super Admin Tecnico',
+                'role_description' => 'Gestiona configuraciones tecnicas del sistema',
+                'role_color' => '#0a58ca',
+                'is_active' => true,
+            ],
+            [
+                'role_name' => 'Admin Área',
+                'role_description' => 'Administrador de área con acceso restringido a recursos de su área',
+                'role_color' => '#1a3a5c',
+                'is_active' => true,
+            ],
+            [
+                'role_name' => 'Operario',
+                'role_description' => 'Operario móvil para resolver tickets asignados sin gestión avanzada de sprints',
+                'role_color' => '#198754',
+                'is_active' => true,
+            ],
         ];
 
         foreach ($roles as $role) {

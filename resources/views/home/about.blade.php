@@ -3,7 +3,7 @@
 @section('title', 'Acerca de Nosotros - Virtual Center')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid home-public-page">
     <!-- Hero Section -->
     <div class="row bg-primary text-white py-5">
         <div class="col-12 text-center">
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Features Section -->
-    <div class="bg-light py-5">
+    <div class="section-surface py-5">
         <div class="container">
             <div class="row text-center mb-5">
                 <div class="col-12">
@@ -74,7 +74,7 @@
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center p-4">
-                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <div class="vc-accent-bg text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
                                 <i class="fas fa-users fa-2x"></i>
                             </div>
                             <h5 class="card-title">Colaboración</h5>
@@ -165,7 +165,7 @@
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body text-center p-4">
-                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                        <div class="vc-accent-bg text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
                             <i class="fas fa-graduation-cap fa-3x"></i>
                         </div>
                         <h5 class="card-title">Consultores Educativos</h5>
@@ -220,6 +220,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 

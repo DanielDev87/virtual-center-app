@@ -1,0 +1,29 @@
+# Normalizar finales de línea según el sistema operativo
+* text=auto
+
+# Archivos de código: forzar saltos de línea Unix (LF)
+*.php text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.blade.php text eol=lf
+*.env text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Archivos binarios (evitar que Git intente comparar diferencias)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.svg binary

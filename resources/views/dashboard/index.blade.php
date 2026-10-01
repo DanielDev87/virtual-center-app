@@ -4,9 +4,25 @@
 
 @section('content')
 <div class="container-fluid">
+    @if($returnedTickets->isNotEmpty())
+    <div class="alert alert-warning shadow-sm">
+        <h5 class="alert-heading"><i class="fas fa-undo me-2"></i>Tickets devueltos por Operarios</h5>
+        <p class="mb-2">Un Operario devolvió tickets que asignaste:</p>
+        <ul class="mb-0">
+            @foreach($returnedTickets as $assignment)
+                <li>
+                    <form method="POST" action="{{ route('returned-alerts.read', $assignment->assignment_id) }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-link p-0 align-baseline">#{{ $assignment->ticket->ticket_number }} - {{ $assignment->ticket->title }}</button>
+                    </form>
+                    <span class="text-muted">({{ $assignment->notes }})</span>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     <!-- Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h1 class="h2"><i class="fas fa-chart-line me-2"></i>Dashboard</h1>
+    <div class="d-flex justify-content-end flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{{ route('admin.reports.index') }}" class="btn btn-sm btn-primary">
                 <i class="fas fa-file-export me-1"></i>Reportes
@@ -190,9 +206,10 @@
                                         </span>
                                     </td>
                                     <td>
+                                        @php $displayProgress = $ticket->auto_progress ?? $ticket->progress_percentage; @endphp
                                         <div class="progress" style="height: 20px; width: 80px;">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ $ticket->progress_percentage }}%">
-                                                {{ $ticket->progress_percentage }}%
+                                            <div class="progress-bar" role="progressbar" style="width: {{ $displayProgress }}%">
+                                                {{ $displayProgress }}%
                                             </div>
                                         </div>
                                     </td>
@@ -251,6 +268,31 @@
                         </div>
                     </div>
                     @endforeach
+                </div>
+            </div>
+
+            <!-- By Topic -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="fas fa-tags me-2"></i>Solicitudes por Tópico</h5>
+                </div>
+                <div class="card-body">
+                    @php
+                        $totalByType = $ticketsByType->sum();
+                    @endphp
+                    @forelse($ticketsByType as $type => $count)
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-truncate me-2" title="{{ $type }}">{{ $type }}</span>
+                            <strong>{{ $count }}</strong>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-primary" style="width: {{ $totalByType > 0 ? ($count / $totalByType * 100) : 0 }}%"></div>
+                        </div>
+                    </div>
+                    @empty
+                    <p class="text-muted text-center">No hay datos</p>
+                    @endforelse
                 </div>
             </div>
 
@@ -428,6 +470,34 @@
             </div>
         </div>
     </div>
+
+    <!-- Topics Chart Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="card-title mb-0"><i class="fas fa-tags me-2"></i>Evolución Mensual por Tópico (Top 5)</h5>
+                    <form action="{{ route('dashboard') }}" method="GET" class="d-flex align-items-center gap-2">
+                        <label for="topic_trend_months" class="small text-muted mb-0">Rango:</label>
+                        <select id="topic_trend_months" name="topic_trend_months" class="form-select form-select-sm" onchange="this.form.submit()">
+                            @foreach($allowedTopicTrendMonths as $monthOption)
+                                <option value="{{ $monthOption }}" {{ (int) $topicTrendMonths === (int) $monthOption ? 'selected' : '' }}>
+                                    Últimos {{ $monthOption }} meses
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+                <div class="card-body">
+                    @if($topicTrendDatasets->count() > 0)
+                        <canvas id="topicsChart" height="120"></canvas>
+                    @else
+                        <p class="text-muted text-center mb-0">No hay datos suficientes para mostrar tendencia por tópico.</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Chart.js -->
@@ -469,6 +539,74 @@ if (ratingCtx) {
                             }
                             label += context.parsed + ' tickets';
                             return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Tickets By Topic Chart
+const topicsCtx = document.getElementById('topicsChart');
+if (topicsCtx) {
+    const trendLabels = {!! json_encode($topicTrendLabels) !!};
+    const trendDatasetsRaw = {!! json_encode($topicTrendDatasets) !!};
+    const palette = [
+        'rgba(13, 110, 253, 0.85)',
+        'rgba(220, 53, 69, 0.85)',
+        'rgba(25, 135, 84, 0.85)',
+        'rgba(255, 193, 7, 0.85)',
+        'rgba(111, 66, 193, 0.85)'
+    ];
+
+    const trendDatasets = trendDatasetsRaw.map(function (dataset, index) {
+        const color = palette[index % palette.length];
+        return {
+            label: dataset.label,
+            data: dataset.data,
+            borderColor: color,
+            backgroundColor: color,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            fill: false,
+        };
+    });
+
+    new Chart(topicsCtx, {
+        type: 'line',
+        data: {
+            labels: trendLabels,
+            datasets: trendDatasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Mes'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    title: {
+                        display: true,
+                        text: 'Solicitudes'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y + ' solicitudes';
                         }
                     }
                 }

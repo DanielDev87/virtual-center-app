@@ -1,0 +1,13 @@
+{
+  "format": "app-branding-v1",
+  "exported_at": "2026-04-28T00:00:00Z",
+  "settings": {
+    "branding_app_name": "Mesa de Servicios - Empresa Demo",
+    "branding_short_name": "MS Demo",
+    "branding_logo_path": "img/company-logo.png",
+    "branding_footer_logo_path": "img/company-footer-logo.png",
+    "branding_favicon_path": "img/company-favicon.ico",
+    "branding_primary_color": "#0057B8",
+    "branding_secondary_color": "#00A8E8"
+  }
+}
