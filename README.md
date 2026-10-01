@@ -1,4 +1,4 @@
-# 🚀 Mesa de Servicio Universidad Católica Luis Amigó
+#  Mesa de Servicio 
 *(Anteriormente basado en Virtual Center - Metodología ADDIE)*
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -425,7 +425,7 @@ Para soporte técnico, preguntas o reportar errores formales, por favor contacta
 
 ---
 
-**Mesa de Servicio Universidad Católica Luis Amigó**  
+**Mesa de Servicio**  
 *Impulsando la Ciencia Abierta y la transformación digital en la educación.*  
 *Desarrollado con ❤️ por Daniel Agudelo usando Laravel y Bootstrap.*
 
