@@ -2,16 +2,22 @@
 
 use Illuminate\Support\Str;
 
+$mysqlSslCaOption = null;
+if (defined('Pdo\\Mysql::ATTR_SSL_CA')) {
+    $mysqlSslCaOption = constant('Pdo\\Mysql::ATTR_SSL_CA');
+} elseif (defined('PDO::MYSQL_ATTR_SSL_CA')) {
+    $mysqlSslCaOption = PDO::MYSQL_ATTR_SSL_CA;
+}
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Database Connection Name
+    | Nombre de Conexión de Base de Datos por Defecto
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which of the database connections below you wish
-    | to use as your default connection for all database work. Of course
-    | you may use many connections at once using the Database library.
+    | Aquí puede especificar cuál de las conexiones de base de datos desea
+    | usar como conexión predeterminada para todo el trabajo de base de datos.
     |
     */
 
@@ -19,17 +25,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Database Connections
+    | Conexiones de Base de Datos
     |--------------------------------------------------------------------------
     |
-    | Here are each of the database connections setup for your application.
-    | Of course, examples of configuring each database platform that is
-    | supported by Laravel is shown below to make development simple.
-    |
-    |
-    | All database work in Laravel is done through the PHP PDO facilities
-    | so make sure you have the driver for your particular database of
-    | choice installed on your machine before you begin development.
+    | Aquí se encuentran las conexiones de base de datos configuradas para
+    | la aplicación. Todo el trabajo de base de datos en Laravel se realiza
+    | a través de PDO, así que asegúrese de tener el driver instalado.
     |
     */
 
@@ -59,7 +60,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                $mysqlSslCaOption => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
 
@@ -97,12 +98,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Migration Repository Table
+    | Tabla de Repositorio de Migraciones
     |--------------------------------------------------------------------------
     |
-    | This table keeps track of all the migrations that have already run for
-    | your application. Using this information, we can determine which of
-    | the migrations on disk haven't actually been run in the database.
+    | Esta tabla mantiene un registro de todas las migraciones que ya se han
+    | ejecutado en la aplicación, permitiendo determinar cuáles faltan.
     |
     */
 
@@ -110,12 +110,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Redis Databases
+    | Bases de Datos Redis
     |--------------------------------------------------------------------------
     |
-    | Redis is an open source, fast, and advanced key-value store that also
-    | provides a richer body of commands than a typical key-value system
-    | such as APC or Memcached. Laravel makes it easy to dig right in.
+    | Redis es un almacén de clave-valor rápido y avanzado. Laravel facilita
+    | su integración para caché, sesiones y colas.
     |
     */
 

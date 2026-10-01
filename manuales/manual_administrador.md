@@ -1,5 +1,5 @@
 # Manual de Usuario - Administrador
-## Sistema A-DDIE (Analysis, Design, Development, Implementation, Evaluation)
+## Sistema Virtual Center
 
 ---
 
@@ -12,28 +12,30 @@
 5. [Gestión de Usuarios](#gestión-de-usuarios)
 6. [Gestión de Roles](#gestión-de-roles)
 7. [Gestión de Puestos de Trabajo](#gestión-de-puestos-de-trabajo)
-8. [Project Management (ADDIE + SCRUM)](#project-management)
+8. [Project Management (Metodología ADDIE + SCRUM)](#project-management)
 9. [Módulo de Reportes](#módulo-de-reportes)
-10. [Configuración del Sistema](#configuración-del-sistema)
+10. [Configuración del Sistema Institucional](#configuración-del-sistema-institucional)
+11. [Configuración y Roles Especiales Técnicos](#configuración-y-roles-especiales-técnicos)
 
 ---
 
 ## Introducción
 
-### ¿Qué es A-DDIE?
+### ¿Qué es Virtual Center?
 
-A-DDIE es un sistema de gestión de servicios educativos que integra la metodología ADDIE (Analysis, Design, Development, Implementation, Evaluation) con prácticas SCRUM para la gestión efectiva de proyectos y tickets de soporte.
+Virtual Center es un sistema de gestión de servicios educativos que integra la metodología ADDIE (Analysis, Design, Development, Implementation, Evaluation) con prácticas SCRUM para la gestión efectiva de proyectos y tickets de soporte de la institución.
 
 ### Rol de Administrador
 
-Como administrador, tienes acceso completo al sistema con las siguientes responsabilidades:
+Como administrador, tienes acceso de control y gestión con las siguientes responsabilidades:
 
 - Gestionar todos los tickets del sistema
-- Administrar usuarios y sus roles
-- Asignar colaboradores a tickets
-- Monitorear el progreso de proyectos
-- Generar reportes y análisis
-- Configurar parámetros del sistema
+- Administrar usuarios y roles
+- Asignar colaboradores a tickets de manera dinámica
+- Asignar únicamente usuarios que pertenezcan al equipo configurado del tópico
+- Revisar alertas de tickets devueltos por Operarios en el dashboard
+- Monitorear el progreso en conjunto de los proyectos
+- Generar reportes y métricas
 
 ---
 
@@ -41,69 +43,22 @@ Como administrador, tienes acceso completo al sistema con las siguientes respons
 
 ### Inicio de Sesión
 
-1. Accede a la URL del sistema A-DDIE
-2. Ingresa tu **correo electrónico** de administrador
-3. Ingresa tu **contraseña**
-4. Haz clic en **"Iniciar Sesión"**
+1. Accede a la URL del sistema Virtual Center (ej. `/login`).
+2. Ingresa tu **correo electrónico** y **contraseña**.
+3. Haz clic en **"Iniciar Sesión"**.
 
-> **Nota**: Si olvidaste tu contraseña, contacta al administrador del sistema.
-
-### Navegación Principal
-
-El panel de administración cuenta con:
-
-- **Sidebar izquierdo**: Menú de navegación principal
-- **Barra superior**: Información de usuario y opciones de perfil
-- **Área central**: Contenido principal de cada sección
+El panel de administración cuenta con un **Sidebar izquierdo** fijo desde el que controlas todas tus opciones, una **Barra superior** para tu perfil y el **Área central** del módulo seleccionado.
 
 ---
 
 ## Dashboard Principal
 
-### Métricas Generales
+El dashboard expone parámetros clave para tu evaluación visual de carga de la mesa de servicio:
 
-El dashboard muestra 8 tarjetas de estadísticas clave:
-
-#### Fila 1: Estadísticas de Tickets
-- **Total Tickets**: Cantidad total de tickets en el sistema
-- **Pendientes**: Tickets sin asignar o sin iniciar
-- **En Progreso**: Tickets actualmente en desarrollo
-- **Completados**: Tickets finalizados exitosamente
-
-#### Fila 2: Métricas Avanzadas
-- **Progreso Promedio**: Porcentaje promedio de avance de todos los tickets
-- **Alta Prioridad**: Tickets urgentes que requieren atención inmediata
-- **Usuarios Activos**: Cantidad de usuarios activos en el sistema
-- **Roles Activos**: Cantidad de roles configurados
-
-#### Fila 3: Métricas de Rendimiento
-- **Calificación Promedio**: Promedio de calificaciones de los solicitantes (1-5 estrellas)
-- **Tiempo Promedio**: Tiempo promedio de resolución en horas
-- **Mejor Tiempo**: Tiempo del ticket resuelto más rápido
-
-### Gráficos y Visualizaciones
-
-#### Gráfico de Distribución de Calificaciones
-- **Tipo**: Gráfico de torta (pie chart)
-- **Muestra**: Distribución de calificaciones de 1 a 5 estrellas
-- **Colores**: 
-  - 1 estrella: Rojo
-  - 2 estrellas: Naranja
-  - 3 estrellas: Amarillo
-  - 4 estrellas: Verde azulado
-  - 5 estrellas: Verde
-
-#### Tabla de Tickets Más Rápidos
-Muestra los 5 tickets completados en menor tiempo con:
-- Número de ticket (enlace directo)
-- Nombre del solicitante
-- Tiempo de resolución en horas
-
-### Secciones Adicionales
-
-- **Tickets Urgentes**: Lista de tickets de alta prioridad pendientes
-- **Distribución por Fase ADDIE**: Cantidad de tickets en cada fase
-- **Top Colaboradores**: Los 5 colaboradores con más tickets completados
+- **Estadísticas Generales**: Total de tickets, listados pendientes, tickets en progreso y tickets finalizados.
+- **Métricas de Rendimiento**: Promedio de calificaciones, número de usuarios y roles activos.
+- **Gráficos**: Incluye distribuciones representadas en gráficas de torta sobre el cumplimiento de tiempos, así como el Chart global de calificaciones del sistema (1 a 5 estrellas).
+- **Tablas de tickets con alertas**: Seguimientos urgentes que demanden la atención del Project Manager.
 
 ---
 
@@ -113,514 +68,149 @@ Muestra los 5 tickets completados en menor tiempo con:
 
 **Ruta**: `Admin > Tickets`
 
-La lista muestra **10 tickets por página** con:
-- Número de ticket
-- Título
-- Solicitante
-- Estado (Pendiente/En Progreso/Completado/Cancelado)
-- Barra de progreso visual
-- Fecha de creación
-- Botón "Ver" para detalles
+La lista te presentará tickets paginados por estado (Pendiente, En Progreso, Realizado por Operario, Completado, Cancelado). Tendrás accesos en tiempo real para visualizar qué tópicos se están gestionando y qué porcentaje acumulado dictamina el sistema.
 
-#### Filtros Disponibles
-- Por estado (Pendiente, En Progreso, Completado, Cancelado)
+### Ver Detalles de un Ticket e Intervenir Equipo
 
-### Ver Detalles de un Ticket
+Haz clic en **"Ver"** en un ticket para gestionar su asignación:
 
-Haz clic en **"Ver"** en cualquier ticket para acceder a:
+1. El sistema soporta un entorno **Multi-Mediador**. En la sección "Equipo de Trabajo", solo se listan usuarios activos pertenecientes al equipo del tópico correspondiente. Puedes agregar varios colaboradores u operarios cuando el trabajo lo requiera.
+2. Es posible asignar o prescindir de un `Puesto de Trabajo` rígido. La asignación es flexible según la carga de trabajo.
 
-#### Información General
-- Número y título del ticket
-- Estado actual con badge de color
-- Nivel de prioridad
-- Tipo de solicitud
-- Barra de progreso general
-- Indicador si fue reabierto
-
-#### Información del Solicitante
-- Nombre completo
-- Correo electrónico
-- Descripción de la solicitud
-
-#### Equipo de Trabajo Asignado
-Tabla con todos los mediadores asignados mostrando:
-- Nombre del colaborador
-- Puesto de trabajo
-- Fecha de asignación
-- Botón para remover del equipo
-
-#### Historial de Avances
-- **Vista estándar**: Muestra todos los avances cronológicamente
-- **Vista de ticket reabierto**: Separa avances en dos secciones:
-  - Avances de Reapertura (desde la fecha de reapertura)
-  - Avances Anteriores (antes de la reapertura)
-
-### Asignar Mediadores al Ticket
-
-#### Sistema Multi-Mediador
-
-1. En la sección **"Equipo de Trabajo"**, ve a **"Agregar Miembro al Equipo"**
-2. Selecciona el **mediador** del dropdown
-3. Selecciona el **puesto de trabajo** que desempeñará
-4. Haz clic en **"Asignar"**
-
-> **Importante**: Puedes asignar múltiples mediadores al mismo ticket con diferentes puestos de trabajo.
-
-#### Remover Mediador
-
-1. En la tabla del equipo, haz clic en el botón **"X"** (rojo)
-2. Confirma la acción
-3. El mediador será marcado como "removido" pero se mantiene el historial
-
-### Establecer Prioridad
-
-**Niveles disponibles**:
-- 🟢 **Baja**: Tickets que pueden esperar
-- 🟡 **Media**: Prioridad normal
-- 🟠 **Alta**: Requiere atención pronto
-- 🔴 **Urgente**: Atención inmediata
-
-**Pasos**:
-1. En el detalle del ticket, ve a la tarjeta **"Establecer Prioridad"**
-2. Selecciona el nivel deseado
-3. Haz clic en **"Actualizar Prioridad"**
-
-### Cerrar un Ticket
+### Establecer Entorno de Cierre y Políticas
 
 #### Requisitos para Cerrar como "Completado"
-
-> **⚠️ VALIDACIONES ESTRICTAS**
-
-Para marcar un ticket como completado, **DEBE cumplir**:
-
-1. ✅ **Progreso al 100%**: La barra de progreso debe estar completa
-2. ✅ **Fase ADDIE correcta**: Debe estar en fase "Implementation" o "Evaluation"
-3. ✅ **Enlace al recurso**: Debes proporcionar la URL del recurso generado
-
-#### Pasos para Cerrar
-
-1. Ve a la tarjeta **"Cerrar Ticket"**
-2. Selecciona **"Completado"** o **"Cancelado"**
-3. Si seleccionas "Completado":
-   - Ingresa el **enlace al recurso generado** (obligatorio)
-   - El sistema validará progreso y fase ADDIE
-4. Opcionalmente agrega notas administrativas
-5. Haz clic en **"Cerrar Ticket"**
-
-#### Mensajes de Error Comunes
-
-- *"El progreso debe estar al 100%"*: El ticket no ha alcanzado el 100% de avance
-- *"Debe completar todas las fases de ADDIE"*: El ticket no está en la fase correcta
-- *"Debe proporcionar el enlace al recurso"*: Falta la URL del recurso
+El cierre oficial puede realizarlo el Admin o un Contributor según el flujo aplicable. Un Operario nunca marca un ticket como Completado: solo puede marcarlo como **Realizado** para que el Admin Área lo audite. El sistema validará de manera **estricta** lo siguiente:
+1. ✅ **Progreso en 100%**: El indicador debe estar llenado en su totalidad.
+2. ✅ **Fases de Virtual Center (ADDIE)**: El ticket solamente estará habilitado para cierre si es categorizado bajo la fase "Implementation" o "Evaluation".
+3. ✅ **Evidencias o Recurso**: Ya sea en comentarios de texto enriquecido o enlace del recurso final.
 
 ### Reabrir un Ticket
+Si el trabajo ha de ser replanteado porque el usuario expuso disconformidades:
+1. Accede al ticket cerrado y selecciona **"Reabrir Ticket"**.
+2. Los progresos de 100% se moverán al histórico como "Avances Anteriores".
+3. El tracking comenzará desde 0%, eliminándose su calificación en orden de exigir una más representativa a la hora de completarlo una segunda vez.
 
-**Cuándo usar**: Cuando el solicitante requiere cambios adicionales después del cierre.
+### Auditoría de tickets realizados por Operarios
 
-**Pasos**:
-1. En un ticket cerrado, ve a la tarjeta **"Reabrir Ticket"**
-2. Haz clic en **"Reabrir Ticket"**
-3. Confirma la acción
+Cuando un Operario marca un ticket como **Realizado**, el ticket queda en estado de revisión. El Admin Área puede revisar la descripción y las evidencias, corregir el detalle de solución y:
 
-**Efectos de la reapertura**:
-- Estado cambia a "En Progreso"
-- Progreso se reinicia a 0%
-- Se marca como "Ticket Reabierto"
-- Calificación anterior se borra (permite nueva evaluación)
-- Se crea una sección separada para nuevos avances
+- **Aprobar y completar**: cambia el estado a Completado y notifica al solicitante por correo.
+- **Devolver para corrección**: cambia el estado a En Proceso y registra el motivo.
 
-### Calificar un Ticket (Evaluación ADDIE)
-
-**Disponible**: Solo para tickets completados
-
-#### Si ya fue calificado
-Muestra:
-- Estrellas visuales (1-5)
-- Calificación numérica
-- Retroalimentación del solicitante
-
-#### Si no ha sido calificado
-1. Ve a la tarjeta **"Evaluación ADDIE"**
-2. Haz clic en las estrellas para seleccionar calificación (1-5)
-3. Opcionalmente agrega retroalimentación
-4. Haz clic en **"Guardar Evaluación"**
+Los tickets Completados o Cancelados no permiten asignar mediadores, remover miembros, cambiar prioridad ni ejecutar otras modificaciones hasta que sean reabiertos.
 
 ---
 
 ## Gestión de Usuarios
 
-### Listar Usuarios
-
 **Ruta**: `Admin > Usuarios`
 
-Muestra tabla con:
-- ID
-- Nombre
-- Correo electrónico
-- Rol
-- Estado (Activo/Inactivo)
-- Acciones (Ver, Editar, Eliminar)
+### Crear o Editar
 
-**Paginación**: 10 usuarios por página
-
-### Crear Nuevo Usuario
-
-1. Haz clic en **"Crear Usuario"**
-2. Completa el formulario:
-   - **Nombre completo**
-   - **Correo electrónico** (único en el sistema)
-   - **Contraseña** (mínimo 8 caracteres)
-   - **Confirmar contraseña**
-   - **Rol**: Selecciona uno (Admin, Monitor, Contributor, Requester)
-   - **Puestos de trabajo**: Selecciona uno o varios (opcional)
-   - **Estado**: Activo/Inactivo
-3. Haz clic en **"Guardar"**
-
-### Editar Usuario
-
-1. En la lista, haz clic en **"Editar"**
-2. Modifica los campos necesarios
-3. Para cambiar contraseña:
-   - Ingresa nueva contraseña
-   - Confirma nueva contraseña
-   - Si dejas vacío, la contraseña no cambia
-4. Haz clic en **"Actualizar"**
-
-### Eliminar Usuario
-
-1. Haz clic en **"Eliminar"**
-2. Confirma la acción
-3. El usuario será eliminado permanentemente
-
-> **⚠️ Precaución**: Esta acción no se puede deshacer.
+Al gestionar perfiles, asegúrate de mantener actualizados los nuevos campos:
+- **Correo y Contraseña**.
+- **Roles principales**: Admin, Monitor, Contributor, Operario, Requester, Super Admin Tecnico y Admin Área.
+- **Información complementaria**: Link o documento adicional referencial.
+- **Área Institucional**: Especifica al área a la cual obedece el nuevo usuario dentro de la universidad/entidad.
 
 ---
 
-## Gestión de Roles
+## Gestión de Roles y Tipos de Solicitud (Tópicos)
 
-### Roles del Sistema
+### Tipos de Solicitud
 
-El sistema A-DDIE maneja 4 roles principales:
+**Ruta**: `Admin > Request Types (Tipos de Solicitud)`
 
-1. **Admin**: Acceso completo al sistema
-2. **Monitor**: Supervisión de tickets y colaboradores
-3. **Contributor**: Colaborador que trabaja en tickets
-4. **Requester**: Solicitante que crea tickets
-
-### Crear Nuevo Rol
-
-1. Ve a `Admin > Roles`
-2. Haz clic en **"Crear Rol"**
-3. Ingresa:
-   - **Nombre del rol**
-   - **Descripción** (opcional)
-   - **Estado**: Activo/Inactivo
-4. Haz clic en **"Guardar"**
-
-### Editar/Eliminar Roles
-
-Similar al proceso de usuarios.
+Para cada tipo de servicio dentro de Virtual Center, se configura la matriz base. Los nuevos Request Types exigen:
+- **Departamento y Área**: Ramificación de la organización.
+- **SLA (Acuerdo de nivel de servicio)**: Límites de tiempo preestablecidos y categorizados por el sistema.
+- **Gestor Principal (Manager)**: Funcionario encargado que sirve de garante para ese tipo de solicitud.
 
 ---
 
-## Gestión de Puestos de Trabajo
+## Configuración del Sistema Institucional
 
-### ¿Qué son los Puestos de Trabajo?
+La plataforma requiere que estructures adecuadamente la malla académica/organizativa para el correcto escalonamiento.
 
-Los puestos de trabajo definen las funciones específicas que un colaborador puede desempeñar en un ticket (ej: Diseñador Gráfico, Desarrollador, Analista).
-
-### Crear Puesto de Trabajo
-
-1. Ve a `Admin > Puestos de Trabajo`
-2. Haz clic en **"Crear Puesto"**
-3. Completa:
-   - **Nombre del puesto**
-   - **Descripción**
-   - **Color** (para identificación visual)
-   - **Estado**: Activo/Inactivo
-4. Haz clic en **"Guardar"**
-
-### Asignar Puestos a Usuarios
-
-Los puestos se asignan al:
-- Crear/editar un usuario
-- Asignar un mediador a un ticket
+- **Departamentos y Áreas**: (`Admin > Departments` y `Admin > Areas`). Sirven para clasificar la rama estructural y administrativa, siendo utilizados en los perfiles de los usuarios y tipos de solicitudes.
+- **Facultades y Programas**: Clasificación de la rama académica desde donde provienen las solicitudes de recursos estudiantiles/profesorales.
 
 ---
 
 ## Project Management
 
-### Acceso al Project Dashboard
+**Ruta**: Dentro del detalle de cada ticket individual, hay un botón hacia el **"Project Dashboard"**.
 
-**Desde**: Detalle de cualquier ticket
+El Dashboard te permite desglosar metodológicamente las estrategias. Las tareas del Kanban y Sprints de SCRUM conviven allí. No interfieren con el porcentaje principal general si no se desea, pero son vitales para tickets prolongados manejados por equipos con más de 3 contributors.
 
-1. Haz clic en el botón **"Project Dashboard"** (icono de tablero)
-2. Se abrirá el dashboard de gestión del proyecto
-
-### Fases ADDIE
-
-El sistema gestiona 5 fases del modelo ADDIE:
-
-1. **Analysis** (Análisis): Investigación y definición de necesidades
-2. **Design** (Diseño): Planificación y diseño de la solución
-3. **Development** (Desarrollo): Creación del contenido/recurso
-4. **Implementation** (Implementación): Puesta en marcha
-5. **Evaluation** (Evaluación): Valoración y retroalimentación
-
-#### Cambiar Fase ADDIE
-
-1. En el Project Dashboard, ve a la sección **"Fases ADDIE"**
-2. Haz clic en el botón de la fase deseada
-3. La fase actual se actualizará
-
-### Gestión de Sprints (SCRUM)
-
-#### Crear Sprint
-
-1. En la sección **"Sprints"**, haz clic en **"Crear Sprint"**
-2. Completa:
-   - **Nombre del sprint** (ej: "Sprint 1 - Análisis")
-   - **Descripción**
-   - **Fecha de inicio**
-   - **Fecha de fin**
-3. Haz clic en **"Guardar"**
-
-#### Estados de Sprint
-
-- **Planificado**: Sprint creado pero no iniciado
-- **Activo**: Sprint en ejecución
-- **Completado**: Sprint finalizado
-
-#### Cambiar Estado de Sprint
-
-1. En la lista de sprints, usa los botones de estado
-2. Haz clic en el estado deseado
-3. El sprint se actualizará
-
-### Gestión de Tareas (Kanban)
-
-#### Crear Tarea
-
-1. En la sección **"Tareas"**, haz clic en **"Crear Tarea"**
-2. Completa:
-   - **Título de la tarea**
-   - **Descripción**
-   - **Sprint** (opcional)
-   - **Asignado a** (colaborador)
-   - **Estado inicial**: To Do
-3. Haz clic en **"Guardar"**
-
-#### Tablero Kanban
-
-Las tareas se organizan en 3 columnas:
-
-- **📋 To Do**: Tareas pendientes
-- **🔄 In Progress**: Tareas en desarrollo
-- **✅ Done**: Tareas completadas
-
-#### Mover Tareas
-
-1. Haz clic en los botones de estado en cada tarjeta de tarea
-2. La tarea se moverá a la columna correspondiente
+Podrás modificar manualmente la **Fase ADDIE** actual (de Analysis a Evaluation) dictaminando si el proyecto avanza o sufre atrasos operacionales.
 
 ---
 
 ## Módulo de Reportes
 
-**Ruta**: `Admin > Reportes` o botón en el Dashboard
+**Ruta**: `Admin > Reportes`
 
-### Tipos de Reportes
-
-#### 1. Reporte de Tickets
-
-**Exporta**: Lista completa de tickets con toda su información
-
-**Filtros disponibles**:
-- Rango de fechas (inicio - fin)
-- Estado (Pendiente, En Progreso, Completado, Cancelado)
-- Prioridad (Baja, Media, Alta, Urgente)
-- Fase ADDIE
-
-**Columnas del reporte**:
-- Número de ticket
-- Título
-- Tipo de solicitud
-- Estado
-- Prioridad
-- Fase ADDIE
-- Progreso %
-- Solicitante
-- Mediador
-- Facultad
-- Programa
-- Fecha de creación
-- Última actualización
-
-**Pasos**:
-1. Selecciona los filtros deseados
-2. Haz clic en **"Generar Reporte de Tickets"**
-3. Se descargará un archivo CSV
-
-#### 2. Reporte de Colaboradores
-
-**Exporta**: Rendimiento de cada colaborador
-
-**Columnas del reporte**:
-- Nombre del colaborador
-- Email
-- Total de tickets asignados
-- Tickets completados
-- Tickets en progreso
-- Tasa de completitud %
-
-**Pasos**:
-1. Haz clic en **"Generar Reporte de Colaboradores"**
-2. Se descargará un archivo CSV
-
-#### 3. Reporte de Progreso
-
-**Exporta**: Historial de todos los avances registrados
-
-**Filtros disponibles**:
-- Rango de fechas
-
-**Columnas del reporte**:
-- Número de ticket
-- Colaborador que registró el avance
-- Descripción del avance
-- Porcentaje de progreso
-- Fecha del registro
-
-**Pasos**:
-1. Selecciona rango de fechas (opcional)
-2. Haz clic en **"Generar Reporte de Progreso"**
-3. Se descargará un archivo CSV
-
-### Abrir Reportes en Excel
-
-Los archivos CSV generados son compatibles con Excel:
-
-1. Abre Microsoft Excel
-2. Ve a `Archivo > Abrir`
-3. Selecciona el archivo CSV descargado
-4. Los datos se mostrarán en formato de tabla
+A través del panel podrás generar volcados totales para Microsoft Excel y otros sistemas empresariales, usando formatos CSV para:
+- Reportes Globales de Tickets.
+- Rendimiento analítico individual de Colaboradores.
+- Registros absolutos segmentados por avances de proyectos y periodos de fechas.
 
 ---
 
-## Configuración del Sistema
+## Configuración y Roles Especiales Técnicos
 
-### Gestión de Tipos de Solicitud
+Virtual Center incluye un rol avanzado e independiente para mantenimientos operacionales, y debe dársele extremo cuidado a su asignación:
 
-**Ruta**: `Admin > Tipos de Solicitud`
+### Rol: "Super Admin Tecnico"
+A diferencia de un Admin regular, el **Super Admin Tecnico** tiene la facultad de ingresar a ajustes sistémicos críticos (`technical/storage-settings`). 
 
-Define los tipos de servicios que se pueden solicitar.
-
-#### Crear Tipo de Solicitud
-
-1. Haz clic en **"Crear Tipo"**
-2. Completa:
-   - **Nombre** (ej: "Diseño Gráfico", "Desarrollo Web")
-   - **Descripción**
-   - **Icono** (clase de Font Awesome)
-   - **Color** (código hexadecimal)
-   - **Estado**: Activo/Inactivo
-3. Haz clic en **"Guardar"**
-
-### Gestión de Facultades
-
-**Ruta**: `Admin > Facultades`
-
-Administra las facultades de la institución.
-
-### Gestión de Programas
-
-**Ruta**: `Admin > Programas`
-
-Administra los programas académicos asociados a facultades.
-
-### Gestión de Cursos
-
-**Ruta**: `Admin > Cursos`
-
-Administra los cursos asociados a programas.
+Desde esta plataforma puede:
+- Modificar lógicas de guardado y mapeo de **almacenamiento de evidencias físicas**, manipulando las constantes del diccionario virtual (App Settings y Store Paths). 
+- Solo debe ser configurado por personal de TI/SysAdmin que coordine el servidor del sistema.
 
 ---
 
-## Casos de Uso Comunes
+## Soporte y Preguntas Frecuentes
 
-### Caso 1: Asignar y Gestionar un Nuevo Ticket
+### ¿Puede un Contribuidor cerrar un ticket?
+Sí, en la actualización moderna de Virtual Center, los Colaboradores (Contributors) pueden auto-cerrar sus propios proyectos una vez han adjuntado todo lo necesario y el sistema valido las condiciones lógicas de metodología ADDIE y porcentaje de avance. 
 
-1. Un solicitante crea un ticket
-2. Recibes notificación en el dashboard (aparece en "Pendientes")
-3. Accedes al detalle del ticket
-4. Estableces la prioridad según urgencia
-5. Asignas colaboradores con sus puestos de trabajo
-6. Los colaboradores registran avances
-7. Monitoreas el progreso desde el dashboard
-8. Cuando llega al 100% y está en fase correcta, cierras el ticket
-9. Proporcionas el enlace al recurso generado
-10. El solicitante califica el servicio
+### ¿Necesito obligatoriamente un "Puesto de Trabajo" para delegar?
+No. La versión reciente estipula que el "Puesto" es indicativo pero *no restrictivo* (puede ser nulo), con fines informativos para coordinar las labores complejas. 
 
-### Caso 2: Reabrir un Ticket por Solicitud de Cambios
+### Contacto
 
-1. Un ticket está marcado como "Completado"
-2. El solicitante solicita modificaciones
-3. Accedes al ticket cerrado
-4. Haces clic en **"Reabrir Ticket"**
-5. El progreso se reinicia a 0%
-6. Los colaboradores registran nuevos avances en la sección de reapertura
-7. Cuando se completa nuevamente, cierras el ticket
-8. El solicitante puede calificar nuevamente
-
-### Caso 3: Generar Reporte Mensual de Rendimiento
-
-1. Accedes al módulo de reportes
-2. Generas "Reporte de Colaboradores"
-3. Generas "Reporte de Tickets" filtrando por el mes
-4. Analizas las métricas en Excel
-5. Identificas colaboradores destacados
-6. Identificas áreas de mejora
+Para asistencia técnica:
+- **Email**: correo@institucion.edu.co
 
 ---
 
-## Preguntas Frecuentes
+**Versión del Manual**: 1.1  
+**Última Actualización**: Abril 2026  
+**Sistema**: Virtual Center v1.1
 
-### ¿Puedo cambiar el rol de un usuario?
+<!-- ACTUALIZACION_JUNIO_2026 -->
+## Novedades Funcionales (Junio 2026)
 
-Sí, editando el usuario y seleccionando un nuevo rol.
+- Carga masiva CSV reforzada con lectura UTF-8 y manejo explicito de comillas dobles como encapsulador de texto.
+- Validacion estructural por fila en importaciones CSV para detectar columnas rotas por delimitador/comillas antes de escribir en BD.
+- Mejora de importacion de cursos para relacion muchos-a-muchos con programas mediante tabla pivote course_program (manteniendo compatibilidad con program_id legado).
+- Carga masiva de cursos con soporte de multiples referencias: program_id/program_ids, program_code/program_codes y program_name/program_names.
+- Resolucion de ambiguedades de programas mejorada con filtros por faculty_id/faculty_name e institution_id/institution_name.
+- Cuando program_code/program_name es duplicado y no se envia desambiguacion, la importacion puede vincular el curso a todos los programas coincidentes.
+- Formularios de crear/editar cursos mejorados con selector multiple con busqueda (Tom Select), conservando compatibilidad del campo program_id.
 
-### ¿Qué pasa si elimino un usuario que tiene tickets asignados?
+<!-- ACTUALIZACION_SEPTIEMBRE_2026 -->
+## Funcionalidades operativas y de calidad
 
-Los tickets quedarán sin mediador asignado. Se recomienda reasignar antes de eliminar.
+Para el alcance actualizado de roles, SLA, asociaciones, incidencias y reportes consulta [actualizacion_funcionalidades_2026.md](actualizacion_funcionalidades_2026.md).
 
-### ¿Puedo asignar más de un colaborador al mismo ticket?
+- El Admin Área puede activar incidencias generales por tópico.
+- Contributor, Admin y Admin Área pueden asociar tickets relacionados.
+- Contributors envían solicitudes agrupadas de asociación para aprobación del Admin Área.
+- El cierre de un ticket principal puede propagar la respuesta, estado y notificación a sus tickets asociados.
+- El sistema calcula SLA con jornada laboral colombiana y festivos registrados.
+- El reporte de solicitantes frecuentes permite identificar demanda recurrente.
 
-Sí, el sistema soporta equipos de trabajo multi-mediador.
-
-### ¿Cómo sé si un ticket fue reabierto?
-
-Aparece un badge azul que dice "Ticket Reabierto" en el detalle del ticket.
-
-### ¿Los reportes incluyen tickets eliminados?
-
-No, solo tickets activos en el sistema.
-
-### ¿Puedo cerrar un ticket sin que esté al 100%?
-
-Solo si lo marcas como "Cancelado". Para "Completado" debe estar al 100%.
-
----
-
-## Soporte Técnico
-
-Para asistencia técnica o reportar problemas:
-
-- **Email**: daniel_agudelo54232@elpoli.edu.co
-- **Teléfono**: (+57) 3225917022
-- **Horario**: Lunes a Viernes, 8:00 AM - 5:00 PM
-
----
-
-**Versión del Manual**: 1.0  
-**Última Actualización**: Diciembre 2025  
-**Sistema**: A-DDIE v1.0

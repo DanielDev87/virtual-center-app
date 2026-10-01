@@ -11,9 +11,19 @@ class AdminInstitutionController extends Controller
     /**
      * Display a listing of institutions
      */
-    public function index()
+    public function index(Request $request)
     {
-        $institutions = Institution::latest()->paginate(15);
+        $query = Institution::query();
+
+        if ($request->filled('search')) {
+            $query->where('institution_name', 'like', "%{$request->search}%");
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $institutions = $query->orderBy('institution_name')->paginate(15)->withQueryString();
         return view('admin.academic.institutions.index', compact('institutions'));
     }
 

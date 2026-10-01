@@ -17,7 +17,7 @@ class ServiceRated extends Mailable
     public $ticket;
 
     /**
-     * Create a new message instance.
+     * Crear una nueva instancia del mensaje.
      */
     public function __construct(Ticket $ticket)
     {
@@ -25,7 +25,7 @@ class ServiceRated extends Mailable
     }
 
     /**
-     * Get the message envelope.
+     * Obtener el sobre del mensaje.
      */
     public function envelope(): Envelope
     {
@@ -35,7 +35,7 @@ class ServiceRated extends Mailable
     }
 
     /**
-     * Get the message content definition.
+     * Obtener la definición del contenido del mensaje.
      */
     public function content(): Content
     {
@@ -45,7 +45,7 @@ class ServiceRated extends Mailable
     }
 
     /**
-     * Get the attachments for the message.
+     * Obtener los adjuntos del mensaje.
      *
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */

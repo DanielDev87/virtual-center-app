@@ -1,4 +1,4 @@
-# Manual de Base de Datos - Sistema A-DDIE
+# Manual de Base de Datos - Sistema Virtual Center
 ## Diccionario de Datos y Estructura
 
 ---
@@ -9,17 +9,17 @@
 2. [Diagrama ER (Entidad-Relación)](#diagrama-er)
 3. [Diccionario de Datos](#diccionario-de-datos)
     - [Usuarios y Roles](#usuarios-y-roles)
-    - [Gestión de Tickets](#gestión-de-tickets)
+    - [Gestión de Tickets y Evidencias](#gestión-de-tickets-y-evidencias)
     - [Gestión de Proyectos (SCRUM)](#gestión-de-proyectos-scrum)
-    - [Catálogos Académicos](#catálogos-académicos)
-    - [Otros Catálogos](#otros-catálogos)
+    - [Catálogos Académicos e Institucionales](#catálogos-académicos-e-institucionales)
+    - [Configuraciones del Sistema](#configuraciones-del-sistema)
 4. [Relaciones Principales](#relaciones-principales)
 
 ---
 
 ## Introducción
 
-Este documento describe la estructura de la base de datos del sistema A-DDIE. La base de datos está diseñada para soportar la gestión de tickets de servicios educativos, asignación de múltiples colaboradores, seguimiento de progreso acumulativo y gestión de proyectos bajo metodologías ADDIE y SCRUM.
+Este documento describe la estructura de la base de datos del sistema Virtual Center. La base de datos está diseñada para soportar la gestión algorítmica de tickets de servicios educativos de la institución, asignación multi-mediador flexible, seguimiento de progreso acumulativo, evidencias multimedia online y la gestión exhaustiva bajo las fases ADDIE y flujos SCRUM.
 
 **Motor de Base de Datos**: MySQL / MariaDB  
 **Charset**: utf8mb4  
@@ -37,12 +37,17 @@ erDiagram
     USERS ||--o{ TICKETS : mediates
     USERS ||--o{ TICKET_ASSIGNMENTS : assigned_to
     USERS }|--|| USER_ROLES : has
+    USERS }|--|| AREAS : is_part_of
     TICKETS ||--o{ TICKET_ASSIGNMENTS : has
     TICKETS ||--o{ TICKET_PROGRESS : tracks
+    TICKETS ||--o{ TICKET_EVIDENCES : has
     TICKETS ||--o{ SPRINTS : contains
     TICKETS ||--o{ PROJECT_TASKS : contains
     TICKETS }|--|| REQUEST_TYPES : classified_as
-    TICKET_ASSIGNMENTS }|--|| JOB_POSITIONS : defines
+    TICKET_ASSIGNMENTS }|--o| JOB_POSITIONS : optional_definition
+    REQUEST_TYPES }|--|| DEPARTMENTS : belongs_to
+    REQUEST_TYPES }|--|| AREAS : belongs_to
+    REQUEST_TYPES }|--|| USERS : managed_by_gestor
     FACULTIES ||--o{ PROGRAMS : has
     PROGRAMS ||--o{ COURSES : has
 ```
@@ -61,189 +66,159 @@ Almacena la información de todos los usuarios del sistema.
 | `user_id` | BIGINT | PK, AI | Identificador único del usuario |
 | `user_name` | VARCHAR(255) | NOT NULL | Nombre completo del usuario |
 | `user_email` | VARCHAR(255) | UNIQUE, NOT NULL | Correo electrónico (login) |
-| `email_verified_at` | TIMESTAMP | NULLABLE | Fecha de verificación de email |
+| `document` | VARCHAR(255) | NULLABLE | Documento de Identidad del empleado/usuario |
+| `institution_link` | VARCHAR(255) | NULLABLE | Enlace institucional de perfil o página externa referenciada |
 | `password` | VARCHAR(255) | NOT NULL | Contraseña hasheada (Bcrypt) |
 | `user_phone` | VARCHAR(255) | NULLABLE | Teléfono de contacto |
 | `user_bio` | TEXT | NULLABLE | Biografía o descripción breve |
 | `user_avatar` | VARCHAR(255) | NULLABLE | Ruta a la imagen de perfil |
-| `role_id` | BIGINT | FK -> user_roles | Rol asignado al usuario |
+| `role_id` | BIGINT | FK -> user_roles | Rol principal asignado |
+| `area_id` | BIGINT | FK -> areas | Área a la que está adscrito |
 | `is_active` | BOOLEAN | DEFAULT TRUE | Estado de la cuenta |
-| `remember_token` | VARCHAR(100) | NULLABLE | Token para "Recordarme" |
-| `created_at` | TIMESTAMP | NULLABLE | Fecha de creación |
-| `updated_at` | TIMESTAMP | NULLABLE | Fecha de última actualización |
 
 #### `user_roles`
-Define los roles de seguridad y acceso.
+Define los roles de seguridad y acceso de Virtual Center.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---------|------|---------------|-------------|
 | `role_id` | BIGINT | PK, AI | Identificador del rol |
-| `role_name` | VARCHAR(255) | NOT NULL | Nombre (Admin, Monitor, Contributor, Requester) |
+| `role_name` | VARCHAR(255) | NOT NULL | Admin, Monitor, Contributor, Operario, Requester, Super Admin Tecnico, Admin Área |
 | `role_description` | TEXT | NULLABLE | Descripción de permisos |
-| `role_color` | VARCHAR(255) | NULLABLE | Color para UI |
-| `is_active` | BOOLEAN | DEFAULT TRUE | Estado del rol |
+| `role_color` | VARCHAR(255) | NULLABLE | Color referencial de la UI |
 
 ---
 
-### Gestión de Tickets
+### Gestión de Tickets y Evidencias
 
 #### `tickets`
-Tabla central que almacena las solicitudes de servicio.
+Tabla central que encapsula todas las solicitudes de servicio/proyectos de Virtual Center.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---------|------|---------------|-------------|
-| `ticket_id` | BIGINT | PK, AI | Identificador interno |
-| `ticket_number` | BIGINT | UNIQUE | Número visible del ticket |
-| `title` | VARCHAR(255) | NOT NULL | Título de la solicitud |
-| `type` | INTEGER | NOT NULL | Tipo numérico (Legacy) |
-| `request_type_id` | BIGINT | FK -> request_types | Tipo de solicitud (Catálogo) |
-| `status` | INTEGER | NOT NULL | 1=Pendiente, 2=En Progreso, 3=Completado, 4=Cancelado |
-| `priority` | INTEGER | NULLABLE | Nivel de prioridad |
-| `progress_percentage` | INTEGER | DEFAULT 0 | Progreso acumulativo (0-100) |
-| `current_phase` | ENUM | DEFAULT 'Analysis' | Fase ADDIE actual |
-| `requester_id` | BIGINT | FK -> users | Usuario que creó el ticket |
-| `mediator_id` | BIGINT | FK -> users | Mediador principal (opcional) |
-| `resource_link` | VARCHAR(255) | NULLABLE | URL del entregable final |
-| `is_reopened` | BOOLEAN | DEFAULT FALSE | Indica si fue reabierto |
-| `reopened_at` | TIMESTAMP | NULLABLE | Fecha de última reapertura |
-| `rating` | INTEGER | NULLABLE | Calificación (1-5) |
-| `feedback` | TEXT | NULLABLE | Retroalimentación del usuario |
-| `created_at` | TIMESTAMP | NULLABLE | Fecha de creación |
-| `updated_at` | TIMESTAMP | NULLABLE | Fecha de actualización |
+| `ticket_id` | BIGINT | PK, AI | Identificador interno absoluto |
+| `ticket_number` | BIGINT | UNIQUE | Número visible autogenerado del ticket |
+| `title` | VARCHAR(255) | NOT NULL | Título de la manifestación de solicitud |
+| `request_type_id` | BIGINT | FK -> request_types | Tópico de clasificación del ticket |
+| `status` | INTEGER | NOT NULL | 1=Pendiente, 2=En Progreso, 3=Completado, 4=Cancelado, 5=Realizado por Operario |
+| `progress_percentage` | INTEGER | DEFAULT 0 | Progreso acumulativo constante (0-100) |
+| `current_phase` | ENUM | DEFAULT 'Analysis' | Fases ADDIE (Analysis, Design, Dev...) |
+| `requester_id` | BIGINT | FK -> users | Solicitante (Dueño de ticket) |
+| `mediator_id` | BIGINT | FK -> users | Mediador principal |
+| `attachment_path` | VARCHAR(255) | NULLABLE | Archivo/Ruta externa del recurso de cierre si se usó fichero clásico |
+| `resource_link` | VARCHAR(255) | NULLABLE | URL de un entregable externo o link de descarga de cierre |
+| `is_reopened` | BOOLEAN | DEFAULT FALSE | Si fue reabierto |
+| `rating` | INTEGER | NULLABLE | Calificación 1 a 5 asignada por el Solicitante |
 
 #### `ticket_assignments`
-Gestiona la asignación de múltiples colaboradores a un ticket.
+Controla la asignación de varios mediadores para un solo ticket.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---------|------|---------------|-------------|
-| `assignment_id` | BIGINT | PK, AI | Identificador de asignación |
-| `ticket_id` | BIGINT | FK -> tickets | Ticket asociado |
-| `user_id` | BIGINT | FK -> users | Colaborador asignado |
-| `job_position_id` | BIGINT | FK -> job_positions | Rol/Puesto en este ticket |
-| `assigned_by` | BIGINT | FK -> users | Quién realizó la asignación |
-| `status` | ENUM | DEFAULT 'active' | 'active', 'completed', 'removed' |
-| `notes` | TEXT | NULLABLE | Notas de asignación |
-| `assigned_at` | TIMESTAMP | DEFAULT CURRENT | Fecha de asignación |
+| `assignment_id` | BIGINT | PK, AI | Identificador de delegación |
+| `ticket_id` | BIGINT | FK -> tickets | Ticket derivado |
+| `user_id` | BIGINT | FK -> users | Colaborador al que se le transfiere |
+| `job_position_id` | BIGINT | FK -> job_positions, NULLABLE | Puesto de apoyo desempeñado (Opcional) |
+| `assigned_by` | BIGINT | FK -> users | Usuario que realizó la asignación |
+| `status` | ENUM | DEFAULT 'active' | active, completed, removed |
+| `assigned_at` | TIMESTAMP | - | Fecha de asignación |
+| `returned_alert_read_at` | TIMESTAMP | NULLABLE | Fecha en que el asignador leyó la alerta de devolución |
+
+#### `ticket_evidences`
+Registra la meta-data de las imágenes insertadas directamente desde el navegador al Rich Text Editor de los avances y descripciones del ticket.
+
+| Columna | Tipo | Restricciones | Descripción |
+|---------|------|---------------|-------------|
+| `id` | BIGINT | PK, AI | - |
+| `ticket_id` | BIGINT | FK -> tickets | Pertenece al ticket principal |
+| `user_id` | BIGINT | FK -> users | Quien propocionó el inline img/text |
+| `file_name` | VARCHAR(255) | NOT NULL | Nombre alfanumérico generado en base local |
+| `file_path` | VARCHAR(255) | NOT NULL | Ruta virtual o absoluta dada por el AppSettings |
+| `mime_type` | VARCHAR(255) | NOT NULL | (e.g. image/png) |
+| `created_at` | TIMESTAMP | - | - |
 
 #### `ticket_progress`
-Historial detallado de avances.
+Histórico de texto sobre los avances realizados a un ticket.
+
+#### Relaciones y soporte operativo añadidos
+
+- `tickets.parent_ticket_id`: ticket principal para agrupar incidencias relacionadas.
+- `ticket_association_requests`: solicitudes individuales o agrupadas de asociación enviadas por Contributors y revisadas por Admin Área.
+- `ticket_join_requests`: solicitudes de Contributors para unirse a equipos de tickets.
+- `holidays`: calendario de festivos nacionales colombianos y días institucionales.
+- `tickets.response_overdue_notified_at`: evita notificaciones repetidas cuando un ticket supera el SLA laboral.
+- `request_types.incident_active`, `incident_title`, `incident_message`, `incident_started_at`: bloqueo temporal y mensaje de incidencias generales por tópico.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---------|------|---------------|-------------|
-| `progress_id` | BIGINT | PK, AI | Identificador de progreso |
-| `ticket_id` | BIGINT | FK -> tickets | Ticket asociado |
-| `user_id` | BIGINT | FK -> users | Usuario que reporta |
-| `progress_description` | TEXT | NOT NULL | Descripción de lo realizado |
-| `progress_percentage` | INTEGER | DEFAULT 0 | Porcentaje reportado |
-| `created_at` | TIMESTAMP | NULLABLE | Fecha del reporte |
+| `progress_id` | BIGINT | PK, AI | - |
+| `ticket_id` | BIGINT | FK -> tickets | - |
+| `progress_description`| TEXT | NOT NULL | Soporta el código HTML del Rich Text |
 
 ---
 
-### Gestión de Proyectos (SCRUM)
+### Catálogos Académicos e Institucionales
 
-#### `sprints`
-Periodos de trabajo para metodología SCRUM.
+#### `faculties` y `programs`
+Estructuras académicas para los estudiantes y docentes.
+
+#### `departments` (Departamentos)
+| Columna | Tipo | Restricciones | Descripción |
+|---------|------|---------------|-------------|
+| `id` | BIGINT | PK, AI | |
+| `name` | VARCHAR(255) | NOT NULL | Nombre del departamento institucional (DTI, Bienestar, etc) |
+
+#### `areas` (Áreas)
+| Columna | Tipo | Restricciones | Descripción |
+|---------|------|---------------|-------------|
+| `id` | BIGINT | PK, AI | |
+| `name` | VARCHAR(255) | NOT NULL | Nombre del área ramificada|
+
+#### `request_types` (Tópicos de Soporte)
+Clasificadores principales de a dónde se dirige el ticket y sus reglas de vencimiento.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---------|------|---------------|-------------|
-| `sprint_id` | BIGINT | PK, AI | Identificador del sprint |
-| `ticket_id` | BIGINT | FK -> tickets | Ticket padre |
-| `name` | VARCHAR(255) | NOT NULL | Nombre del sprint |
-| `start_date` | DATE | NOT NULL | Fecha inicio |
-| `end_date` | DATE | NOT NULL | Fecha fin |
-| `goal` | TEXT | NULLABLE | Objetivo del sprint |
-| `status` | ENUM | DEFAULT 'planned' | 'planned', 'active', 'completed' |
-
-#### `project_tasks`
-Tareas individuales (Kanban).
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `task_id` | BIGINT | PK, AI | Identificador de tarea |
-| `ticket_id` | BIGINT | FK -> tickets | Ticket padre |
-| `sprint_id` | BIGINT | FK -> sprints | Sprint asignado (opcional) |
-| `title` | VARCHAR(255) | NOT NULL | Título de la tarea |
-| `description` | TEXT | NULLABLE | Detalles |
-| `assigned_to` | BIGINT | FK -> users | Responsable |
-| `status` | ENUM | DEFAULT 'todo' | 'todo', 'in_progress', 'review', 'done' |
-| `priority` | ENUM | DEFAULT 'medium' | 'low', 'medium', 'high' |
+| `type_id` | BIGINT | PK, AI | - |
+| `type_name` | VARCHAR(100) | NOT NULL | Título del servicio proporcionado |
+| `sla` | INTEGER | NULLABLE | SLA (Acuerdos de nivel del servicio o Tiempos límite en días) |
+| `department_id` | BIGINT | FK -> departments | Departamento organizador de este tópico |
+| `area_id` | BIGINT | FK -> areas | Área organizadora de este tópico explícito |
+| `gestor_id` | BIGINT | FK -> users | Account Manager o Gestor principal de responsabilidad en esta rama |
 
 ---
 
-### Catálogos Académicos
+### Configuraciones del Sistema
 
-#### `faculties`
-Facultades de la institución.
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `faculty_id` | BIGINT | PK, AI | Identificador |
-| `faculty_name` | VARCHAR(255) | NOT NULL | Nombre de la facultad |
-
-#### `programs`
-Programas académicos.
+#### `app_settings`
+Almacena configuración crucial dinámica en JSON o variables atómicas administradas desde el portal del `Super Admin Tecnico`.
 
 | Columna | Tipo | Restricciones | Descripción |
 |---------|------|---------------|-------------|
-| `program_id` | BIGINT | PK, AI | Identificador |
-| `faculty_id` | BIGINT | FK -> faculties | Facultad a la que pertenece |
-| `program_name` | VARCHAR(255) | NOT NULL | Nombre del programa |
-
-#### `courses`
-Cursos o materias.
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `course_id` | BIGINT | PK, AI | Identificador |
-| `program_id` | BIGINT | FK -> programs | Programa al que pertenece |
-| `course_code` | VARCHAR(20) | NOT NULL | Código del curso |
-| `course_name` | VARCHAR(255) | NOT NULL | Nombre del curso |
-| `credits` | INTEGER | NULLABLE | Créditos académicos |
-| `is_active` | BOOLEAN | DEFAULT TRUE | Estado |
+| `id` | BIGINT | PK, AI | |
+| `key` | VARCHAR(255) | UNIQUE, NOT NULL | (e.g., `storage.path.evidence`) |
+| `value` | TEXT | NULLABLE | Directorio global persistente |
 
 ---
 
-### Otros Catálogos
+## Relaciones Principales Re-Evaluadas
 
-#### `request_types`
-Tipos de servicios disponibles.
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `type_id` | BIGINT | PK, AI | Identificador |
-| `type_name` | VARCHAR(100) | NOT NULL | Nombre (Diseño, Web, Video...) |
-| `type_icon` | VARCHAR(50) | NULLABLE | Clase de icono FontAwesome |
-| `type_color` | VARCHAR(7) | DEFAULT '#6c757d' | Color Hex |
-
-#### `job_positions`
-Puestos de trabajo para colaboradores.
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| `job_position_id` | BIGINT | PK, AI | Identificador |
-| `position_name` | VARCHAR(255) | NOT NULL | Nombre del puesto |
-| `position_color` | VARCHAR(7) | NULLABLE | Color identificador |
+1. **Gestión de Recursos Multimedia Evidenciales**: A diferencia de versiones A-DDIE anteriores, `TICKET_EVIDENCES` convive de forma adyacente a `TICKET_PROGRESS`, garantizando que si se suben recortes en un avance, la tabla de evidencias apunte todos los archivos mediante `file_path` controlado por `APP_SETTINGS`.  
+2. **Escalamiento Corporativo**: Todo requerimiento formal se asocia con `REQUEST_TYPES`, el cual ahora rutea con SLA y Gestor hacia estructuras directivas `DEPARTMENTS` o `AREAS`.
+3. **Cierre Multiplicador**: `ticket_assignments` ha relajado el uso de `job_position_id` para tolerar delegaciones masivas en situaciones ágiles sin una etiqueta laboral forzada como en el viejo sistema. Solo un usuario es el `mediator_id` central del ticket maestro.
 
 ---
 
-## Relaciones Principales
+**Generado**: Abril 2026  
+**Sistema**: Virtual Center v1.1
 
-### Tickets y Usuarios
-- Un **Ticket** pertenece a un **Solicitante** (`requester_id`).
-- Un **Ticket** puede tener un **Mediador Principal** (`mediator_id`).
-- Un **Ticket** tiene muchos **Colaboradores** a través de `ticket_assignments`.
+<!-- ACTUALIZACION_JUNIO_2026 -->
+## Novedades Funcionales (Junio 2026)
 
-### Estructura Académica
-- Una **Facultad** tiene muchos **Programas**.
-- Un **Programa** tiene muchos **Cursos**.
+- Carga masiva CSV reforzada con lectura UTF-8 y manejo explicito de comillas dobles como encapsulador de texto.
+- Validacion estructural por fila en importaciones CSV para detectar columnas rotas por delimitador/comillas antes de escribir en BD.
+- Mejora de importacion de cursos para relacion muchos-a-muchos con programas mediante tabla pivote course_program (manteniendo compatibilidad con program_id legado).
+- Carga masiva de cursos con soporte de multiples referencias: program_id/program_ids, program_code/program_codes y program_name/program_names.
+- Resolucion de ambiguedades de programas mejorada con filtros por faculty_id/faculty_name e institution_id/institution_name.
+- Cuando program_code/program_name es duplicado y no se envia desambiguacion, la importacion puede vincular el curso a todos los programas coincidentes.
+- Formularios de crear/editar cursos mejorados con selector multiple con busqueda (Tom Select), conservando compatibilidad del campo program_id.
 
-### Gestión de Proyectos
-- Un **Ticket** puede tener múltiples **Sprints**.
-- Un **Ticket** tiene muchas **Tareas**.
-- Una **Tarea** puede pertenecer a un **Sprint**.
-- Una **Tarea** puede estar asignada a un **Usuario**.
-
----
-
-**Generado**: Diciembre 2025  
-**Sistema**: A-DDIE v1.0

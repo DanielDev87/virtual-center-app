@@ -1,5 +1,5 @@
 # Manual de Usuario - Colaborador
-## Sistema A-DDIE (Analysis, Design, Development, Implementation, Evaluation)
+## Sistema Virtual Center
 
 ---
 
@@ -9,28 +9,30 @@
 2. [Acceso al Sistema](#acceso-al-sistema)
 3. [Dashboard del Colaborador](#dashboard-del-colaborador)
 4. [Trabajar con Tickets Asignados](#trabajar-con-tickets-asignados)
-5. [Registrar Avances](#registrar-avances)
+5. [Registrar Avances y Evidencias](#registrar-avances-y-evidencias)
 6. [Trabajo en Equipo](#trabajo-en-equipo)
-7. [Metodología ADDIE](#metodología-addie)
+7. [Metodología ADDIE y Cierre de Tickets](#metodología-addie-y-cierre-de-tickets)
 8. [Buenas Prácticas](#buenas-prácticas)
 
 ---
 
 ## Introducción
 
-### ¿Qué es A-DDIE?
+### ¿Qué es Virtual Center?
 
-A-DDIE es un sistema de gestión de servicios educativos que te permite colaborar en proyectos siguiendo la metodología ADDIE (Analysis, Design, Development, Implementation, Evaluation).
+Virtual Center es un sistema de gestión de servicios educativos que te permite colaborar en proyectos siguiendo la metodología ADDIE (Analysis, Design, Development, Implementation, Evaluation) complementada con seguimiento de tickets y reporte de avances.
 
 ### Rol de Colaborador
 
 Como colaborador (Contributor), tus responsabilidades son:
 
 - Trabajar en los tickets que te han sido asignados
-- Registrar avances periódicamente
+- Registrar avances periódicamente usando texto enriquecido e imágenes
 - Colaborar con otros miembros del equipo
 - Seguir la metodología ADDIE en cada proyecto
-- Mantener actualizado el progreso de tus tareas
+- Posibilidad de realizar el Cierre de Tickets cuando se cumplen los criterios requeridos del proceso y porcentaje.
+
+El rol **Operario** es independiente del Contributor. Los Operarios atienden labores físicas y marcan los tickets como **Realizado** para auditoría; no sustituyen el cierre del Contributor.
 
 ---
 
@@ -38,7 +40,7 @@ Como colaborador (Contributor), tus responsabilidades son:
 
 ### Inicio de Sesión
 
-1. Accede a la URL del sistema A-DDIE
+1. Accede a la URL del sistema Virtual Center
 2. Ingresa tu **correo electrónico**
 3. Ingresa tu **contraseña**
 4. Haz clic en **"Iniciar Sesión"**
@@ -49,7 +51,7 @@ Como colaborador (Contributor), tus responsabilidades son:
 
 Tu interfaz incluye:
 
-- **Barra de navegación superior**: Logo, nombre de la app, y menú de usuario
+- **Barra de navegación superior**: Logo de Virtual Center y menú de usuario
 - **Área central**: Dashboard con tus tickets asignados
 - **Paginación**: 10 tickets por página
 
@@ -73,20 +75,19 @@ La tabla muestra:
 #### Columnas
 - **#**: Número del ticket
 - **Título**: Nombre descriptivo del ticket
-- **Rol**: Tu puesto de trabajo en este ticket
-- **Tipo**: Categoría de la solicitud
+- **Rol**: Tu puesto de trabajo en este ticket (Nota: En configuraciones recientes, este campo puede aparecer vacío si asistes opcionalmente y no es estricto en la designación)
+- **Tipo / Tópico**: Categoría de la solicitud
 - **Solicitante**: Quién solicitó el servicio
-- **Estado**: Pendiente/En Progreso/Completado/Cancelado
+- **Estado**: Pendiente/En Progreso/Realizado por Operario/Completado/Cancelado
 - **Fecha**: Cuándo se creó el ticket
 - **Acciones**: Botón "Ver" para acceder al detalle
 
 #### Indicadores Visuales
 
-- **Badge de rol**: Muestra tu puesto de trabajo asignado
-  - Ejemplo: "Diseñador Gráfico", "Desarrollador", "Analista"
 - **Badge de estado**: Color según el estado
   - Gris: Pendiente
   - Amarillo: En Progreso
+  - Azul: Realizado por Operario, pendiente de auditoría
   - Verde: Completado
   - Rojo: Cancelado
 
@@ -105,8 +106,8 @@ La tabla muestra:
 - Número y título
 - Estado actual
 - Nivel de prioridad
-- Tipo de solicitud
-- Barra de progreso general
+- Tipo de solicitud o tópico al que pertenece
+- Lógica ADDIE en progreso
 
 #### Sección: Información del Solicitante
 - Nombre del solicitante
@@ -114,75 +115,44 @@ La tabla muestra:
 - Descripción completa de lo que necesita
 
 #### Sección: Equipo de Trabajo
-Tabla con todos los colaboradores asignados:
-- Nombre del colaborador
-- Puesto de trabajo que desempeña
-- Fecha de asignación
+Tabla con todos los colaboradores asignados. Te permite coordinar esfuerzos visualizando si perteneces a un equipo multi-mediador.
 
-> **Importante**: Puedes ver quién más está trabajando en el ticket para coordinar esfuerzos.
-
-#### Sección: Historial de Avances
+#### Sección: Historial de Avances y Evidencias
 - Lista cronológica de todos los avances registrados
 - Muestra quién registró cada avance
-- Porcentaje de progreso en cada momento
-- Descripción detallada de lo realizado
+- Porcentaje de progreso del ticket
+- Visualización de imágenes anexas o evidencias
 
 ---
 
-## Registrar Avances
+## Registrar Avances y Evidencias
 
 ### ¿Cuándo Registrar un Avance?
 
 Debes registrar avances:
-
-- ✅ Al completar una tarea significativa
-- ✅ Al finalizar una sesión de trabajo
+- ✅ Al completar una tarea significativa o sesión de trabajo
 - ✅ Cuando alcances un hito del proyecto
-- ✅ Al menos una vez por semana (recomendado)
-- ✅ Cuando el progreso aumente al menos 10%
+- ✅ Al menos una vez por semana o cuando el progreso aumente representativamente.
 
-### Cómo Registrar un Avance
+### Cómo Registrar un Avance (Texto Enriquecido)
 
 1. En el detalle del ticket, ve a la tarjeta **"Registrar Avance"**
-2. Completa el formulario:
+2. Completa el formulario de progreso:
 
 #### Campo: Porcentaje de Progreso
-- Ingresa el **porcentaje acumulado** del ticket
-- Ejemplo: Si el ticket estaba en 30% y avanzaste 20%, ingresa **50%**
+- Ingresa el **porcentaje acumulado** del ticket. Ojo: No el adicional, sino al porcentaje total al que está llegando el ticket.
 - Rango: 0% - 100%
 
-> **⚠️ Importante**: El porcentaje es **acumulativo**, no incremental.
+#### Campo: Descripción del Avance (Texto Enriquecido e Imágenes)
+- Describe **qué hiciste** en este avance claramente.
+- El editor soporta formato de texto enriquecido (Rich Text Editor).
+- **Pegar imágenes/evidencias**: Puedes tomar recortes de pantalla y directamente pegarlos en el campo de descripción. Las imágenes se cargarán y adjuntarán automáticamente a la plataforma, mostrándose como evidencia al solicitante.
 
-#### Campo: Descripción del Avance
-- Describe **qué hiciste** en este avance
-- Sé específico y claro
-- Menciona entregables si aplica
+**Ejemplos de avance ideal**:
+- ✅ "Se completó la vista principal. Adjunto imagen renderizada del componente web"
+- ✅ "Proceso en un 50% para refactorización. La base de datos aceptó las correcciones en el esquema de ADDIE." (Anexa foto de consola)
 
-**Ejemplos de buenas descripciones**:
-- ✅ "Completado el diseño de la interfaz principal. Entregables: 3 mockups en Figma"
-- ✅ "Desarrollado el módulo de autenticación. Funcionalidad de login y registro operativa"
-- ✅ "Realizado análisis de requerimientos. Documento de especificaciones adjunto"
-
-**Ejemplos de descripciones pobres**:
-- ❌ "Trabajé en el proyecto"
-- ❌ "Avance"
-- ❌ "Hice cosas"
-
-3. Haz clic en **"Guardar Avance"**
-
-### Sistema de Progreso Acumulativo
-
-El sistema calcula el progreso de forma **acumulativa**:
-
-- Cada nuevo avance **reemplaza** el porcentaje anterior
-- El progreso **nunca debe disminuir**
-- El ticket se considera completo al llegar a **100%**
-
-**Ejemplo de flujo**:
-1. Primer avance: 25% - "Análisis completado"
-2. Segundo avance: 50% - "Diseño finalizado"
-3. Tercer avance: 75% - "Desarrollo al 75%"
-4. Cuarto avance: 100% - "Implementación completa"
+3. Haz clic en **"Guardar Avance"**.
 
 ---
 
@@ -190,247 +160,78 @@ El sistema calcula el progreso de forma **acumulativa**:
 
 ### Tickets Multi-Colaborador
 
-Algunos tickets tienen **varios colaboradores** asignados con diferentes roles.
+Algunos tickets tienen varios colaboradores trabajando bajo diferentes roles que cubren fases complejas en ADDIE (ej. Diseñador para Fase 2, Programador para Fase 3). 
+Es indispensable que si otro mediador interactúa, el progreso que ponga como total sea acordado en conjunto al equipo.
 
-#### Ver el Equipo
-
-En la sección "Equipo de Trabajo" puedes ver:
-- Todos los miembros del equipo
-- El rol de cada uno
-- Cuándo fueron asignados
-
-#### Coordinación
-
-**Recomendaciones**:
-- 📞 Comunícate con tu equipo fuera del sistema
-- 📝 Revisa los avances de otros colaboradores
-- 🤝 Coordina para evitar duplicar esfuerzos
-- 📊 Asegúrate de que los porcentajes reflejen el trabajo de todo el equipo
+Cuando el equipo incluya Operarios, el Contributor conserva el flujo de gestión y cierre. Los Operarios pueden visualizar el trabajo conjunto, pero no pueden completar el ticket.
 
 ### Tickets Reabiertos
-
-Si ves un badge **"Ticket Reabierto"**:
-
-- El ticket fue completado anteriormente
-- El solicitante pidió cambios adicionales
-- El progreso se reinició a 0%
-- Hay dos secciones de avances:
-  - **Avances de Reapertura**: Trabajo actual
-  - **Avances Anteriores**: Trabajo previo al cierre
+Si el administrador reabre un ticket, los registros previos del progreso se categorizan como "Avances Anteriores" y el seguimiento iniciará de cero en la nueva fase solicitada.
 
 ---
 
-## Metodología ADDIE
+## Metodología ADDIE y Cierre de Tickets
 
-### Las 5 Fases de ADDIE
+Todos los tickets siguen el modelo ADDIE de 5 fases.
+1. Analysis (Análisis)
+2. Design (Diseño)
+3. Development (Desarrollo)
+4. Implementation (Implementación)
+5. Evaluation (Evaluación)
 
-Todos los tickets siguen el modelo ADDIE:
+### Cerrar un Ticket como Colaborador
 
-#### 1. Analysis (Análisis)
-**Objetivo**: Entender el problema y las necesidades
+En actualizaciones recientes de Virtual Center, **el colaborador principal (Contributor) puede ahora cerrar tickets directamente** una vez que se han cumplido un conjunto de condiciones rígidas dictadas por sistema:
 
-**Actividades**:
-- Revisar la solicitud del usuario
-- Identificar requerimientos
-- Analizar el contexto educativo
-- Definir objetivos de aprendizaje
+**Condiciones de Sistema para Cierre Exitoso**:
+1. Tu porcentaje general de Progreso registrado debe ser de exactamente **100%**.
+2. El ticket **debe de situarse** en fase de **Implementation** o de **Evaluation**. Si el ticket se encuentra en fase Development, el sistema bloqueará el cierre y te pedirá actualizar la fase junto al Administrador o Project Manager.
 
-**Entregable típico**: Documento de análisis de necesidades
+**Cómo Cerrar:**
+1. En la tarjeta de opciones de tu ticket que cumpla el 100%, verás el botón de "Cerrar Ticket".
+2. Incluye siempre la entrega final o consideraciones.
+3. El ticket pasará a estado completado y se notificará por correo al solicitante para su eventual calificación.
 
-#### 2. Design (Diseño)
-**Objetivo**: Planificar la solución
-
-**Actividades**:
-- Diseñar la estructura del contenido
-- Crear wireframes o bocetos
-- Planificar la experiencia de usuario
-- Definir estrategias pedagógicas
-
-**Entregable típico**: Diseños, mockups, storyboards
-
-#### 3. Development (Desarrollo)
-**Objetivo**: Crear el contenido/recurso
-
-**Actividades**:
-- Desarrollar el material educativo
-- Crear recursos multimedia
-- Programar funcionalidades (si aplica)
-- Producir contenidos
-
-**Entregable típico**: Recurso educativo funcional
-
-#### 4. Implementation (Implementación)
-**Objetivo**: Poner en marcha la solución
-
-**Actividades**:
-- Desplegar el recurso
-- Capacitar a usuarios
-- Realizar pruebas finales
-- Ajustes de última hora
-
-**Entregable típico**: Recurso publicado y accesible
-
-#### 5. Evaluation (Evaluación)
-**Objetivo**: Valorar la efectividad
-
-**Actividades**:
-- Recopilar retroalimentación
-- Analizar resultados
-- Identificar mejoras
-- Documentar lecciones aprendidas
-
-**Entregable típico**: Informe de evaluación
-
-### Seguir ADDIE en tu Trabajo
-
-**Consejos**:
-
-1. **Identifica la fase actual**: Revisa en qué fase está el ticket
-2. **Enfócate en los objetivos de esa fase**: Cada fase tiene propósitos específicos
-3. **Registra avances por fase**: Menciona la fase en tus descripciones
-4. **No saltes fases**: Sigue el orden secuencial
-5. **Comunica si necesitas cambiar de fase**: Informa al administrador
+Los tickets Completados o Cancelados quedan bloqueados para modificaciones hasta que un administrador los reabra.
 
 ---
 
 ## Buenas Prácticas
 
 ### Gestión del Tiempo
+- Actualiza tus porcentajes y añade evidencias progresivamente semana a semana en lugar del mero día de cierre.
 
-- ⏰ Revisa tus tickets asignados **diariamente**
-- 📅 Prioriza tickets urgentes (marcados en rojo)
-- 🎯 Establece metas semanales de progreso
-- ⚡ Actualiza el progreso al menos **una vez por semana**
+### Calidad y Transparencia
+- ¡Utiliza la herramienta de inserción de imagen! Proveer avances gráficos con el Rich Text en lugar del texto plano simple reduce la constante necesidad de aclaratorias con el usuario que hace peticiones.
 
-### Comunicación Efectiva
+## Asociaciones, transferencias y reportes
 
-- 💬 Describe tus avances de forma **clara y específica**
-- 📎 Menciona entregables cuando sea posible
-- 🔗 Incluye enlaces a recursos si aplica
-- ❓ Pregunta al administrador si tienes dudas
+El Contributor puede solicitar asociar uno o varios tickets relacionados. La solicitud queda pendiente hasta aprobación del Admin Área. También puede transferir un ticket a un tópico activo de otra área cuando el tópico original fue seleccionado incorrectamente, siempre que exista un colaborador destino válido.
 
-### Calidad del Trabajo
-
-- ✨ Enfócate en la **calidad** sobre la velocidad
-- 🔍 Revisa tu trabajo antes de marcar como completado
-- 📚 Sigue las mejores prácticas de tu área
-- 🎓 Aplica principios pedagógicos en recursos educativos
-
-### Colaboración
-
-- 🤝 Coordina con otros miembros del equipo
-- 💡 Comparte ideas y sugerencias
-- 🆘 Pide ayuda cuando la necesites
-- 🎉 Celebra los logros del equipo
-
----
-
-## Casos de Uso Comunes
-
-### Caso 1: Trabajar en un Ticket Nuevo
-
-1. Recibes notificación de asignación (aparece en tu dashboard)
-2. Accedes al detalle del ticket
-3. Lees la descripción del solicitante
-4. Revisas la fase ADDIE actual
-5. Planificas tu trabajo según la fase
-6. Comienzas a trabajar
-7. Registras tu primer avance (ej: 20%)
-8. Continúas trabajando y registrando avances
-9. Cuando llegues al 100%, notificas al administrador
-10. El administrador cierra el ticket
-
-### Caso 2: Colaborar en un Ticket de Equipo
-
-1. Ves que hay otros colaboradores asignados
-2. Identificas tu rol específico
-3. Revisas los avances de otros miembros
-4. Coordinas con el equipo (email, chat, reunión)
-5. Trabajas en tu parte específica
-6. Registras avances que reflejen el trabajo conjunto
-7. Mantienes comunicación constante
-8. Apoyas a tus compañeros si es necesario
-
-### Caso 3: Trabajar en un Ticket Reabierto
-
-1. Ves el badge "Ticket Reabierto"
-2. Revisas los "Avances Anteriores" para contexto
-3. Lees la nueva solicitud o cambios requeridos
-4. Comienzas a trabajar en las modificaciones
-5. Registras avances en la sección de "Reapertura"
-6. El progreso comienza desde 0% nuevamente
-7. Trabajas hasta completar los cambios (100%)
-8. El administrador cierra el ticket nuevamente
-
----
-
-## Preguntas Frecuentes
-
-### ¿Qué hago si no entiendo la solicitud del ticket?
-
-Contacta al administrador para que te ponga en contacto con el solicitante o te aclare los detalles.
-
-### ¿Puedo trabajar en varios tickets a la vez?
-
-Sí, puedes tener múltiples tickets asignados. Organiza tu tiempo adecuadamente.
-
-### ¿Qué pasa si no puedo completar un ticket?
-
-Informa al administrador lo antes posible para que pueda reasignar o buscar apoyo.
-
-### ¿Cómo sé en qué fase ADDIE está el ticket?
-
-La fase actual se muestra en el detalle del ticket. El administrador la actualiza según el progreso.
-
-### ¿Puedo ver tickets en los que no estoy asignado?
-
-No, solo ves los tickets donde fuiste asignado como mediador o miembro del equipo.
-
-### ¿Qué hago si el porcentaje de progreso no refleja mi trabajo?
-
-Registra un nuevo avance con el porcentaje correcto. El sistema siempre toma el último valor.
-
-### ¿Puedo eliminar o editar un avance registrado?
-
-No, los avances son permanentes. Asegúrate de verificar antes de guardar.
-
----
-
-## Consejos para el Éxito
-
-### Productividad
-
-- 📊 Usa herramientas de gestión de tiempo
-- 🎯 Establece objetivos claros para cada sesión
-- 🔄 Trabaja en bloques de tiempo enfocado
-- 📝 Documenta tu proceso de trabajo
-
-### Aprendizaje Continuo
-
-- 📚 Familiarízate con la metodología ADDIE
-- 🎓 Mejora tus habilidades técnicas constantemente
-- 💡 Aprende de los avances de otros colaboradores
-- 🌟 Busca retroalimentación para mejorar
-
-### Profesionalismo
-
-- ⏰ Cumple con los plazos establecidos
-- 💼 Mantén comunicación profesional
-- 🎨 Entrega trabajo de alta calidad
-- 🤝 Sé un buen compañero de equipo
+El Contributor puede consultar el reporte de solicitantes frecuentes limitado a los tickets donde participa.
 
 ---
 
 ## Soporte Técnico
 
-Para asistencia técnica o reportar problemas:
+Para asistencia técnica del sistema o inconvenientes de carga de imágenes en la evidencia:
 
-- **Email**: daniel_agudelo54232@elpoli.edu.co
-- **Teléfono**: (+57) 3225917022
-- **Horario**: Lunes a Viernes, 8:00 AM - 5:00 PM
+- **Email**: correo@institucion.edu.co
 
 ---
 
-**Versión del Manual**: 1.0  
-**Última Actualización**: Diciembre 2025  
-**Sistema**: A-DDIE v1.0
+**Versión del Manual**: 1.1  
+**Última Actualización**: Abril 2026  
+**Sistema**: Virtual Center v1.1
+
+<!-- ACTUALIZACION_JUNIO_2026 -->
+## Novedades Funcionales (Junio 2026)
+
+- Carga masiva CSV reforzada con lectura UTF-8 y manejo explicito de comillas dobles como encapsulador de texto.
+- Validacion estructural por fila en importaciones CSV para detectar columnas rotas por delimitador/comillas antes de escribir en BD.
+- Mejora de importacion de cursos para relacion muchos-a-muchos con programas mediante tabla pivote course_program (manteniendo compatibilidad con program_id legado).
+- Carga masiva de cursos con soporte de multiples referencias: program_id/program_ids, program_code/program_codes y program_name/program_names.
+- Resolucion de ambiguedades de programas mejorada con filtros por faculty_id/faculty_name e institution_id/institution_name.
+- Cuando program_code/program_name es duplicado y no se envia desambiguacion, la importacion puede vincular el curso a todos los programas coincidentes.
+- Formularios de crear/editar cursos mejorados con selector multiple con busqueda (Tom Select), conservando compatibilidad del campo program_id.
+

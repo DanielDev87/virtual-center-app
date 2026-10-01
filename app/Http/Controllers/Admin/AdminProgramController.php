@@ -9,10 +9,29 @@ use Illuminate\Http\Request;
 
 class AdminProgramController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $programs = Program::with('faculty')->latest()->paginate(15);
-        return view('admin.academic.programs.index', compact('programs'));
+        $query = Program::with('faculty');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('program_name', 'like', "%{$search}%")
+                  ->orWhere('program_code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('faculty_id')) {
+            $query->where('faculty_id', $request->faculty_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $programs = $query->orderBy('program_name')->paginate(15)->withQueryString();
+        $faculties = Faculty::where('is_active', true)->orderBy('faculty_name')->get();
+        return view('admin.academic.programs.index', compact('programs', 'faculties'));
     }
 
     public function create()

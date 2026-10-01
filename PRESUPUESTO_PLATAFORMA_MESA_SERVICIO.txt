@@ -1,0 +1,112 @@
+PRESUPUESTO REFERENCIAL
+PLATAFORMA DE MESA DE SERVICIO Y GESTION DE TICKETS
+
+Fecha: 08 de septiembre de 2026
+Moneda: Pesos colombianos (COP)
+Modalidad: Implementacion y puesta a punto de plataforma web Laravel
+
+1. ALCANCE FUNCIONAL
+
+La plataforma incluye:
+
+- Creacion y seguimiento de solicitudes.
+- Gestion de tickets por topicos, areas y regionales.
+- Roles Admin, Admin Area, Contributor, Operario, Monitor, Requester y Super Admin Tecnico.
+- Pool de tickets por topico con control de disponibilidad.
+- Equipos multi-mediador.
+- Solicitudes para unirse a equipos con aprobacion del responsable.
+- Transferencia de tickets entre topicos y areas.
+- Asociacion de tickets con ticket principal.
+- Solicitudes individuales o agrupadas de asociacion con aprobacion del Admin Area.
+- Cierre propagado de tickets asociados.
+- Flujo Operario: En Proceso, Realizado, evidencias y devolucion.
+- Auditoria del Admin Area antes de completar tickets operativos.
+- Evidencias y archivos adjuntos.
+- Respuesta final visible al solicitante.
+- Correos de creacion, cierre, cancelacion, devolucion y vencimiento de SLA.
+- SLA por prioridad calculado en jornada laboral colombiana.
+- Calendario de festivos colombianos y dias institucionales.
+- Alertas de incidencias generales por topico.
+- Reportes de tickets, progreso, topicos, colaboradores y solicitantes frecuentes.
+- Exportacion de reportes a Excel, CSV y PDF.
+- Interfaz responsive para computador, tablet y movil.
+
+2. ESTIMACION DE ESFUERZO
+
+Analisis funcional y levantamiento:                         24 horas
+Backend Laravel, modelos, servicios y reglas:               150 horas
+Frontend Blade, Bootstrap, modales y responsive:              90 horas
+Roles, permisos, areas y regionales:                          38 horas
+SLA laboral, festivos y notificaciones:                       32 horas
+Reportes y exportaciones:                                     30 horas
+Pruebas automatizadas y regresion:                            48 horas
+Documentacion tecnica y manuales:                             24 horas
+Puesta en marcha y configuracion inicial:                     24 horas
+
+Esfuerzo estimado total:                                     460 horas
+
+3. VALOR REFERENCIAL DE IMPLEMENTACION
+
+Escenario economico, tarifa de referencia COP 80.000/hora:   $36.800.000
+Escenario recomendado, tarifa de referencia COP 110.000/hora: $50.600.000
+Escenario especializado, tarifa de referencia COP 150.000/hora: $69.000.000
+
+VALOR RECOMENDADO PARA PRESENTAR:
+
+$50.600.000 COP + impuestos aplicables
+
+Este valor corresponde a una implementacion completa, pruebas, documentacion y puesta en marcha de la plataforma descrita.
+
+4. OPCIONES COMERCIALES
+
+Opcion A - Implementacion base:                              $36.800.000 COP
+Incluye configuracion funcional, roles principales, tickets, asignaciones, SLA y reportes basicos.
+
+Opcion B - Implementacion completa recomendada:              $50.600.000 COP
+Incluye todo el alcance descrito, asociaciones de tickets, Operario, auditoria, festivos, notificaciones, reportes, pruebas y documentacion.
+
+Opcion C - Implementacion institucional avanzada:            $69.000.000 COP
+Incluye el alcance completo, parametrizacion avanzada, acompanamiento de migracion, capacitacion ampliada, ajustes de integracion y soporte de salida a produccion.
+
+5. COSTOS RECURRENTES NO INCLUIDOS
+
+- Hosting o servidor de produccion.
+- Dominio y certificado SSL si son contratados externamente.
+- Servicio SMTP o proveedor de correo.
+- Almacenamiento de evidencias en Google Drive, S3 u otro proveedor.
+- Soporte mensual posterior a la garantia.
+- Integraciones con sistemas externos no descritas en el alcance.
+- Carga o depuracion masiva de datos historicos, salvo que se cotice aparte.
+
+6. SOPORTE Y GARANTIA SUGERIDOS
+
+Garantia de estabilizacion: 30 dias posteriores a la puesta en produccion.
+Incluye correccion de errores reproducibles del alcance entregado.
+
+Soporte mensual opcional:
+
+- Basico, hasta 10 horas:                         $1.100.000 COP/mes
+- Operativo, hasta 20 horas:                      $2.000.000 COP/mes
+- Institucional, hasta 40 horas:                  $3.600.000 COP/mes
+
+7. FORMA DE PAGO SUGERIDA
+
+- 30% al iniciar el proyecto.
+- 40% al entregar la version funcional para pruebas.
+- 30% al realizar la puesta en produccion.
+
+8. SUPUESTOS
+
+- El cliente suministra reglas institucionales, usuarios iniciales y responsables de areas.
+- El cliente define el proveedor de correo y almacenamiento de evidencias.
+- La aplicacion se implementa sobre la infraestructura disponible del cliente o un servidor contratado.
+- Los festivos nacionales se cargan automaticamente y los dias institucionales se registran con el administrador.
+- El valor es referencial y debe ajustarse despues de validar integraciones, migracion de datos, volumen de usuarios y requisitos de soporte.
+
+9. VIGENCIA
+
+Este presupuesto referencial tiene una vigencia sugerida de 30 dias calendario y debe formalizarse mediante propuesta comercial o contrato.
+
+NOTA
+
+Este documento es una estimacion comercial, no una factura ni una cotizacion contractual definitiva. Los valores pueden variar por impuestos, alcance final, integraciones, infraestructura y condiciones de soporte.

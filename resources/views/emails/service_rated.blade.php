@@ -6,14 +6,22 @@
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
         .header { background-color: #e9ecef; padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+        .header-logo { display: block; margin: 0 auto 8px; height: 56px; width: auto; }
         .content { padding: 20px; }
         .rating { color: #ffc107; font-size: 1.5em; }
         .footer { margin-top: 20px; font-size: 0.8em; text-align: center; color: #777; }
     </style>
 </head>
 <body>
+    @php
+        $logoPath = public_path('img/logomsula.png');
+        $logoSrc = (isset($message) && file_exists($logoPath))
+            ? $message->embed($logoPath)
+            : asset('img/logomsula.png');
+    @endphp
     <div class="container">
         <div class="header">
+            <img src="{{ $logoSrc }}" alt="Mesa de Servicio" class="header-logo">
             <h2>Nueva Calificación Recibida</h2>
         </div>
         <div class="content">

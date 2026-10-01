@@ -38,6 +38,15 @@ class Program extends Model
     }
 
     /**
+     * Courses linked through pivot table (many-to-many).
+     */
+    public function linkedCourses()
+    {
+        return $this->belongsToMany(Course::class, 'course_program', 'program_id', 'course_id')
+            ->withTimestamps();
+    }
+
+    /**
      * Get tickets for this program
      */
     public function tickets()

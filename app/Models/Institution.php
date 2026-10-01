@@ -35,5 +35,10 @@ class Institution extends Model
     {
         return $this->hasMany(Ticket::class, 'institution_id', 'institution_id');
     }
+
+    public function requestTypeRegionalAssignments()
+    {
+        return $this->hasMany(RequestTypeRegionalAssignment::class, 'institution_id', 'institution_id');
+    }
 }
 

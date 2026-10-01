@@ -1,4 +1,4 @@
-# Manual Técnico - Sistema A-DDIE
+# Manual Técnico - Sistema Virtual Center
 ## Documentación para Desarrolladores
 
 ---
@@ -27,7 +27,7 @@
 
 ### Descripción del Proyecto
 
-**Nombre**: A-DDIE (Analysis, Design, Development, Implementation, Evaluation)  
+**Nombre**: Virtual Center (metodología base ADDIE)  
 **Versión**: 1.0  
 **Framework**: Laravel 10.x  
 **PHP**: 8.4.13  
@@ -48,7 +48,9 @@ Sistema de gestión de servicios educativos que integra la metodología ADDIE co
 - ✅ Reportes exportables a CSV
 - ✅ Dashboard con métricas y gráficos (Chart.js)
 - ✅ Paginación de 10 items por página
-- ✅ Roles y permisos (Admin, Monitor, Contributor, Requester)
+- ✅ Roles y permisos (Super Admin Tecnico, Admin, Monitor, Contributor, Operario, Requester, Admin Área)
+    - ✅ Seguimiento público de tickets (Unauthenticated)
+    - ✅ Carga de imágenes directas vía Rich Text Editor
     - ✅ **Notificaciones por Correo** (Cierre de ticket y Reporte de calificación)
 
 ---
@@ -196,13 +198,29 @@ DB_PASSWORD=tu_contraseña
     MAIL_FROM_NAME="${APP_NAME}"
 ```
 
-### 5. Crear Base de Datos
+### 5. Configurar CORS (Opcional)
 
-```sql
-CREATE DATABASE addie_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+El archivo `config/cors.php` ahora lee variables de entorno para su configuración. Al ser una aplicación del lado del servidor (Laravel Blade), no deberías permitir todos los orígenes. Es recomendable restringir al dominio específico de la aplicación:
+
+```env
+CORS_ALLOWED_ORIGINS=https://tudominio.com
+CORS_ALLOWED_METHODS=GET,POST,PUT,PATCH,DELETE
+CORS_ALLOWED_HEADERS=Content-Type,Authorization,X-Requested-With
+CORS_EXPOSED_HEADERS=
+CORS_MAX_AGE=86400
+CORS_SUPPORTS_CREDENTIALS=true
 ```
 
-### 6. Ejecutar Migraciones
+- `CORS_ALLOWED_ORIGINS`: Orígenes permitidos separados por coma. **No uses `*` en producción**; especifica solo el dominio de la aplicación.
+- `CORS_SUPPORTS_CREDENTIALS`: `true` si se envían cookies/headers de autenticación entre dominios.
+
+### 6. Crear Base de Datos
+
+```sql
+CREATE DATABASE virtual_center_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 7. Ejecutar Migraciones
 
 ```bash
 # Ejecutar todas las migraciones
@@ -212,7 +230,7 @@ php artisan migrate
 php artisan migrate:fresh
 ```
 
-### 7. Ejecutar Seeders (Opcional)
+### 8. Ejecutar Seeders (Opcional)
 
 ```bash
 # Ejecutar todos los seeders
@@ -223,7 +241,7 @@ php artisan db:seed --class=RequestTypeSeeder
 php artisan db:seed --class=TestUsersSeeder
 ```
 
-### 8. Configurar Permisos
+### 9. Configurar Permisos
 
 ```bash
 # Linux/Mac
@@ -234,7 +252,7 @@ chown -R www-data:www-data storage bootstrap/cache
 # No requiere cambios de permisos generalmente
 ```
 
-### 9. Iniciar Servidor de Desarrollo
+### 10. Iniciar Servidor de Desarrollo
 
 ```bash
 php artisan serve
@@ -347,6 +365,8 @@ Asignaciones de colaboradores a tickets (sistema multi-mediador).
 - `job_position_id` (FK → job_positions)
 - `status` (active, removed)
 - `assigned_at`
+- `assigned_by` (FK -> users): usuario que realizó la asignación
+- `returned_alert_read_at`: marca de lectura de la alerta de devolución
 
 #### 4. `ticket_progress`
 Historial de avances de tickets.
@@ -364,7 +384,7 @@ Roles del sistema.
 
 **Campos clave**:
 - `role_id` (PK)
-- `role_name` (Admin, Monitor, Contributor, Requester)
+- `role_name` (Super Admin Tecnico, Admin, Monitor, Contributor, Requester)
 - `is_active`
 
 #### 6. `job_positions`
@@ -400,6 +420,12 @@ Tareas del proyecto (Kanban).
 - `description`
 - `status` (to_do, in_progress, done)
 - `assigned_to` (FK → users)
+
+#### 9. `ticket_evidences` & `app_settings`
+Evidencias vinculadas al editor de texto enriquecido (imágenes pegadas inline). Las rutas del directorio físico de almacenamiento son configuradas en `app_settings` y controladas por el Super Admin Tecnico.
+
+#### 10. `departments` & `areas`
+Clasificación organizacional de recursos conectada a los `request_types`.
 
 ### Migraciones Importantes
 
@@ -531,7 +557,7 @@ public function removeAssignment($assignmentId)
 // Establecer prioridad
 public function setPriority(Request $request, $id)
 
-// Cerrar ticket (validaciones estrictas)
+// Cerrar ticket (validaciones estrictas, aplicable también al Contributor)
 public function close(Request $request, $id)
 
 // Reabrir ticket
@@ -546,7 +572,7 @@ public function rate(Request $request, $id)
 // Requisitos para marcar como "Completado":
 1. progress_percentage == 100
 2. current_phase in ['Implementation', 'Evaluation']
-3. resource_link != null
+3. resource_link != null o evidencia gráfica provista
 ```
 
 ### ContributorController
@@ -562,8 +588,11 @@ public function dashboard()
 // Ver ticket asignado
 public function show($id)
 
-// Registrar avance (progreso acumulativo)
+// Registrar avance (progreso acumulativo y metadatos de evidencia ricos)
 public function storeProgress(Request $request, $id)
+
+// Cierre autogestionado por el colaborador con base en la fase ADDIE
+public function closeTicket(Request $request, $id)
 ```
 
 **Lógica de progreso acumulativo**:
@@ -854,6 +883,17 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
 4. Puede registrar avances
 5. Admin puede remover del equipo (status = 'removed')
 
+### Funcionalidades técnicas nuevas
+
+- `BusinessHoursService` calcula SLA con jornada laboral colombiana de lunes a viernes, 07:00-17:00.
+- `holidays` almacena festivos nacionales y días institucionales.
+- `TicketClosurePropagationService` propaga cierres desde tickets principales a asociados abiertos.
+- `ticket_association_requests` gestiona solicitudes individuales o agrupadas de asociación.
+- `ticket_join_requests` gestiona solicitudes de Contributors para unirse a equipos.
+- `TicketResponseOverdue` notifica tickets fuera de SLA y `response_overdue_notified_at` evita duplicados.
+- `request_types.incident_*` controla incidencias generales que bloquean nuevas solicitudes por tópico.
+- `FinalTicketEvidenceService` centraliza evidencias anexadas durante el cierre.
+
 ### 2. Progreso Acumulativo
 
 **Concepto**: El progreso es acumulativo, no incremental.
@@ -1047,3 +1087,15 @@ tail -f storage/logs/laravel.log
 ---
 
 **Fin del Manual Técnico**
+
+<!-- ACTUALIZACION_JUNIO_2026 -->
+## Novedades Funcionales (Junio 2026)
+
+- Carga masiva CSV reforzada con lectura UTF-8 y manejo explicito de comillas dobles como encapsulador de texto.
+- Validacion estructural por fila en importaciones CSV para detectar columnas rotas por delimitador/comillas antes de escribir en BD.
+- Mejora de importacion de cursos para relacion muchos-a-muchos con programas mediante tabla pivote course_program (manteniendo compatibilidad con program_id legado).
+- Carga masiva de cursos con soporte de multiples referencias: program_id/program_ids, program_code/program_codes y program_name/program_names.
+- Resolucion de ambiguedades de programas mejorada con filtros por faculty_id/faculty_name e institution_id/institution_name.
+- Cuando program_code/program_name es duplicado y no se envia desambiguacion, la importacion puede vincular el curso a todos los programas coincidentes.
+- Formularios de crear/editar cursos mejorados con selector multiple con busqueda (Tom Select), conservando compatibilidad del campo program_id.
+

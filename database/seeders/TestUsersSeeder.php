@@ -59,8 +59,8 @@ class TestUsersSeeder extends Seeder
             );
         }
 
-        $this->command->info('✅ Usuarios de prueba creados exitosamente!');
-        $this->command->info('📧 Email: admin@test.com | colaborador@test.com | monitor@test.com | solicitante@test.com');
-        $this->command->info('🔑 Password: password (para todos)');
+        $this->command->info('Usuarios de prueba creados exitosamente!');
+        $this->command->info('Email: admin@test.com | colaborador@test.com | monitor@test.com | solicitante@test.com');
+        $this->command->info('Password: password (para todos)');
     }
 }

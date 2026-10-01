@@ -14,7 +14,7 @@ class CreatePepitaAdmin extends Seeder
         $adminRole = UserRole::where('role_name', 'Admin')->first();
 
         if (!$adminRole) {
-            $this->command->error('❌ Rol Admin no encontrado. Ejecuta primero: php artisan db:seed --class=UserRoleSeeder');
+            $this->command->error('Rol Admin no encontrado. Ejecuta primero: php artisan db:seed --class=UserRoleSeeder');
             return;
         }
 
@@ -28,7 +28,7 @@ class CreatePepitaAdmin extends Seeder
             ]
         );
 
-        $this->command->info('✅ Usuario admin creado/actualizado: pepita@prueba.edu.co');
-        $this->command->info('🔑 Contraseña: password');
+        $this->command->info('Usuario admin creado/actualizado: pepita@prueba.edu.co');
+        $this->command->info('Contraseña: password');
     }
 }

@@ -6,12 +6,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Cache Store
+    | Almacén de Caché por Defecto
     |--------------------------------------------------------------------------
     |
-    | This option controls the default cache connection that gets used while
-    | using this caching library. This connection is used when another is
-    | not explicitly specified when executing a given caching function.
+    | Esta opción controla la conexión de caché predeterminada que se usa
+    | cuando no se especifica otra explícitamente al ejecutar una función de caché.
     |
     */
 
@@ -19,14 +18,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cache Stores
+    | Almacenes de Caché
     |--------------------------------------------------------------------------
     |
-    | Here you may define all of the cache "stores" for your application as
-    | well as their drivers. You may even define multiple stores for the
-    | same cache driver to group types of items stored in your caches.
+    | Aquí puede definir todos los "almacenes" de caché de la aplicación y
+    | sus drivers. Puede definir múltiples almacenes para el mismo driver.
     |
-    | Supported drivers: "apc", "array", "database", "file",
+    | Drivers soportados: "apc", "array", "database", "file",
     |         "memcached", "redis", "dynamodb", "octane", "null"
     |
     */
@@ -96,7 +94,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cache Key Prefix
+    | Prefijo de Clave de Caché
     |--------------------------------------------------------------------------
     |
     | When utilizing the APC, database, memcached, Redis, or DynamoDB cache

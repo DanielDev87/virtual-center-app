@@ -4,13 +4,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Third Party Services
+    | Servicios de Terceros
     |--------------------------------------------------------------------------
     |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
+    | Este archivo almacena las credenciales para servicios de terceros como
+    | Mailgun, Postmark, AWS y otros. Es la ubicación estándar para este tipo
+    | de información, permitiendo que los paquetes la encuentren fácilmente.
     |
     */
 
@@ -29,6 +28,16 @@ return [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
+
+    'google_drive' => [
+        'enabled' => env('GOOGLE_DRIVE_ENABLED', false),
+        'client_id' => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+        'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+        'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
+        'share_publicly' => env('GOOGLE_DRIVE_SHARE_PUBLICLY', true),
+        'verify_ssl' => env('GOOGLE_DRIVE_VERIFY_SSL', true),
     ],
 
 ];

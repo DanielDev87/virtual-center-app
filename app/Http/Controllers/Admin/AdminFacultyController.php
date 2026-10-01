@@ -9,10 +9,25 @@ use Illuminate\Http\Request;
 
 class AdminFacultyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $faculties = Faculty::with('institution')->latest()->paginate(15);
-        return view('admin.academic.faculties.index', compact('faculties'));
+        $query = Faculty::with('institution');
+
+        if ($request->filled('search')) {
+            $query->where('faculty_name', 'like', "%{$request->search}%");
+        }
+
+        if ($request->filled('institution_id')) {
+            $query->where('institution_id', $request->institution_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        $faculties = $query->orderBy('faculty_name')->paginate(15)->withQueryString();
+        $institutions = Institution::where('is_active', true)->orderBy('institution_name')->get();
+        return view('admin.academic.faculties.index', compact('faculties', 'institutions'));
     }
 
     public function create()

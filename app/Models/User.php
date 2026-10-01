@@ -17,13 +17,16 @@ class User extends Authenticatable
 
     protected $fillable = [
         'user_name',
+        'document_number',
+        'institution_link',
         'user_email',
         'password',
         'user_phone',
         'user_bio',
         'user_avatar',
         'role_id',
-        'is_active'
+        'is_active',
+        'area_id'
     ];
 
     protected $hidden = [
@@ -37,6 +40,11 @@ class User extends Authenticatable
     ];
 
     // Relaciones
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'area_id', 'area_id');
+    }
+
     public function role()
     {
         return $this->belongsTo(UserRole::class, 'role_id', 'role_id');
@@ -73,6 +81,12 @@ class User extends Authenticatable
     public function mediationForms()
     {
         return $this->hasMany(MediationForm::class, 'created_by', 'user_id');
+    }
+
+    public function assignedRequestTypes()
+    {
+        return $this->belongsToMany(RequestType::class, 'request_type_user', 'user_id', 'request_type_id')
+            ->withTimestamps();
     }
 }
 

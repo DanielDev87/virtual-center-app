@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Mail\TicketAssigned;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 
 class TicketAssignment extends Model
 {
@@ -17,11 +19,60 @@ class TicketAssignment extends Model
         'status',
         'notes',
         'assigned_at',
+        'returned_alert_read_at',
     ];
 
     protected $casts = [
         'assigned_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (self $assignment): void {
+            self::notifyAssignedCollaborator($assignment);
+        });
+
+        static::updated(function (self $assignment): void {
+            if (!$assignment->wasChanged('status')) {
+                return;
+            }
+
+            if (($assignment->status ?? null) !== 'active') {
+                return;
+            }
+
+            if (($assignment->getOriginal('status') ?? null) === 'active') {
+                return;
+            }
+
+            self::notifyAssignedCollaborator($assignment);
+        });
+    }
+
+    protected static function notifyAssignedCollaborator(self $assignment): void
+    {
+        if (($assignment->status ?? null) !== 'active') {
+            return;
+        }
+
+        $assignment->loadMissing(['ticket.requestType', 'mediator']);
+
+        $recipient = $assignment->mediator;
+        if (!$recipient || empty($recipient->user_email)) {
+            return;
+        }
+
+        $roleName = $recipient->role?->role_name;
+        if (!is_string($roleName) || !str_contains(strtolower($roleName), 'contributor')) {
+            return;
+        }
+
+        try {
+            Mail::to($recipient->user_email)->send(new TicketAssigned($assignment));
+        } catch (\Throwable $e) {
+            \Log::error('Error sending assignment email: ' . $e->getMessage());
+        }
+    }
 
     /**
      * Get the ticket for this assignment

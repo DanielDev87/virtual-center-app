@@ -4,12 +4,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
+    | Configuración de Intercambio de Recursos de Origen Cruzado (CORS)
     |--------------------------------------------------------------------------
     |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. You are free to adjust these settings as needed.
+    | Aquí puede configurar los ajustes para el intercambio de recursos de
+    | origen cruzado (CORS). Esto determina qué operaciones entre orígenes
+    | pueden ejecutarse en los navegadores web.
     |
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
@@ -17,19 +17,19 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => explode(',', env('CORS_ALLOWED_METHODS', '*')),
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', '*')),
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => explode(',', env('CORS_ALLOWED_HEADERS', '*')),
 
-    'exposed_headers' => [],
+    'exposed_headers' => explode(',', env('CORS_EXPOSED_HEADERS', '')),
 
-    'max_age' => 0,
+    'max_age' => env('CORS_MAX_AGE', 0),
 
-    'supports_credentials' => false,
+    'supports_credentials' => env('CORS_SUPPORTS_CREDENTIALS', false),
 
 ];
 

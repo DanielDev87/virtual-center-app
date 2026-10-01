@@ -9,12 +9,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Log Channel
+    | Canal de Log por Defecto
     |--------------------------------------------------------------------------
     |
-    | This option defines the default log channel that gets used when writing
-    | messages to the logs. The name specified in this option should match
-    | one of the channels defined in the "channels" configuration array.
+    | Esta opción define el canal de log predeterminado para escribir mensajes.
+    | El nombre especificado debe coincidir con uno de los canales definidos
+    | en el array de configuración "channels".
     |
     */
 
@@ -22,13 +22,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Deprecations Log Channel
+    | Canal de Log de Deprecaciones
     |--------------------------------------------------------------------------
     |
-    | This option controls the log channel that should be used to log warnings
-    | regarding PHP's "deprecated" features and other deprecation warnings
-    | that are displayed in the error log. This allows you to control your
-    | log channels and the severity of deprecation messages.
+    | Esta opción controla el canal de log para registrar advertencias sobre
+    | características "obsoletas" de PHP y otras advertencias de deprecación.
     |
     */
 
@@ -39,14 +37,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Log Channels
+    | Canales de Log
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the log channels for your application. Out of
-    | the box, Laravel uses the Monolog PHP logging library. This gives
-    | you a variety of powerful log handlers / formatters to utilize.
+    | Aquí puede configurar los canales de log de la aplicación. Laravel
+    | usa la librería Monolog, que ofrece potentes manejadores y formateadores.
     |
-    | Available Drivers: "single", "daily", "slack", "syslog",
+    | Drivers disponibles: "single", "daily", "slack", "syslog",
     |                    "errorlog", "monolog",
     |                    "custom", "stack"
     |

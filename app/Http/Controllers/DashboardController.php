@@ -7,15 +7,41 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\RequestType;
+use App\Models\TicketAssignment;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     /**
+     * Calcular el progreso automático desde tareas de sprint (% completadas sobre el total vinculado a sprints).
+     */
+    private function computeAutoProgress($ticket): int
+    {
+        $sprintTasks = $ticket->sprints->flatMap(fn($sprint) => $sprint->tasks);
+        $total = $sprintTasks->count();
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        $done = $sprintTasks->where('status', 'done')->count();
+        return (int) round(($done / $total) * 100);
+    }
+
+    /**
      * Mostrar dashboard principal para admin
      */
-    public function index()
+    public function index(Request $request)
     {
+        // Promedio de progreso automático basado en tareas de sprint para tickets no cancelados.
+        $ticketsForProgress = Ticket::with('sprints.tasks')
+            ->where('status', '!=', 4)
+            ->get();
+
+        $avgProgress = $ticketsForProgress->count() > 0
+            ? $ticketsForProgress->map(fn($ticket) => $this->computeAutoProgress($ticket))->avg()
+            : 0;
+
         // Estadísticas generales
         $stats = [
             'total_tickets' => Ticket::count(),
@@ -24,14 +50,29 @@ class DashboardController extends Controller
             'completed_tickets' => Ticket::where('status', 3)->count(),
             'total_users' => User::where('is_active', true)->count(),
             'total_roles' => UserRole::where('is_active', true)->count(),
-            'avg_progress' => Ticket::where('status', '!=', 4)->avg('progress_percentage') ?? 0,
-            'high_priority' => Ticket::where('priority', 'high')->whereIn('status', [1, 2])->count(),
+            'avg_progress' => $avgProgress,
+            'high_priority' => Ticket::whereIn('priority', [3, 4])->whereIn('status', [1, 2])->count(),
         ];
 
         // Tickets recientes
-        $recentTickets = Ticket::with(['requester', 'mediator', 'requestType'])
+        $recentTickets = Ticket::with(['requester', 'mediator', 'requestType', 'sprints.tasks'])
+            ->orderByDesc('priority')
             ->latest()
             ->paginate(10);
+
+        $recentTickets->getCollection()->transform(function ($ticket) {
+            $ticket->auto_progress = $this->computeAutoProgress($ticket);
+            return $ticket;
+        });
+
+        $returnedTickets = TicketAssignment::with(['ticket.requestType', 'ticket.mediator'])
+            ->where('assigned_by', $request->user()->user_id)
+            ->where('status', 'removed')
+            ->where('notes', 'like', 'Devuelto por operario:%')
+            ->whereNull('returned_alert_read_at')
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
 
         // Tickets por estado
         $ticketsByStatus = [
@@ -50,6 +91,51 @@ class DashboardController extends Controller
             ->mapWithKeys(function($item) {
                 return [$item->requestType->type_name ?? 'Sin tipo' => $item->count];
             });
+
+        // Tendencia mensual por tópico (rango configurable: 3, 6 o 12 meses).
+        $allowedTopicTrendMonths = [3, 6, 12];
+        $topicTrendMonths = (int) $request->query('topic_trend_months', 6);
+        if (!in_array($topicTrendMonths, $allowedTopicTrendMonths, true)) {
+            $topicTrendMonths = 6;
+        }
+
+        $monthKeys = collect(range(0, $topicTrendMonths - 1))
+            ->map(fn ($offset) => now()->copy()->subMonths(($topicTrendMonths - 1) - $offset)->startOfMonth()->format('Y-m'));
+
+        $topicTrendLabels = collect(range(0, $topicTrendMonths - 1))
+            ->map(fn ($offset) => now()->copy()->subMonths(($topicTrendMonths - 1) - $offset)->startOfMonth()->format('m/Y'));
+
+        $topicMonthlyRaw = Ticket::leftJoin('request_types', 'tickets.request_type_id', '=', 'request_types.type_id')
+            ->selectRaw("DATE_FORMAT(tickets.created_at, '%Y-%m') as month_key")
+            ->selectRaw("COALESCE(request_types.type_name, 'Sin tópico') as topic_name")
+            ->selectRaw('COUNT(*) as total')
+            ->whereDate('tickets.created_at', '>=', now()->copy()->subMonths($topicTrendMonths - 1)->startOfMonth())
+            ->groupBy('month_key', 'topic_name')
+            ->orderBy('month_key')
+            ->get();
+
+        $topTopicNames = $topicMonthlyRaw
+            ->groupBy('topic_name')
+            ->map(fn ($rows) => (int) $rows->sum('total'))
+            ->sortDesc()
+            ->take(5)
+            ->keys()
+            ->values();
+
+        $topicTrendDatasets = $topTopicNames->map(function ($topicName) use ($topicMonthlyRaw, $monthKeys) {
+            $data = $monthKeys->map(function ($monthKey) use ($topicMonthlyRaw, $topicName) {
+                $match = $topicMonthlyRaw->first(function ($row) use ($topicName, $monthKey) {
+                    return $row->topic_name === $topicName && $row->month_key === $monthKey;
+                });
+
+                return $match ? (int) $match->total : 0;
+            })->values();
+
+            return [
+                'label' => $topicName,
+                'data' => $data,
+            ];
+        })->values();
 
         // Tickets por fase ADDIE
         $ticketsByPhase = Ticket::select('current_phase', DB::raw('count(*) as count'))
@@ -82,7 +168,7 @@ class DashboardController extends Controller
 
 
         // Tickets urgentes
-        $urgentTickets = Ticket::where('priority', 'high')
+        $urgentTickets = Ticket::whereIn('priority', [3, 4])
             ->whereIn('status', [1, 2])
             ->with(['requester', 'requestType'])
             ->take(5)
@@ -122,6 +208,7 @@ class DashboardController extends Controller
         return view('dashboard.index', compact(
             'stats', 
             'recentTickets', 
+            'returnedTickets',
             'ticketsByStatus', 
             'ticketsByType',
             'ticketsByPhase',
@@ -130,8 +217,27 @@ class DashboardController extends Controller
             'fastestTickets',
             'averageRating',
             'ratingDistribution',
-            'avgCompletionTime'
+            'avgCompletionTime',
+            'topicTrendLabels',
+            'topicTrendDatasets',
+            'topicTrendMonths',
+            'allowedTopicTrendMonths'
         ));
+    }
+
+    public function markReturnedAlertAsRead(Request $request, $assignmentId)
+    {
+        $assignment = TicketAssignment::where('assignment_id', $assignmentId)
+            ->where('assigned_by', $request->user()->user_id)
+            ->where('status', 'removed')
+            ->where('notes', 'like', 'Devuelto por operario:%')
+            ->firstOrFail();
+
+        $assignment->update(['returned_alert_read_at' => now()]);
+
+        return $request->user()->role?->role_name === 'Admin Área'
+            ? redirect()->route('area-admin.tickets.show', $assignment->ticket_id)
+            : redirect()->route('admin.tickets.show', $assignment->ticket_id);
     }
 }
 
