@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -145,6 +147,69 @@ class Ticket extends Model
     public function associationRequests()
     {
         return $this->hasMany(TicketAssociationRequest::class, 'parent_ticket_id', 'ticket_id');
+    }
+
+    /**
+     * Filtros combinables para listados de tickets (HU-040).
+     * Se encadena con AND sobre la consulta ya restringida por rol/área,
+     * por lo que solo reduce resultados, nunca los amplía.
+     */
+    public function scopeApplyFilters(Builder $query, array $filters): Builder
+    {
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $query->where('tickets.status', (int) $filters['status']);
+        }
+
+        if (!empty($filters['request_type_id'])) {
+            $query->where('tickets.request_type_id', (int) $filters['request_type_id']);
+        }
+
+        if (!empty($filters['mediator_id'])) {
+            $mediatorId = (int) $filters['mediator_id'];
+            $query->where(function (Builder $q) use ($mediatorId) {
+                $q->where('tickets.mediator_id', $mediatorId)
+                    ->orWhereHas('assignments', function ($a) use ($mediatorId) {
+                        $a->where('user_id', $mediatorId)->where('status', 'active');
+                    });
+            });
+        }
+
+        $from = self::parseFilterDate($filters['date_from'] ?? null);
+        $to = self::parseFilterDate($filters['date_to'] ?? null);
+
+        if ($from && $to && $from->greaterThan($to)) {
+            [$from, $to] = [$to, $from];
+        }
+        if ($from) {
+            $query->where('tickets.created_at', '>=', $from->startOfDay());
+        }
+        if ($to) {
+            $query->where('tickets.created_at', '<=', $to->endOfDay());
+        }
+
+        $search = mb_substr(trim((string) ($filters['search'] ?? '')), 0, 100);
+        if ($search !== '') {
+            $like = '%' . addcslashes($search, '%_\\') . '%';
+            $query->where(function (Builder $q) use ($like) {
+                $q->where('tickets.ticket_number', 'like', $like)
+                    ->orWhere('tickets.title', 'like', $like);
+            });
+        }
+
+        return $query;
+    }
+
+    private static function parseFilterDate($value): ?Carbon
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        try {
+            return Carbon::createFromFormat('Y-m-d', (string) $value);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /**

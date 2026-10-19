@@ -351,19 +351,8 @@ class AreaAdminController extends Controller
         }
 
         $query = $this->areaTicketsQuery()
-            ->with(['requester', 'mediator', 'requestType', 'sprints.tasks']);
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('request_type_id')) {
-            $query->where('request_type_id', $request->request_type_id);
-        }
-
-        if ($request->filled('mediator_id')) {
-            $query->where('mediator_id', $request->mediator_id);
-        }
+            ->with(['requester', 'mediator', 'requestType', 'sprints.tasks'])
+            ->applyFilters($request->only(['status', 'request_type_id', 'mediator_id', 'date_from', 'date_to', 'search']));
 
         $areaTopics = $this->visibleAreaRequestTypesQuery()
             ->get(['type_id', 'type_name']);
