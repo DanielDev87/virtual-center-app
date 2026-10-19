@@ -104,4 +104,14 @@ class RequestType extends Model
     {
         return $this->hasMany(RequestTypeRegionalAssignment::class, 'request_type_id', 'type_id');
     }
+
+    /**
+     * Preguntas adicionales configuradas para este tópico (HU-047).
+     */
+    public function questions()
+    {
+        return $this->hasMany(RequestTypeQuestion::class, 'request_type_id', 'type_id')
+            ->orderBy('sort_order')
+            ->orderBy('question_id');
+    }
 }

@@ -75,6 +75,8 @@ class ServiceManagementController extends Controller
         }
         $requestTypes = $requestTypesQuery->get();
 
+        $requestTypeQuestionsMap = $this->questionsMapFor($requestTypes);
+
         $institutions = $supportsRegionalAssignments
             ? Institution::where('is_active', true)->orderBy('institution_name')->get()
             : collect();
@@ -104,8 +106,9 @@ class ServiceManagementController extends Controller
             ? $businessHours->nextBusinessStart()
             : null;
         
-        return view('service-management.create', compact('requestTypes', 'institutions', 'requestTypeRegionalMap', 'faculties', 'programs', 'courses', 'outsideBusinessHours', 'nextBusinessStart'));
+        return view('service-management.create', compact('requestTypes', 'institutions', 'requestTypeRegionalMap', 'faculties', 'programs', 'courses', 'outsideBusinessHours', 'nextBusinessStart', 'requestTypeQuestionsMap'));
     }
+
 
     /**
      * Guardar nuevo ticket
@@ -153,6 +156,8 @@ class ServiceManagementController extends Controller
             'priority_justification.required' => 'Debes justificar por qué la prioridad es alta o urgente.',
             'priority_justification.min' => 'La justificación de prioridad debe tener mínimo 20 caracteres.',
         ]);
+
+        $questionAnswers = $this->validateQuestionAnswers($request);
 
         $priority = (int) $request->input('priority');
         $priorityJustification = trim((string) $request->input('priority_justification', ''));
@@ -293,6 +298,9 @@ class ServiceManagementController extends Controller
         $richTextStorage = app(LocalRichTextImageStorageService::class);
         $processedDescription = $this->processRichTextDescription($request->description, $ticket, $requesterId, $richTextStorage);
         $finalRequesterInfo = $processedDescription !== '' ? $processedDescription : $sanitizedDescription;
+        foreach ($questionAnswers as $answerRow) {
+            \App\Models\TicketAnswer::create($answerRow + ['ticket_id' => $ticket->ticket_id]);
+        }
         $finalRequesterInfo = $this->appendPriorityJustificationToRequesterInfo($finalRequesterInfo, $priority, $priorityJustification);
 
         $ticket->update([
@@ -337,7 +345,115 @@ class ServiceManagementController extends Controller
             return back()->with('new_ticket', $ticket);
         }
     }
+        /**
+     * Preguntas activas por tópico, para mostrarlas en el formulario (HU-047).
+     */
+    private function questionsMapFor($requestTypes)
+    {
+        if (!Schema::hasTable('request_type_questions') || $requestTypes->isEmpty()) {
+            return collect();
+        }
 
+        return \App\Models\RequestTypeQuestion::whereIn('request_type_id', $requestTypes->pluck('type_id'))
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('question_id')
+            ->get()
+            ->groupBy('request_type_id')
+            ->map(fn ($questions) => $questions->map(fn ($question) => [
+                'id' => (int) $question->question_id,
+                'label' => $question->label,
+                'type' => $question->field_type,
+                'required' => (bool) $question->is_required,
+                'options' => $question->options ?? [],
+            ])->values()->all());
+    }
+
+    /**
+     * Valida de nuevo en el servidor las respuestas a las preguntas del tópico elegido (HU-047).
+     * Solo se consideran las preguntas activas de ese tópico; cualquier otra respuesta se ignora.
+     * Devuelve las filas listas para guardar en ticket_answers.
+     */
+    private function validateQuestionAnswers(Request $request): array
+    {
+        if (!Schema::hasTable('request_type_questions')) {
+            return [];
+        }
+
+        $questions = \App\Models\RequestTypeQuestion::where('request_type_id', (int) $request->input('request_type_id'))
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('question_id')
+            ->get();
+
+        if ($questions->isEmpty()) {
+            return [];
+        }
+
+        $rules = [];
+        $attributes = [];
+
+        foreach ($questions as $question) {
+            $key = 'answers.' . $question->question_id;
+            $fieldRules = [$question->is_required ? 'required' : 'nullable'];
+
+            switch ($question->field_type) {
+                case 'textarea':
+                    $fieldRules[] = 'string';
+                    $fieldRules[] = 'max:2000';
+                    break;
+                case 'number':
+                    $fieldRules[] = 'numeric';
+                    break;
+                case 'date':
+                    $fieldRules[] = 'date_format:Y-m-d';
+                    break;
+                case 'select':
+                    $fieldRules[] = Rule::in($question->options ?? []);
+                    break;
+                default:
+                    $fieldRules[] = 'string';
+                    $fieldRules[] = 'max:500';
+            }
+
+            $rules[$key] = $fieldRules;
+            $attributes[$key] = $question->label;
+        }
+
+        $messages = [
+            'answers.*.required' => 'La pregunta ":attribute" es obligatoria.',
+            'answers.*.string' => 'La respuesta a ":attribute" no es válida.',
+            'answers.*.max' => 'La respuesta a ":attribute" es demasiado larga.',
+            'answers.*.numeric' => 'La respuesta a ":attribute" debe ser un número.',
+            'answers.*.date_format' => 'La respuesta a ":attribute" debe ser una fecha válida.',
+            'answers.*.in' => 'Selecciona una opción válida para ":attribute".',
+        ];
+
+        $validated = \Illuminate\Support\Facades\Validator::make(
+            ['answers' => (array) $request->input('answers', [])],
+            $rules,
+            $messages,
+            $attributes
+        )->validate();
+
+        $rows = [];
+        foreach ($questions as $question) {
+            $value = $validated['answers'][$question->question_id] ?? null;
+            $value = (is_string($value) || is_numeric($value)) ? trim((string) $value) : '';
+
+            if ($value === '') {
+                continue;
+            }
+
+            $rows[] = [
+                'question_id' => (int) $question->question_id,
+                'question_label' => $question->label,
+                'answer_value' => $value,
+            ];
+        }
+
+        return $rows;
+    }
     private function supportsRegionalAssignments(): bool
     {
         return Schema::hasTable('request_type_regional_assignments');
