@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('tickets:notify-overdue')->hourly()->withoutOverlapping();
+        $schedule->command('tickets:notify-overdue')->hourly()->withoutOverlapping();         $schedule->command('tickets:escalate-sla')->hourly()->withoutOverlapping();
     }
 
     /**
