@@ -106,6 +106,7 @@
         </div>
     </div>
 
+    @include('partials.sla-risk-cards', ['slaSummary' => $slaSummary, 'slaRoute' => 'area-admin.tickets.index'])
     <!-- Stats cards -->
     <div class="row g-3 mb-4">
         <div class="col-xl-2 col-md-4 col-6">

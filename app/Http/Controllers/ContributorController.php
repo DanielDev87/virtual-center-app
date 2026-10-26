@@ -286,6 +286,7 @@ class ContributorController extends Controller
             ->when($selectedStatus !== null, function ($query) use ($selectedStatus) {
                 $query->where('status', $selectedStatus);
             })
+            ->applyFilters($request->only(['sla']))
             ->with(['requester', 'requestType', 'assignments' => function($q) use ($userId) {
                 $q->where('user_id', $userId);
             }])
@@ -332,7 +333,16 @@ class ContributorController extends Controller
                 return [$item->rating => $item->count];
             });
 
-        return view('contributors.dashboard', compact('tickets', 'stats', 'averageRating', 'ratingDistribution'));
+            $slaSummary = app(\App\Services\SlaRiskService::class)->summarize(
+            Ticket::where(function ($query) use ($userId) {
+                $query->where('mediator_id', $userId)
+                    ->orWhereHas('assignments', function ($q) use ($userId) {
+                        $q->where('user_id', $userId)->where('status', 'active');
+                    });
+            })
+        );
+
+        return view('contributors.dashboard', compact('tickets', 'stats', 'averageRating', 'ratingDistribution', 'slaSummary'));
     }
 
     /**

@@ -196,6 +196,12 @@ class Ticket extends Model
             });
         }
 
+         $slaState = $filters['sla'] ?? null;
+        if (in_array($slaState, \App\Services\SlaRiskService::STATES, true)) {
+            app(\App\Services\SlaRiskService::class)->restrictQuery($query, $slaState);
+        }
+
+
         return $query;
     }
 

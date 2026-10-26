@@ -37,7 +37,7 @@ class AdminTicketController extends Controller
     public function index(Request $request)
     {
         $query = Ticket::with(['requester', 'mediator', 'requestType', 'sprints.tasks'])
-            ->applyFilters($request->only(['status', 'request_type_id', 'mediator_id', 'date_from', 'date_to', 'search']));
+            ->applyFilters($request->only(['status', 'request_type_id', 'mediator_id', 'date_from', 'date_to', 'search', 'sla']));
 
         $requestTypes = RequestType::where('is_active', true)
             ->orderBy('type_name')
