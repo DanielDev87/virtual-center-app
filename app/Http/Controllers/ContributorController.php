@@ -54,7 +54,8 @@ class ContributorController extends Controller
         }
 
         $ticketsQuery = $this->buildTopicQueueQuery($topicIds)
-            ->with(['requester', 'requestType', 'institution', 'mediator.role', 'assignments.mediator.role']);
+            ->with(['requester', 'requestType', 'institution', 'mediator.role', 'assignments.mediator.role'])
+            ->applyFilters($request->only(['date_from', 'date_to', 'search']));
 
         if ($selectedTopicId !== null) {
             $ticketsQuery->where('request_type_id', $selectedTopicId);
@@ -62,7 +63,8 @@ class ContributorController extends Controller
 
         $tickets = $ticketsQuery
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $tickets->getCollection()->transform(function ($ticket) {
             $ticket->pool_available = !$this->ticketHasActiveContributor($ticket);
