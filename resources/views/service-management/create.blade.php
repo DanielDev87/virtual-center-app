@@ -32,6 +32,21 @@
                         </div>
                     </div>
 
+                                        @if($errors->any())
+                    <div class="alert alert-danger">
+                        <strong>No se pudo enviar la solicitud:</strong>
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $formError)
+                                <li>{{ $formError }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    @endif
+                    @if(session('error'))
+                    <div class="alert alert-warning">{{ session('error') }}</div>
+                    @endif
+                    
                     <form method="POST" action="{{ route('service-management.store') }}" id="serviceRequestForm" enctype="multipart/form-data">
                         @csrf
                         
@@ -508,6 +523,11 @@ $(document).ready(function() {
         quill.clipboard.dangerouslyPasteHTML(initialDescription);
     }
     
+        // Mantener el campo oculto de la descripción sincronizado mientras se escribe
+    quill.on('text-change', function () {
+        $('#description').val(quill.getText().trim() === '' ? '' : quill.root.innerHTML);
+    });
+
     // Configuración CSRF
     $.ajaxSetup({
         headers: {
@@ -794,9 +814,13 @@ $(document).ready(function() {
         section.removeClass('d-none');
     }
 
-    $('#request_type_id').on('change', function () {
-        renderTopicQuestions($(this).val());
-    });
+    
+
+        document.getElementById('request_type_id').addEventListener('change', function () {
+        renderTopicQuestions(this.value);
+    });     
+
+    
     renderTopicQuestions($('#request_type_id').val());
 
     if (initialTopic) {
