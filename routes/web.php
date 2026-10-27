@@ -174,6 +174,10 @@ Route::middleware(['auth'])->group(function () {
         // request-types (Tópicos)
         Route::resource('request-types', \App\Http\Controllers\Admin\AdminRequestTypeController::class)->except(['show']);
         
+        Route::post('request-types/{id}/questions', [\App\Http\Controllers\Admin\RequestTypeQuestionController::class, 'store'])->name('request-types.questions.store');
+        Route::put('request-types/{id}/questions/{questionId}', [\App\Http\Controllers\Admin\RequestTypeQuestionController::class, 'update'])->name('request-types.questions.update');
+        Route::delete('request-types/{id}/questions/{questionId}', [\App\Http\Controllers\Admin\RequestTypeQuestionController::class, 'destroy'])->name('request-types.questions.destroy');    
+
         // Gestión de Usuarios
         Route::resource('users', \App\Http\Controllers\AdminUserController::class);
         

@@ -54,7 +54,8 @@ class ContributorController extends Controller
         }
 
         $ticketsQuery = $this->buildTopicQueueQuery($topicIds)
-            ->with(['requester', 'requestType', 'institution', 'mediator.role', 'assignments.mediator.role']);
+            ->with(['requester', 'requestType', 'institution', 'mediator.role', 'assignments.mediator.role'])
+            ->applyFilters($request->only(['date_from', 'date_to', 'search']));
 
         if ($selectedTopicId !== null) {
             $ticketsQuery->where('request_type_id', $selectedTopicId);
@@ -62,7 +63,8 @@ class ContributorController extends Controller
 
         $tickets = $ticketsQuery
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $tickets->getCollection()->transform(function ($ticket) {
             $ticket->pool_available = !$this->ticketHasActiveContributor($ticket);
@@ -284,6 +286,7 @@ class ContributorController extends Controller
             ->when($selectedStatus !== null, function ($query) use ($selectedStatus) {
                 $query->where('status', $selectedStatus);
             })
+            ->applyFilters($request->only(['sla']))
             ->with(['requester', 'requestType', 'assignments' => function($q) use ($userId) {
                 $q->where('user_id', $userId);
             }])
@@ -330,7 +333,16 @@ class ContributorController extends Controller
                 return [$item->rating => $item->count];
             });
 
-        return view('contributors.dashboard', compact('tickets', 'stats', 'averageRating', 'ratingDistribution'));
+            $slaSummary = app(\App\Services\SlaRiskService::class)->summarize(
+            Ticket::where(function ($query) use ($userId) {
+                $query->where('mediator_id', $userId)
+                    ->orWhereHas('assignments', function ($q) use ($userId) {
+                        $q->where('user_id', $userId)->where('status', 'active');
+                    });
+            })
+        );
+
+        return view('contributors.dashboard', compact('tickets', 'stats', 'averageRating', 'ratingDistribution', 'slaSummary'));
     }
 
     /**
