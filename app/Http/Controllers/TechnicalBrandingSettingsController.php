@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
+use App\Services\BrandPaletteService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
@@ -75,6 +76,46 @@ class TechnicalBrandingSettingsController extends Controller
         return back()->with('success', 'Personalizacion de marca guardada correctamente.');
     }
 
+    /**
+     * Guarda la paleta de colores (HU-039). Valida el contraste antes de guardar.
+     */
+    public function updatePalette(Request $request)
+    {
+        $rules = ['palette_enabled' => 'nullable|boolean'];
+        $messages = [];
+
+        foreach (range(1, 6) as $i) {
+            $rules['palette_' . $i] = ['required', 'regex:/^#[0-9a-fA-F]{6}$/'];
+            $messages['palette_' . $i . '.required'] = 'El color ' . $i . ' de la paleta es obligatorio.';
+            $messages['palette_' . $i . '.regex'] = 'El color ' . $i . ' debe tener formato hexadecimal, por ejemplo #06141B.';
+        }
+
+        $validated = $request->validateWithBag('palette', $rules, $messages);
+
+        $palette = array_map(fn ($i) => strtoupper($validated['palette_' . $i]), range(1, 6));
+        $enabled = $request->boolean('palette_enabled');
+
+        if ($enabled) {
+            $result = BrandPaletteService::evaluate($palette);
+
+            if (!$result['ok']) {
+                $suggestionIsReadable = BrandPaletteService::evaluate($result['suggested'])['ok'];
+
+                return back()
+                    ->withInput()
+                    ->withErrors(['contrast' => 'La paleta no se guardó: algunas combinaciones de texto no alcanzan el contraste mínimo WCAG AA (4.5:1).'], 'palette')
+                    ->with('palette_failures', $this->failureMessages($result['failures']))
+                    ->with('palette_suggested', $suggestionIsReadable ? $result['suggested'] : null);
+            }
+        }
+
+        $this->savePalette($palette, $enabled);
+
+        return back()->with('success', $enabled
+            ? 'Paleta guardada y aplicada a la plataforma.'
+            : 'Paleta guardada, pero desactivada: la plataforma conserva su apariencia actual.');
+    }
+
     public function export()
     {
         $settings = [];
@@ -82,6 +123,12 @@ class TechnicalBrandingSettingsController extends Controller
         foreach (self::DEFAULTS as $key => $default) {
             $settings[$key] = AppSetting::getValue($key, $default) ?? $default;
         }
+
+        $paletteConfig = BrandPaletteService::settings();
+        foreach (BrandPaletteService::KEYS as $index => $key) {
+            $settings[$key] = $paletteConfig['palette'][$index];
+        }
+        $settings[BrandPaletteService::ENABLED_KEY] = $paletteConfig['enabled'] ? '1' : '0';
 
         $payload = [
             'format' => 'app-branding-v1',
@@ -124,11 +171,41 @@ class TechnicalBrandingSettingsController extends Controller
             return back()->withErrors($validator)->with('error', 'El archivo contiene datos invalidos.');
         }
 
+        // Paleta (HU-039): un archivo antiguo sin paleta restablece los valores predeterminados.
+        $importPalette = BrandPaletteService::DEFAULT_PALETTE;
+        $importEnabled = false;
+        $hasPalette = count(array_intersect_key($decoded['settings'], array_flip(BrandPaletteService::KEYS))) > 0;
+
+        if ($hasPalette) {
+            $paletteInput = [];
+            foreach (BrandPaletteService::KEYS as $index => $key) {
+                $paletteInput[$key] = $decoded['settings'][$key] ?? BrandPaletteService::DEFAULT_PALETTE[$index];
+            }
+
+            $paletteValidator = Validator::make(
+                $paletteInput,
+                array_fill_keys(BrandPaletteService::KEYS, ['required', 'regex:/^#[0-9a-fA-F]{6}$/'])
+            );
+
+            if ($paletteValidator->fails()) {
+                return back()->with('error', 'El archivo contiene una paleta de colores invalida.');
+            }
+
+            $importPalette = array_map('strtoupper', array_values($paletteInput));
+            $importEnabled = (string) ($decoded['settings'][BrandPaletteService::ENABLED_KEY] ?? '0') === '1';
+
+            if ($importEnabled && !BrandPaletteService::evaluate($importPalette)['ok']) {
+                return back()->with('error', 'La paleta del archivo no cumple el contraste minimo WCAG AA (4.5:1) y no se importo.');
+            }
+        }
+
         $validated = $validator->validated();
         foreach (self::SETTING_KEYS as $key) {
             $value = isset($validated[$key]) ? trim((string) $validated[$key]) : (self::DEFAULTS[$key] ?? '');
             AppSetting::setValue($key, $value);
         }
+
+        $this->savePalette($importPalette, $importEnabled);
 
         return back()->with('success', 'Personalizacion importada correctamente.');
     }
@@ -154,6 +231,23 @@ class TechnicalBrandingSettingsController extends Controller
         }
 
         abort(404);
+    }
+
+    private function savePalette(array $palette, bool $enabled): void
+    {
+        foreach (array_values($palette) as $index => $color) {
+            AppSetting::setValue('branding_palette_'.($index + 1), $color);
+        }
+
+        AppSetting::setValue(BrandPaletteService::ENABLED_KEY, $enabled ? '1' : '0');
+    }
+
+    private function failureMessages(array $failures): array
+    {
+        return array_map(
+            fn ($check) => $check['label'].': '.number_format($check['ratio'], 2).':1 (mínimo 4.5:1)',
+            $failures
+        );
     }
 
     private function rules(): array

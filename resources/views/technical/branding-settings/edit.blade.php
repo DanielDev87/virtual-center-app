@@ -254,6 +254,7 @@
         </div>
     </div>
 </div>
+@include('technical.branding-settings._palette')
 @endsection
 
 @push('styles')

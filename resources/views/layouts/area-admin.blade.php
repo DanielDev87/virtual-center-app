@@ -102,6 +102,7 @@
         }
     </style>
     @stack('styles')
+    @include('partials.brand-palette-styles')
 </head>
 <body>
     @php
