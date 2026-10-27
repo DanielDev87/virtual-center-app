@@ -100,6 +100,10 @@
                     </div>
 
                     <div class="text-muted">{!! $ticket->requester_info !!}</div>
+                   
+                   
+                    @include('partials.ticket-sla-status', ['ticket' => $ticket])
+                    @include('partials.ticket-answers', ['ticket' => $ticket])
 
                     @php $visibleEvidences = $ticket->evidences->where('storage_disk', '!=', 'richtext_filesystem'); @endphp
                     @if($ticket->requester_url || $visibleEvidences->count())

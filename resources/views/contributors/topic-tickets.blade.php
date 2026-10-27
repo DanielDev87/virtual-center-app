@@ -3,6 +3,12 @@
 @section('title', 'Tickets de Mi Tópico - Colaborador')
 
 @section('content')
+@php
+    $hasFilters = (($selectedTopicId ?? null) !== null)
+        || collect(request()->only(['date_from', 'date_to', 'search']))
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->isNotEmpty();
+@endphp
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
     <h1 class="h2">Tickets de Mi Tópico <span class="text-primary">- {{ $topicHeaderName ?? 'Sin tópico asignado' }}</span></h1>
     <small class="text-muted">Pool compartido de solicitudes para tomar y asignarse</small>
@@ -25,7 +31,7 @@
 <div class="card shadow-sm mb-3">
     <div class="card-body">
         <form method="GET" action="{{ route('contributors.topic-tickets.index') }}" class="row g-2 align-items-end">
-            <div class="col-12 col-md-8 col-lg-6">
+            <div class="col-12 col-md-6 col-lg-3">
                 <label for="topic_id" class="form-label mb-1">Filtrar por tópico</label>
                 <select id="topic_id" name="topic_id" class="form-select">
                     <option value="">Todos mis tópicos</option>
@@ -36,6 +42,22 @@
                     @endforeach
                 </select>
             </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <label for="ticketSearch" class="form-label mb-1">Buscar</label>
+                <input id="ticketSearch" type="text" name="search" class="form-control"
+                       value="{{ request('search') }}" maxlength="100"
+                       placeholder="Número o título del ticket">
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <label for="ticketDateFrom" class="form-label mb-1">Creado desde</label>
+                <input id="ticketDateFrom" type="date" name="date_from" class="form-control"
+                       value="{{ request('date_from') }}">
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <label for="ticketDateTo" class="form-label mb-1">Creado hasta</label>
+                <input id="ticketDateTo" type="date" name="date_to" class="form-control"
+                       value="{{ request('date_to') }}">
+            </div>
             <div class="col-12 col-md-auto">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-filter me-1"></i>Aplicar
@@ -43,12 +65,18 @@
             </div>
             <div class="col-12 col-md-auto">
                 <a href="{{ route('contributors.topic-tickets.index') }}" class="btn btn-outline-secondary w-100">
-                    Limpiar
+                    <i class="fas fa-eraser me-1"></i>Limpiar filtros
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+@if($hasFilters)
+<p class="text-muted small mb-3">
+    <i class="fas fa-filter me-1"></i>{{ $tickets->total() }} resultado(s) con los filtros aplicados.
+</p>
+@endif
 
 <div class="card shadow d-none d-md-block">
     <div class="card-body">
@@ -135,8 +163,16 @@
                     @empty
                     <tr>
                         <td colspan="8" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-3x mb-3"></i>
-                            <p class="mb-0">No hay tickets pendientes en tus tópicos.</p>
+                            @if($hasFilters)
+                                <i class="fas fa-search fa-3x mb-3"></i>
+                                <p class="mb-2">No se encontraron tickets con los filtros aplicados.</p>
+                                <a href="{{ route('contributors.topic-tickets.index') }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eraser me-1"></i>Quitar filtros
+                                </a>
+                            @else
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p class="mb-0">No hay tickets pendientes en tus tópicos.</p>
+                            @endif
                         </td>
                     </tr>
                     @endforelse
@@ -217,8 +253,16 @@
     @empty
         <div class="card shadow-sm">
             <div class="card-body text-center text-muted py-4">
-                <i class="fas fa-inbox fa-2x mb-3"></i>
-                <p class="mb-0">No hay tickets pendientes en tus tópicos.</p>
+                @if($hasFilters)
+                    <i class="fas fa-search fa-2x mb-3"></i>
+                    <p class="mb-2">No se encontraron tickets con los filtros aplicados.</p>
+                    <a href="{{ route('contributors.topic-tickets.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-eraser me-1"></i>Quitar filtros
+                    </a>
+                @else
+                    <i class="fas fa-inbox fa-2x mb-3"></i>
+                    <p class="mb-0">No hay tickets pendientes en tus tópicos.</p>
+                @endif
             </div>
         </div>
     @endforelse

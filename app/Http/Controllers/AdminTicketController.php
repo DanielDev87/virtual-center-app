@@ -36,30 +36,26 @@ class AdminTicketController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Ticket::with(['requester', 'mediator', 'requestType', 'sprints.tasks']);
-
-        // Filtrar por estado si se proporcionó
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filtrar por tópico si se proporcionó
-        if ($request->filled('request_type_id')) {
-            $query->where('request_type_id', $request->request_type_id);
-        }
+        $query = Ticket::with(['requester', 'mediator', 'requestType', 'sprints.tasks'])
+            ->applyFilters($request->only(['status', 'request_type_id', 'mediator_id', 'date_from', 'date_to', 'search', 'sla']));
 
         $requestTypes = RequestType::where('is_active', true)
             ->orderBy('type_name')
             ->get(['type_id', 'type_name']);
 
-        $tickets = $query->orderByDesc('priority')->latest()->paginate(10);
-        
+        $mediators = User::whereIn(
+            'user_id',
+            Ticket::whereNotNull('mediator_id')->pluck('mediator_id')
+        )->orderBy('user_name')->get(['user_id', 'user_name']);
+
+        $tickets = $query->orderByDesc('priority')->latest()->paginate(10)->withQueryString();
+
         $tickets->getCollection()->transform(function ($ticket) {
             $ticket->auto_progress = $this->computeAutoProgress($ticket);
             return $ticket;
         });
-        
-        return view('admin.tickets.index', compact('tickets', 'requestTypes'));
+
+        return view('admin.tickets.index', compact('tickets', 'requestTypes', 'mediators'));
     }
 
     /**

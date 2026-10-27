@@ -210,6 +210,9 @@ class AreaAdminController extends Controller
             ->take(10)
             ->values();
 
+        $slaSummary = app(\App\Services\SlaRiskService::class)->summarize($baseQuery());
+
+
         // Tickets por estado
         $ticketsByStatus = [
             'Pendiente'   => $baseQuery()->where('status', 1)->count(),
@@ -313,7 +316,8 @@ class AreaAdminController extends Controller
             'topicTrendLabels',
             'topicTrendDatasets',
             'topicTrendMonths',
-            'allowedTopicTrendMonths',
+           'allowedTopicTrendMonths',
+            'slaSummary',
             'regionalScope'
         ));
     }
@@ -351,19 +355,8 @@ class AreaAdminController extends Controller
         }
 
         $query = $this->areaTicketsQuery()
-            ->with(['requester', 'mediator', 'requestType', 'sprints.tasks']);
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('request_type_id')) {
-            $query->where('request_type_id', $request->request_type_id);
-        }
-
-        if ($request->filled('mediator_id')) {
-            $query->where('mediator_id', $request->mediator_id);
-        }
+            ->with(['requester', 'mediator', 'requestType', 'sprints.tasks'])
+            ->applyFilters($request->only(['status', 'request_type_id', 'mediator_id', 'date_from', 'date_to', 'search', 'sla']));
 
         $areaTopics = $this->visibleAreaRequestTypesQuery()
             ->get(['type_id', 'type_name']);

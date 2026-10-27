@@ -32,6 +32,21 @@
                         </div>
                     </div>
 
+                                        @if($errors->any())
+                    <div class="alert alert-danger">
+                        <strong>No se pudo enviar la solicitud:</strong>
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $formError)
+                                <li>{{ $formError }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    @endif
+                    @if(session('error'))
+                    <div class="alert alert-warning">{{ session('error') }}</div>
+                    @endif
+                    
                     <form method="POST" action="{{ route('service-management.store') }}" id="serviceRequestForm" enctype="multipart/form-data">
                         @csrf
                         
@@ -152,7 +167,21 @@
                             </div>
                         </div>
 
-                        <!-- STEP 4: Details & Captcha -->
+                        <!-- Preguntas adicionales del tópico (HU-047) -->
+                        @if($errors->has('answers.*'))
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach(collect($errors->get('answers.*'))->flatten()->unique() as $answerError)
+                                    <li>{{ $answerError }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        @endif
+                        <div id="topic-questions-section" class="d-none mb-4">
+                            <h4 class="text-primary mb-3 border-bottom pb-2">Información adicional del tópico</h4>
+                            <div id="topic-questions-container" class="row g-3"></div>
+                        </div>
+                        
                         <div id="step4-details" class="step-section @guest d-none @endguest" @auth style="display:none;" @endauth>
                             <h4 class="text-primary mb-4 border-bottom pb-2">Paso 4: Detalles de Solicitud</h4>
                             
@@ -494,6 +523,11 @@ $(document).ready(function() {
         quill.clipboard.dangerouslyPasteHTML(initialDescription);
     }
     
+        // Mantener el campo oculto de la descripción sincronizado mientras se escribe
+    quill.on('text-change', function () {
+        $('#description').val(quill.getText().trim() === '' ? '' : quill.root.innerHTML);
+    });
+
     // Configuración CSRF
     $.ajaxSetup({
         headers: {
@@ -725,7 +759,70 @@ $(document).ready(function() {
         }
     });
 
-    const initialTopic = $('#request_type_id').val();
+    // ===== HU-047: preguntas adicionales por tópico =====
+    const topicQuestionsConfig = @json($requestTypeQuestionsMap ?? []);
+    const previousTopicAnswers = @json(old('answers', []));
+
+    function renderTopicQuestions(topicId) {
+        const container = $('#topic-questions-container');
+        const section = $('#topic-questions-section');
+        container.empty();
+
+        const questions = (topicId && topicQuestionsConfig[topicId]) ? topicQuestionsConfig[topicId] : [];
+        if (!questions.length) {
+            section.addClass('d-none');
+            return;
+        }
+
+        questions.forEach(function (q) {
+            const fieldId = 'answer_' + q.id;
+            const col = $('<div></div>').addClass(q.type === 'textarea' ? 'col-md-12' : 'col-md-6');
+            const label = $('<label class="form-label fw-bold"></label>').attr('for', fieldId).text(q.label);
+            if (q.required) {
+                label.append($('<span class="text-danger"></span>').text(' *'));
+            }
+
+            let field;
+            if (q.type === 'textarea') {
+                field = $('<textarea class="form-control" rows="3" maxlength="2000"></textarea>');
+            } else if (q.type === 'select') {
+                field = $('<select class="form-select"></select>');
+                field.append($('<option value="">-- Seleccione --</option>'));
+                (q.options || []).forEach(function (option) {
+                    field.append($('<option></option>').val(option).text(option));
+                });
+            } else if (q.type === 'number') {
+                field = $('<input type="number" step="any" class="form-control">');
+            } else if (q.type === 'date') {
+                field = $('<input type="date" class="form-control">');
+            } else {
+                field = $('<input type="text" class="form-control" maxlength="500">');
+            }
+
+            field.attr({ id: fieldId, name: 'answers[' + q.id + ']' });
+            if (q.required) {
+                field.prop('required', true);
+            }
+            if (previousTopicAnswers && previousTopicAnswers[q.id] !== undefined) {
+                field.val(previousTopicAnswers[q.id]);
+            }
+
+            col.append(label, field);
+            container.append(col);
+        });
+
+        section.removeClass('d-none');
+    }
+
+    
+
+        document.getElementById('request_type_id').addEventListener('change', function () {
+        renderTopicQuestions(this.value);
+    });     
+
+    
+    renderTopicQuestions($('#request_type_id').val());
+
     if (initialTopic) {
         updateRegionalSelectorByTopic(initialTopic);
         $('#step4-details').removeClass('d-none').show();

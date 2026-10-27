@@ -72,6 +72,7 @@
     </div>
 </div>
 
+@include('partials.sla-risk-cards', ['slaSummary' => $slaSummary, 'slaRoute' => 'contributors.dashboard'])
 <!-- Ratings Cards -->
 <div class="row mb-4">
     <!-- Average Rating -->
