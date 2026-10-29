@@ -465,7 +465,18 @@ class ServiceManagementController extends Controller
     public function track(Request $request)
     {
         if ($request->has('ticket_number') && $request->has('document_number')) {
-            $ticket = Ticket::with(['requestType', 'progress.user', 'evidences'])
+            $ticket = Ticket::with([
+                'requestType',
+                'progress' => function ($query) {
+                    $query->whereNotIn('status_update', [
+                        'manual_note', 'self_assigned', 'ticket_transferred',
+                        'task_completed', 'sprint_completed',
+                        'operario_completion_approved', 'operario_completion_rejected'
+                    ])->orderBy('created_at', 'asc');
+                },
+                'progress.user',
+                'evidences'
+            ])
                 ->where('ticket_number', $request->ticket_number)
                 ->whereHas('requester', function ($query) use ($request) {
                     $query->where('document_number', $request->document_number);
@@ -524,7 +535,18 @@ class ServiceManagementController extends Controller
             'ticket_number' => 'required|numeric'
         ]);
 
-        $ticket = Ticket::with(['requestType', 'progress.user', 'evidences'])
+       $ticket = Ticket::with([
+            'requestType',
+            'progress' => function ($query) {
+                $query->whereNotIn('status_update', [
+                    'manual_note', 'self_assigned', 'ticket_transferred',
+                    'task_completed', 'sprint_completed',
+                    'operario_completion_approved', 'operario_completion_rejected'
+                ])->orderBy('created_at', 'asc');
+            },
+            'progress.user',
+            'evidences'
+        ])  
             ->where('ticket_number', $request->ticket_number)
             ->whereHas('requester', function ($query) use ($request) {
                 $query->where('document_number', $request->document_number);
@@ -543,7 +565,18 @@ class ServiceManagementController extends Controller
      */
     public function show($id)
     {
-        $ticket = Ticket::with(['requestType.area', 'evidences', 'progress'])
+        $ticket = Ticket::with([
+            'requestType.area', 
+            'evidences',
+            'progress' => function ($query) {
+                $query->whereNotIn('status_update', [
+                    'manual_note', 'self_assigned', 'ticket_transferred',
+                    'task_completed', 'sprint_completed',
+                    'operario_completion_approved', 'operario_completion_rejected'
+                ])->orderBy('created_at', 'asc');
+            },
+            'progress.user'
+        ])
             ->where('requester_id', Auth::id())
             ->findOrFail($id);
 
