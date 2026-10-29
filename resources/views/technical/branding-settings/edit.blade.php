@@ -44,6 +44,12 @@
                         @csrf
                         @method('PUT')
 
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold" for="branding_institution_name">Nombre de la Institución (Reemplaza menciones a Luis Amigó)</label>
+                            <input id="branding_institution_name" name="branding_institution_name" type="text" class="form-control @error('branding_institution_name') is-invalid @enderror" value="{{ old('branding_institution_name', $settings['branding_institution_name'] ?? 'Mesa de Servicio Neutral') }}" maxlength="120" required>
+                            @error('branding_institution_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+
                         <div class="col-md-8">
                             <label class="form-label fw-semibold" for="branding_app_name">Nombre principal de la app</label>
                             <input id="branding_app_name" name="branding_app_name" type="text" class="form-control @error('branding_app_name') is-invalid @enderror" value="{{ old('branding_app_name', $settings['branding_app_name']) }}" maxlength="120" required>

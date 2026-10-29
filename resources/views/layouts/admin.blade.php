@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-bs-theme="{{ session('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
@@ -54,7 +54,7 @@
             }
         }
 
-        /* Móvil: sin margen izquierdo en main/navbar */
+        /* MÃ³vil: sin margen izquierdo en main/navbar */
         @media (max-width: 991.98px) {
             main {
                 margin-left: 0 !important;
@@ -247,11 +247,11 @@
         $isTechnicalSuperAdmin = $currentRoleName === 'Super Admin Tecnico';
     @endphp
 
-    <!-- Sidebar (offcanvas en móvil, fija en desktop) -->
+    <!-- Sidebar (offcanvas en mÃ³vil, fija en desktop) -->
     <nav class="sidebar offcanvas-lg offcanvas-start" id="adminSidebar" tabindex="-1" aria-labelledby="adminSidebarLabel">
         <div class="sidebar-sticky">
             <div class="sidebar-branding px-3 py-2 border-bottom border-secondary text-center position-relative">
-                <!-- Botón cerrar solo en móvil -->
+                <!-- BotÃ³n cerrar solo en mÃ³vil -->
                 <button type="button" class="btn-close btn-close-white d-lg-none position-absolute top-0 end-0 m-2"
                         data-bs-dismiss="offcanvas" data-bs-target="#adminSidebar" aria-label="Cerrar"></button>
                 <img src="{{ $branding['logo_url'] ?? asset('img/logomsula.png') }}" alt="{{ $branding['app_name'] ?? 'Sistema de Soporte Universitario' }}" class="img-fluid mb-2 bg-white rounded p-2" style="max-height: 72px;">
@@ -292,7 +292,7 @@
                     <a class="nav-link {{ request()->routeIs('admin.request-types.*') ? 'active' : '' }}" 
                        href="{{ route('admin.request-types.index') }}">
                         <i class="fas fa-tags"></i>
-                        Tópicos de Servicio
+                        TÃ³picos de Servicio
                     </a>
                 </li>
                 <li class="nav-item">
@@ -330,7 +330,7 @@
 
             <!-- Academic Management Section -->
             @if(!$isTechnicalSuperAdmin)
-            <h6 class="sidebar-heading">Gestión Académica</h6>
+            <h6 class="sidebar-heading">GestiÃ³n AcadÃ©mica</h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('admin.academic.institutions.*') ? 'active' : '' }}" 
@@ -350,7 +350,7 @@
                     <a class="nav-link {{ request()->routeIs('admin.academic.areas.*') ? 'active' : '' }}" 
                        href="{{ route('admin.academic.areas.index') }}">
                         <i class="fas fa-sitemap"></i>
-                        Áreas
+                        Ãreas
                     </a>
                 </li>
                 <li class="nav-item">
@@ -375,7 +375,7 @@
                     <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" 
                        href="{{ route('admin.reports.index') }}">
                         <i class="fas fa-file-export"></i>
-                        Módulo de Reportes
+                        MÃ³dulo de Reportes
                     </a>
                 </li>
             </ul>
@@ -403,7 +403,7 @@
                         @csrf
                         <button type="submit" class="nav-link logout-nav-btn border-0 w-100 text-start">
                             <i class="fas fa-sign-out-alt"></i>
-                            Cerrar Sesión
+                            Cerrar SesiÃ³n
                         </button>
                     </form>
                 </li>
@@ -457,10 +457,10 @@
             @endphp
             <div class="w-100 d-flex align-items-center justify-content-between gap-2">
                 <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
-                    <!-- Hamburguesa solo en móvil -->
+                    <!-- Hamburguesa solo en mÃ³vil -->
                     <button class="btn btn-sm me-2 d-lg-none border-0 text-secondary" type="button"
                             data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar"
-                            title="Menú">
+                            title="MenÃº">
                         <i class="fas fa-bars fa-lg"></i>
                     </button>
                     <span class="navbar-top-title">{{ $topbarTitle }}</span>
@@ -499,7 +499,7 @@
         <div class="container-fluid pt-3">
             <div class="alert alert-warning mb-3" role="alert">
                 <i class="fas fa-eye me-2"></i>
-                Perfil Auditor: no tienes permisos para editar, bloquear o eliminar. Tu acceso es solo de observación.
+                Perfil Auditor: no tienes permisos para editar, bloquear o eliminar. Tu acceso es solo de observaciÃ³n.
             </div>
         </div>
         @endif
@@ -522,7 +522,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body" id="fileTooLargeModalBody">
-                    El archivo que intentó subir excede el tamaño máximo permitido.
+                    El archivo que intentÃ³ subir excede el tamaÃ±o mÃ¡ximo permitido.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -550,10 +550,10 @@
                 var body = document.getElementById('fileTooLargeModalBody');
                 var title = document.getElementById('fileTooLargeModalTitle');
                 var normalizedMessage = (message || '').toLowerCase();
-                var isUploadError = /archivo|tamaño|tamano|upload|413|excede|subir/.test(normalizedMessage);
+                var isUploadError = /archivo|tamaÃ±o|tamano|upload|413|excede|subir/.test(normalizedMessage);
 
                 if(title){
-                    title.textContent = isUploadError ? 'Archivo demasiado grande' : 'No se pudo completar la acción';
+                    title.textContent = isUploadError ? 'Archivo demasiado grande' : 'No se pudo completar la acciÃ³n';
                 }
                 if(body) body.textContent = message || body.textContent;
                 var modalEl = document.getElementById('fileTooLargeModal');
@@ -573,7 +573,7 @@
                         if(maxBytes && f.size > maxBytes){
                             e.preventDefault();
                             target.value = '';
-                            showFileTooLarge('El archivo "' + f.name + '" excede el máximo permitido de ' + maxSizeStr + '.');
+                            showFileTooLarge('El archivo "' + f.name + '" excede el mÃ¡ximo permitido de ' + maxSizeStr + '.');
                             break;
                         }
                     }
@@ -658,3 +658,4 @@
     @stack('scripts')
 </body>
 </html>
+
