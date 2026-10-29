@@ -13,6 +13,7 @@ class TechnicalBrandingSettingsController extends Controller
 {
     private const SETTING_KEYS = [
         'branding_app_name',
+        'branding_institution_name',
         'branding_short_name',
         'branding_logo_path',
         'branding_footer_logo_path',
@@ -28,6 +29,7 @@ class TechnicalBrandingSettingsController extends Controller
 
     private const DEFAULTS = [
         'branding_app_name' => 'Sistema de Soporte Universitario',
+        'branding_institution_name' => 'Mesa de Servicio',
         'branding_short_name' => 'Soporte Univ.',
         'branding_logo_path' => 'img/logomsula.png',
         'branding_footer_logo_path' => 'img/LogoCampus.png',
@@ -254,6 +256,7 @@ class TechnicalBrandingSettingsController extends Controller
     {
         return [
             'branding_app_name' => 'required|string|max:120',
+            'branding_institution_name' => 'required|string|max:120',
             'branding_short_name' => 'required|string|max:50',
             'branding_logo_path' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9_\-\.\/]+$/'],
             'branding_footer_logo_path' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z0-9_\-\.\/]+$/'],
