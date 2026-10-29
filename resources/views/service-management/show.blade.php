@@ -78,6 +78,59 @@
                         </div>
                     </div>
 
+                     <!-- Línea de tiempo de estados (HU-041) -->
+                    <div class="card shadow-sm mt-4 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0"><i class="fas fa-stream me-2"></i>Línea de tiempo de la solicitud</h5>
+                        </div>
+                        <div class="card-body">
+                            @php
+                                // Extraemos solo los eventos de cambio de estado.
+                                // Recordar que los eventos internos ya fueron filtrados desde el controlador.
+                                $timelineEvents = collect([
+                                    (object)[
+                                        'date' => $ticket->created_at,
+                                        'status' => 'Ticket Creado',
+                                        'icon' => 'fa-plus-circle text-primary',
+                                    ]
+                                ])->merge(
+                                    $ticket->progress->filter(function($log) {
+                                        return in_array($log->status_update, ['status_changed', 'service_closed', 'service_closed_admin', 'service_closed_area_admin', 'service_cancelled_admin', 'service_cancelled_area_admin', 'operario_completion_approved']);
+                                    })->map(function($log) {
+                                        $title = 'Actualización de Estado';
+                                        $icon = 'fa-sync-alt text-info';
+                                        
+                                        if (str_starts_with($log->status_update, 'service_closed') || $log->status_update === 'operario_completion_approved') {
+                                            $title = 'Ticket Completado';
+                                            $icon = 'fa-check-circle text-success';
+                                        } elseif (str_starts_with($log->status_update, 'service_cancelled')) {
+                                            $title = 'Ticket Cancelado';
+                                            $icon = 'fa-times-circle text-danger';
+                                        }
+
+                                        return (object)[
+                                            'date' => $log->created_at,
+                                            'status' => $title,
+                                            'icon' => $icon,
+                                        ];
+                                    })
+                                )->sortBy('date')->values();
+                            @endphp
+
+                            <div class="position-relative ps-4 py-2 border-start border-2 border-secondary ms-2" style="border-opacity: 0.3;">
+                                @foreach($timelineEvents as $event)
+                                    <div class="mb-3 position-relative">
+                                        <i class="fas {{ $event->icon }} position-absolute bg-white" style="left: -1.75rem; top: 0.25rem; font-size: 1.25rem; border-radius: 50%; box-shadow: 0 0 0 4px var(--bs-body-bg);"></i>
+                                        <div>
+                                            <strong class="d-block">{{ $event->status }}</strong>
+                                            <small class="text-muted">{{ $event->date->format('d/m/Y h:i A') }}</small>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>           
+
                     @if($ticket->priority_sla_hours)
                     <hr>
                     <div class="row g-3">

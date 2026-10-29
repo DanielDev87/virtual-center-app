@@ -59,7 +59,7 @@
             </p>
         </div>
         <div class="footer">
-            <p>Sistema A-DDIE - Gestión de Servicios Educativos<br>Universidad Católica Luis Amigó</p>
+            <p>{{ \App\Models\AppSetting::getValue('branding_institution_name', 'Mesa de Servicio') }}</p>
         </div>
     </div>
 </body>

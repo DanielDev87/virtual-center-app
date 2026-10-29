@@ -7,6 +7,8 @@
     $entityDefinitions = $entities ?? [];
     $selectedEntity = old('entity', 'users');
     $currentDefinition = $entityDefinitions[$selectedEntity] ?? null;
+    $summary = session('import_summary');
+    $preview = session('import_preview');
 @endphp
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
@@ -43,31 +45,48 @@
                 </div>
             @endif
 
-            @php
-                $summary = session('import_summary');
-                $preview = session('import_preview');
-            @endphp
             @if($preview)
                 <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-light">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <strong>Resultado de previsualizacion (sin guardar)</strong>
+                        @if(!empty($preview['errors']))
+                            <a href="{{ route('admin.bulk-import.errors-report') }}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-file-download me-1"></i>Descargar reporte de errores
+                            </a>
+                        @endif
                     </div>
                     <div class="card-body">
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-3"><span class="badge bg-dark w-100 py-2">Filas procesadas: {{ $preview['total'] }}</span></div>
-                            <div class="col-md-3"><span class="badge bg-success w-100 py-2">Se crearian: {{ $preview['created'] }}</span></div>
-                            <div class="col-md-3"><span class="badge bg-primary w-100 py-2">Se actualizarian: {{ $preview['updated'] }}</span></div>
-                            <div class="col-md-3"><span class="badge bg-secondary w-100 py-2">Se omitirian: {{ $preview['skipped'] }}</span></div>
+                        <div class="alert alert-info py-2 small">
+                            Esto es solo una previsualizacion: todavia no se guardo ningun registro.
                         </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-3"><span class="badge bg-dark w-100 py-2">Filas procesadas: {{ $preview['total'] }}</span></div>
+                            <div class="col-md-3"><span class="badge bg-success w-100 py-2">Validas: {{ $preview['valid'] }}</span></div>
+                            <div class="col-md-3"><span class="badge bg-danger w-100 py-2">Invalidas: {{ $preview['invalid'] }}</span></div>
+                            <div class="col-md-3"><span class="badge bg-warning text-dark w-100 py-2">Posibles duplicados: {{ $preview['duplicates'] }}</span></div>
+                        </div>
+                        <p class="small text-muted mb-3">
+                            De las filas validas: {{ $preview['created'] }} se crearian, {{ $preview['updated'] }} se actualizarian y {{ $preview['skipped'] }} se omitirian.
+                            Un posible duplicado es una fila que repite el identificador (por ejemplo el correo o el nombre) de otra fila del mismo archivo.
+                        </p>
+
+                        @if($preview['invalid'] > 0)
+                            <div class="alert alert-warning py-2 small">
+                                Hay {{ $preview['invalid'] }} fila(s) con errores. Si procesa el archivo asi, <strong>no se guardara ningun registro</strong>,
+                                salvo que marque la opcion de importacion parcial.
+                            </div>
+                        @endif
 
                         @if(!empty($preview['rows']))
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th style="width: 110px;">Linea</th>
-                                            <th style="width: 150px;">Resultado</th>
-                                            <th>Detalle</th>
+                                            <th style="width: 90px;">Fila</th>
+                                            <th style="width: 190px;">Resultado</th>
+                                            <th style="width: 180px;">Campo</th>
+                                            <th>Motivo</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -84,7 +103,11 @@
                                                     @else
                                                         <span class="badge bg-secondary">Omitir</span>
                                                     @endif
+                                                    @if($item['status'] === 'warning')
+                                                        <span class="badge bg-warning text-dark">Duplicado</span>
+                                                    @endif
                                                 </td>
+                                                <td><code>{{ $item['field'] ?? '-' }}</code></td>
                                                 <td>{{ $item['message'] }}</td>
                                             </tr>
                                         @endforeach
@@ -98,39 +121,100 @@
 
             @if($summary)
                 <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-light">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <strong>Resultado de la ultima importacion</strong>
+                        @if(($summary['errors_total'] ?? 0) > 0)
+                            <a href="{{ route('admin.bulk-import.errors-report') }}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-file-download me-1"></i>Descargar reporte de errores
+                            </a>
+                        @endif
                     </div>
                     <div class="card-body">
+                        @if(!empty($summary['rolled_back']))
+                            <div class="alert alert-danger">
+                                <strong>No se guardo ningun registro.</strong>
+                                {{ $summary['errors_total'] }} fila(s) tienen errores, por eso se cancelo toda la importacion.
+                                Corrija el archivo o marque la importacion parcial para guardar solo las filas validas
+                                ({{ $summary['valid_rows'] }} fila(s) eran validas).
+                            </div>
+                        @elseif(!empty($summary['partial']))
+                            <div class="alert alert-warning">
+                                <strong>Importacion parcial.</strong>
+                                Se guardaron {{ $summary['saved_total'] }} registro(s) y {{ $summary['errors_total'] }} fila(s) no se guardaron por errores.
+                                Revise abajo cuales se guardaron y cuales no.
+                            </div>
+                        @else
+                            <div class="alert alert-success">
+                                <strong>Importacion completa.</strong> Todas las filas se procesaron sin errores.
+                            </div>
+                        @endif
+
                         <div class="row g-2 mb-3">
-                            <div class="col-md-3"><span class="badge bg-dark w-100 py-2">Filas procesadas: {{ $summary['total'] }}</span></div>
-                            <div class="col-md-3"><span class="badge bg-success w-100 py-2">Creados: {{ $summary['created'] }}</span></div>
+                            <div class="col-md-2"><span class="badge bg-dark w-100 py-2">Filas: {{ $summary['total'] }}</span></div>
+                            <div class="col-md-2"><span class="badge bg-success w-100 py-2">Creados: {{ $summary['created'] }}</span></div>
                             <div class="col-md-3"><span class="badge bg-primary w-100 py-2">Actualizados: {{ $summary['updated'] }}</span></div>
-                            <div class="col-md-3"><span class="badge bg-secondary w-100 py-2">Omitidos: {{ $summary['skipped'] }}</span></div>
+                            <div class="col-md-2"><span class="badge bg-secondary w-100 py-2">Omitidos: {{ $summary['skipped'] }}</span></div>
+                            <div class="col-md-3"><span class="badge bg-danger w-100 py-2">Con error: {{ $summary['errors_total'] ?? 0 }}</span></div>
                         </div>
 
                         @if(!empty($summary['errors']))
-                            <div class="alert alert-warning mb-0">
-                                <strong>Filas con error</strong>
-                                <div class="table-responsive mt-2">
-                                    <table class="table table-sm table-bordered mb-0">
-                                        <thead class="table-light">
+                            <h6>Filas que no se guardaron</h6>
+                            <div class="table-responsive mb-3">
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 90px;">Fila</th>
+                                            <th style="width: 180px;">Campo</th>
+                                            <th>Motivo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($summary['errors'] as $error)
                                             <tr>
-                                                <th style="width: 120px;">Linea</th>
-                                                <th>Detalle</th>
+                                                <td>{{ $error['line'] }}</td>
+                                                <td><code>{{ $error['field'] ?? '-' }}</code></td>
+                                                <td>{{ $error['message'] }}</td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($summary['errors'] as $error)
-                                                <tr>
-                                                    <td>{{ $error['line'] }}</td>
-                                                    <td>{{ $error['message'] }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
+                            @if(($summary['errors_total'] ?? 0) > count($summary['errors']))
+                                <p class="small text-muted">Se muestran las primeras {{ count($summary['errors']) }}; el reporte descargable incluye todas.</p>
+                            @endif
+                        @endif
+
+                        @if(!empty($summary['saved']))
+                            <h6>Registros guardados</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 90px;">Fila</th>
+                                            <th style="width: 150px;">Operacion</th>
+                                            <th>Registro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($summary['saved'] as $item)
+                                            <tr>
+                                                <td>{{ $item['line'] }}</td>
+                                                <td>
+                                                    @if($item['operation'] === 'created')
+                                                        <span class="badge bg-success">Creado</span>
+                                                    @else
+                                                        <span class="badge bg-primary">Actualizado</span>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $item['identifier'] ?? '-' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @if(($summary['saved_total'] ?? 0) > count($summary['saved']))
+                                <p class="small text-muted mt-2">Se muestran los primeros {{ count($summary['saved']) }} de {{ $summary['saved_total'] }} registros guardados.</p>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -187,11 +271,24 @@
                                     <div id="entityTips" class="small text-muted">
                                         <ul class="mb-0">
                                             <li>El sistema crea o actualiza segun coincidencia por identificador principal (email, nombre o id).</li>
-                                            <li>Las filas con error se omiten sin detener la importacion completa.</li>
+                                            <li>Por defecto, si alguna fila tiene errores no se guarda ningun registro (todo o nada).</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="allow_partial" id="allow_partial" value="1">
+                                <label class="form-check-label" for="allow_partial">
+                                    Permitir importacion parcial: guardar las filas validas aunque otras tengan errores
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                Si no la marca, ante cualquier fila con error no se guardara ningun registro.
+                                Si la marca, al terminar se le informara cuales registros se guardaron y cuales no.
+                            </small>
                         </div>
 
                         <div class="col-12 d-flex justify-content-end">
@@ -271,7 +368,7 @@
             if (tipsContainer) {
                 const commonTips = [
                     'El sistema crea o actualiza segun coincidencia por identificador principal (email, nombre o id).',
-                    'Las filas con error se omiten sin detener la importacion completa.'
+                    'Por defecto, si alguna fila tiene errores no se guarda ningun registro (todo o nada).'
                 ];
                 const selectedTips = entityTips[entityKey] || [];
                 const allTips = [...selectedTips, ...commonTips];

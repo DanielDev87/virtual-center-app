@@ -59,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/branding-settings', [\App\Http\Controllers\TechnicalBrandingSettingsController::class, 'edit'])->name('branding-settings.edit');
         Route::put('/branding-settings', [\App\Http\Controllers\TechnicalBrandingSettingsController::class, 'update'])->name('branding-settings.update');
         Route::get('/branding-settings/export', [\App\Http\Controllers\TechnicalBrandingSettingsController::class, 'export'])->name('branding-settings.export');
-        Route::post('/branding-settings/import', [\App\Http\Controllers\TechnicalBrandingSettingsController::class, 'import'])->name('branding-settings.import');
+        Route::post('/branding-settings/import', [\App\Http\Controllers\TechnicalBrandingSettingsController::class, 'import'])->name('branding-settings.import');        Route::put('/branding-palette', [\App\Http\Controllers\TechnicalBrandingSettingsController::class, 'updatePalette'])->name('branding-palette.update');
     });
 
     // Evidencias de tickets (acceso autorizado por rol/relación al ticket)
@@ -132,7 +132,10 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de Admin de Área (acceso restringido al área asignada al usuario)
     Route::prefix('area-admin')->name('area-admin.')->middleware('role:Admin Área')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\AreaAdminController::class, 'dashboard'])->name('dashboard');
-        Route::patch('/topics/{id}/incident', [\App\Http\Controllers\AreaAdminController::class, 'updateTopicIncident'])->name('topics.incident');
+        Route::patch('/topics/{id}/incident', [\App\Http\Controllers\AreaAdminController::class, 'updateTopicIncident'])->name('topics.incident');        Route::get('/sla-rules', [\App\Http\Controllers\AreaAdminSlaRuleController::class, 'index'])->name('sla-rules.index');
+        Route::post('/sla-rules', [\App\Http\Controllers\AreaAdminSlaRuleController::class, 'store'])->name('sla-rules.store');
+        Route::put('/sla-rules/{ruleId}', [\App\Http\Controllers\AreaAdminSlaRuleController::class, 'update'])->name('sla-rules.update');
+        Route::delete('/sla-rules/{ruleId}', [\App\Http\Controllers\AreaAdminSlaRuleController::class, 'destroy'])->name('sla-rules.destroy');
 
         // Tickets
         Route::get('/tickets', [\App\Http\Controllers\AreaAdminController::class, 'tickets'])->name('tickets.index');
@@ -167,6 +170,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('bulk-import', [\App\Http\Controllers\Admin\AdminBulkImportController::class, 'store'])
             ->middleware('role:Admin')
             ->name('bulk-import.store');
+            
+
+        Route::get('bulk-import/errors-report', [\App\Http\Controllers\Admin\AdminBulkImportController::class, 'downloadErrorsReport'])
+            ->middleware('role:Admin')
+            ->name('bulk-import.errors-report');
 
         // Gestión de Roles
         Route::resource('roles', \App\Http\Controllers\AdminRoleController::class);
