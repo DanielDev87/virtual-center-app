@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-bs-theme="{{ session('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
@@ -92,7 +92,7 @@
                                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
                                         @csrf
                                         <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar SesiÃ³n
                                         </button>
                                     </form>
                                 </li>
@@ -101,7 +101,7 @@
                     @else
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                                <i class="fas fa-sign-in-alt me-1"></i>Iniciar SesiÃ³n
                             </a>
                         </li>
                     @endauth
@@ -130,7 +130,7 @@
                 </div>
                 <div class="col-md-5 text-md-end mt-4 mt-md-0 app-footer-meta">
                     <p class="mb-0">&copy; {{ date('Y') }} {{ $branding['app_name'] ?? 'Sistema de Soporte Universitario' }}.</p>
-                    <p class="mb-0 small">Desarrollado por: Gestión TICS - All rights reserved.</p>
+                    <p class="mb-0 small">Desarrollado por: GestiÃ³n TICS - All rights reserved.</p>
                 </div>
             </div>
         </div>
@@ -230,7 +230,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body" id="fileTooLargeModalBody">
-                    El archivo que intentó subir excede el tamaño máximo permitido.
+                    El archivo que intentÃ³ subir excede el tamaÃ±o mÃ¡ximo permitido.
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -258,10 +258,10 @@
                 var body = document.getElementById('fileTooLargeModalBody');
                 var title = document.getElementById('fileTooLargeModalTitle');
                 var normalizedMessage = (message || '').toLowerCase();
-                var isUploadError = /archivo|tamaño|tamano|upload|413|excede|subir/.test(normalizedMessage);
+                var isUploadError = /archivo|tamaÃ±o|tamano|upload|413|excede|subir/.test(normalizedMessage);
 
                 if(title){
-                    title.textContent = isUploadError ? 'Archivo demasiado grande' : 'No se pudo completar la acción';
+                    title.textContent = isUploadError ? 'Archivo demasiado grande' : 'No se pudo completar la acciÃ³n';
                 }
                 if(body) body.textContent = message || body.textContent;
                 var modalEl = document.getElementById('fileTooLargeModal');
@@ -273,7 +273,7 @@
                 }
             }
 
-            // Validación cliente antes de enviar el formulario
+            // ValidaciÃ³n cliente antes de enviar el formulario
             document.addEventListener('change', function(e){
                 var target = e.target;
                 if(target && target.type === 'file' && target.files && target.files.length){
@@ -282,7 +282,7 @@
                         if(maxBytes && f.size > maxBytes){
                             e.preventDefault();
                             target.value = '';
-                            showFileTooLarge('El archivo "' + f.name + '" excede el máximo permitido de ' + maxSizeStr + '.');
+                            showFileTooLarge('El archivo "' + f.name + '" excede el mÃ¡ximo permitido de ' + maxSizeStr + '.');
                             break;
                         }
                     }
@@ -326,7 +326,7 @@
                 };
             }
 
-            // Si la sesión trae un error de tamaño, mostrar modal al cargar
+            // Si la sesiÃ³n trae un error de tamaÃ±o, mostrar modal al cargar
             @if(session('error'))
                 @php $err = session('error'); @endphp
                 document.addEventListener('DOMContentLoaded', function(){
@@ -339,6 +339,7 @@
     @stack('scripts')
 </body>
 </html>
+
 
 
 

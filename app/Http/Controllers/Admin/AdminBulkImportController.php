@@ -19,11 +19,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
+use App\Http\Controllers\Admin\Concerns\BuildsImportReports;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminBulkImportController extends Controller
 {
     private const CSV_ENCLOSURE = '"';
+    use BuildsImportReports;
     private const CSV_ESCAPE = '\\';
 
     private const ENTITY_USERS = 'users';
@@ -69,7 +71,7 @@ class AdminBulkImportController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+       public function store(Request $request)
     {
         $this->ensureAdminRole();
 
@@ -79,102 +81,154 @@ class AdminBulkImportController extends Controller
             'entity' => ['required', Rule::in(array_keys($entities))],
             'action' => ['nullable', Rule::in(['preview', 'import'])],
             'file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
+            'allow_partial' => ['nullable', 'boolean'],
         ]);
 
         $entity = $validated['entity'];
         $action = $validated['action'] ?? 'import';
+        $allowPartial = $request->boolean('allow_partial');
+        $fileName = $request->file('file')->getClientOriginalName();
+        $entityLabel = $entities[$entity]['label'];
 
         try {
             $parsed = $this->parseCsv($request->file('file'));
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', $exception->getMessage());
+                ->with('error', $exception->getMessage() . ' No se guardo ningun registro.');
         }
 
         if (empty($parsed['rows'])) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'El archivo no contiene filas de datos para importar.');
+                ->with('error', 'El archivo no contiene filas de datos para importar. No se guardo ningun registro.');
         }
 
         if ($action === 'preview') {
             $preview = $this->buildPreview($entity, $parsed['rows']);
+            $preview['file_name'] = $fileName;
             $errorCount = count($preview['errors']);
-            $entityLabel = $entities[$entity]['label'];
 
-            $message = "Previsualizacion de {$entityLabel}: {$preview['created']} se crearian, {$preview['updated']} se actualizarian";
+            $this->rememberErrorsReport($entity, $fileName, 'preview', $preview['errors']);
 
-            if ($preview['skipped'] > 0) {
-                $message .= ", {$preview['skipped']} se omitirian";
-            }
-
-            if ($errorCount > 0) {
-                $message .= ", {$errorCount} con error";
-            }
+            $message = "Previsualizacion de {$entityLabel}: {$preview['valid']} filas validas, {$errorCount} invalidas y {$preview['duplicates']} posibles duplicados. Todavia no se guardo ningun registro.";
 
             return redirect()->route('admin.bulk-import.index')
-                ->with('success', $message . '.')
+                ->with($errorCount > 0 ? 'error' : 'success', $message)
                 ->with('import_preview', $preview);
         }
 
         $result = [
             'entity' => $entity,
+            'file_name' => $fileName,
             'total' => 0,
+            'valid_rows' => 0,
             'created' => 0,
             'updated' => 0,
             'skipped' => 0,
             'errors' => [],
+            'errors_total' => 0,
+            'saved' => [],
+            'saved_total' => 0,
+            'rolled_back' => false,
+            'partial' => false,
         ];
 
-        foreach ($parsed['rows'] as $index => $row) {
-            $lineNumber = $index + 2;
+        $allErrors = [];
+        $saved = [];
 
-            if ($this->isRowEmpty($row)) {
-                continue;
-            }
+        // Todo o nada: todas las filas van dentro de una transaccion y solo se confirma
+        // si no hay errores o si la persona permitio explicitamente la importacion parcial.
+        DB::beginTransaction();
 
-            $result['total']++;
+        try {
+            foreach ($parsed['rows'] as $index => $row) {
+                $lineNumber = $index + 2;
 
-            try {
-                $action = DB::transaction(function () use ($entity, $row) {
-                    return $this->importEntityRow($entity, $row);
-                });
-
-                if ($action === 'created') {
-                    $result['created']++;
-                } elseif ($action === 'updated') {
-                    $result['updated']++;
-                } else {
-                    $result['skipped']++;
+                if ($this->isRowEmpty($row)) {
+                    continue;
                 }
-            } catch (\Throwable $exception) {
-                $result['errors'][] = [
-                    'line' => $lineNumber,
-                    'message' => $exception->getMessage(),
-                ];
+
+                $result['total']++;
+
+                try {
+                    $operation = DB::transaction(function () use ($entity, $row) {
+                        return $this->importEntityRow($entity, $row);
+                    });
+
+                    $result['valid_rows']++;
+
+                    if ($operation === 'created') {
+                        $result['created']++;
+                    } elseif ($operation === 'updated') {
+                        $result['updated']++;
+                    } else {
+                        $result['skipped']++;
+                    }
+
+                    if (in_array($operation, ['created', 'updated'], true)) {
+                        $saved[] = [
+                            'line' => $lineNumber,
+                            'operation' => $operation,
+                            'identifier' => $this->rowIdentifier($entity, $row),
+                        ];
+                    }
+                } catch (\Throwable $exception) {
+                    $allErrors[] = [
+                        'line' => $lineNumber,
+                        'field' => $this->detectErrorField($entity, $exception->getMessage(), $row),
+                        'message' => $exception->getMessage(),
+                    ];
+                }
             }
+
+            if (!empty($allErrors) && !$allowPartial) {
+                DB::rollBack();
+                $result['rolled_back'] = true;
+                $result['created'] = 0;
+                $result['updated'] = 0;
+                $result['skipped'] = 0;
+                $saved = [];
+            } else {
+                DB::commit();
+                $result['partial'] = !empty($allErrors);
+            }
+        } catch (\Throwable $exception) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'La importacion fallo y no se guardo ningun registro: ' . $exception->getMessage());
         }
 
-        $errorCount = count($result['errors']);
+        $result['errors_total'] = count($allErrors);
+        $result['errors'] = array_slice($allErrors, 0, 100);
+        $result['saved_total'] = count($saved);
+        $result['saved'] = array_slice($saved, 0, 100);
 
-        if ($errorCount > 100) {
-            $result['errors'] = array_slice($result['errors'], 0, 100);
-        }
+        $this->rememberErrorsReport($entity, $fileName, 'import', $allErrors);
 
-        $entityLabel = $entities[$entity]['label'];
-        $message = "Carga masiva de {$entityLabel}: {$result['created']} creados, {$result['updated']} actualizados";
+        if ($result['rolled_back']) {
+            $flash = 'error';
+            $message = "Carga masiva de {$entityLabel}: NO se guardo ningun registro porque {$result['errors_total']} fila(s) tienen errores. Corrija el archivo o marque la importacion parcial para guardar solo las filas validas.";
+        } elseif ($result['partial']) {
+            $flash = 'error';
+            $message = "Carga masiva de {$entityLabel} PARCIAL: se guardaron {$result['saved_total']} registros ({$result['created']} creados, {$result['updated']} actualizados) y {$result['errors_total']} fila(s) no se guardaron por errores.";
+        } else {
+            $flash = 'success';
+            $message = "Carga masiva de {$entityLabel}: {$result['created']} creados, {$result['updated']} actualizados";
 
-        if ($result['skipped'] > 0) {
-            $message .= ", {$result['skipped']} omitidos";
-        }
+            if ($result['skipped'] > 0) {
+                $message .= ", {$result['skipped']} omitidos";
+            }
 
-        if ($errorCount > 0) {
-            $message .= ", {$errorCount} errores";
+            $message .= '.';
         }
 
         return redirect()->route('admin.bulk-import.index')
-            ->with('success', $message . '.')
+            ->with($flash, $message)
             ->with('import_summary', $result);
     }
 
@@ -186,9 +240,14 @@ class AdminBulkImportController extends Controller
             'created' => 0,
             'updated' => 0,
             'skipped' => 0,
+            'valid' => 0,
+            'invalid' => 0,
+            'duplicates' => 0,
             'errors' => [],
             'rows' => [],
         ];
+
+        $seen = [];
 
         foreach ($rows as $index => $row) {
             $lineNumber = $index + 2;
@@ -198,6 +257,19 @@ class AdminBulkImportController extends Controller
             }
 
             $result['total']++;
+
+            $duplicateOf = null;
+            $identifier = $this->rowIdentifier($entity, $row);
+
+            if ($identifier !== null) {
+                $key = mb_strtolower($identifier, 'UTF-8');
+
+                if (isset($seen[$key])) {
+                    $duplicateOf = $seen[$key];
+                } else {
+                    $seen[$key] = $lineNumber;
+                }
+            }
 
             try {
                 $operation = $this->previewEntityRow($entity, $row);
@@ -210,15 +282,29 @@ class AdminBulkImportController extends Controller
                     $result['skipped']++;
                 }
 
+                $result['valid']++;
+
+                if ($duplicateOf !== null) {
+                    $result['duplicates']++;
+                }
+
                 $result['rows'][] = [
                     'line' => $lineNumber,
-                    'status' => 'ok',
+                    'status' => $duplicateOf !== null ? 'warning' : 'ok',
                     'operation' => $operation,
-                    'message' => 'Validacion correcta.',
+                    'field' => '-',
+                    'message' => $duplicateOf !== null
+                        ? "Posible duplicado: repite el identificador de la fila {$duplicateOf}."
+                        : 'Validacion correcta.',
                 ];
             } catch (\Throwable $exception) {
+                $field = $this->detectErrorField($entity, $exception->getMessage(), $row);
+
+                $result['invalid']++;
+
                 $result['errors'][] = [
                     'line' => $lineNumber,
+                    'field' => $field,
                     'message' => $exception->getMessage(),
                 ];
 
@@ -226,6 +312,7 @@ class AdminBulkImportController extends Controller
                     'line' => $lineNumber,
                     'status' => 'error',
                     'operation' => 'error',
+                    'field' => $field,
                     'message' => $exception->getMessage(),
                 ];
             }
@@ -233,7 +320,7 @@ class AdminBulkImportController extends Controller
 
         return $result;
     }
-
+    
     private function previewEntityRow(string $entity, array $row): string
     {
         if ($entity === self::ENTITY_USERS) {

@@ -274,4 +274,56 @@ class Ticket extends Model
         return now()->greaterThan($this->response_deadline);
     }
 
+    public function audits()
+    {
+        return $this->hasMany(TicketAudit::class, 'ticket_id', 'ticket_id');
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($ticket) {
+            \App\Models\TicketAudit::create([
+                'ticket_id' => $ticket->ticket_id,
+                'user_id' => auth()->id(),
+                'action' => 'created',
+                'old_values' => null,
+                'new_values' => $ticket->getAttributes(),
+                'created_at' => now(),
+            ]);
+        });
+
+        static::updated(function ($ticket) {
+            $changes = $ticket->getChanges();
+            // Evitamos registrar si solo cambió el timestamp de actualización
+            unset($changes['updated_at']);
+            
+            if (!empty($changes)) {
+                $oldValues = [];
+                foreach (array_keys($changes) as $field) {
+                    $oldValues[$field] = $ticket->getOriginal($field);
+                }
+
+                \App\Models\TicketAudit::create([
+                    'ticket_id' => $ticket->ticket_id,
+                    'user_id' => auth()->id(),
+                    'action' => 'updated',
+                    'old_values' => $oldValues,
+                    'new_values' => $changes,
+                    'created_at' => now(),
+                ]);
+            }
+        });
+
+        static::deleted(function ($ticket) {
+            \App\Models\TicketAudit::create([
+                'ticket_id' => $ticket->ticket_id,
+                'user_id' => auth()->id(),
+                'action' => 'deleted',
+                'old_values' => $ticket->getAttributes(),
+                'new_values' => null,
+                'created_at' => now(),
+            ]);
+        });
+    }
+
 }
