@@ -447,4 +447,5 @@
     
     @stack('scripts')
 </body>
+@include('partials.virtual-assistant')
 </html>
