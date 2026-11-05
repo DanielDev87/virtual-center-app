@@ -103,6 +103,7 @@
                    
                    
                     @include('partials.ticket-sla-status', ['ticket' => $ticket])
+                    @include('partials.similar-tickets', ['ticket' => $ticket])
                     @include('partials.ticket-answers', ['ticket' => $ticket])
 
                     @php $visibleEvidences = $ticket->evidences->where('storage_disk', '!=', 'richtext_filesystem'); @endphp
