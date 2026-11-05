@@ -518,6 +518,124 @@ $(document).ready(function() {
         }
     });
 
+        // ===== HU-049: posibles solicitudes duplicadas =====
+    (function () {
+        const similarForm = document.getElementById('serviceRequestForm');
+        const similarTopic = document.getElementById('request_type_id');
+        const similarTitle = similarForm ? similarForm.querySelector('[name="title"]') : null;
+        if (!similarForm || !similarTopic || !similarTitle) { return; }
+
+        const similarEndpoint = @json(route('service-management.similar'));
+        const box = document.createElement('div');
+        box.id = 'similar-tickets-box';
+        box.className = 'alert alert-warning mt-2 d-none';
+        box.setAttribute('role', 'status');
+        similarTitle.insertAdjacentElement('afterend', box);
+
+        let timer = null;
+        let lastQuery = '';
+        let dismissedFor = '';
+
+        function editorText() {
+            const editor = document.querySelector('#description_editor .ql-editor');
+            return editor ? (editor.innerText || '').trim().slice(0, 600) : '';
+        }
+
+        function node(tag, className, text) {
+            const element = document.createElement(tag);
+            if (className) { element.className = className; }
+            if (text !== undefined && text !== null) { element.textContent = text; }
+            return element;
+        }
+
+        function hideBox() {
+            box.classList.add('d-none');
+            box.innerHTML = '';
+        }
+
+        function render(results) {
+            box.innerHTML = '';
+            box.appendChild(node('strong', null, 'Ya existen solicitudes abiertas parecidas en este tópico.'));
+            box.appendChild(node('div', 'small', 'Revisa si ya reportaron lo mismo antes de continuar. Es solo una sugerencia: tú decides si sigues con tu solicitud, y el sistema no combina ni cierra solicitudes por su cuenta.'));
+
+            const list = document.createElement('ul');
+            list.className = 'mb-2 mt-2';
+
+            results.forEach(function (item) {
+                const li = document.createElement('li');
+
+                if (item.accessible && item.url) {
+                    const link = node('a', null, '#' + item.ticket_number + ' - ' + item.title);
+                    link.href = item.url;
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    li.appendChild(link);
+                    li.appendChild(node('span', 'text-muted small', ' (' + item.status + ', ' + item.created_at + ')'));
+                } else {
+                    li.appendChild(node('span', null, 'Solicitud abierta similar'));
+                    li.appendChild(node('span', 'text-muted small', ' (' + item.status + ', ' + item.created_at + '). No tienes permiso para abrirla.'));
+                }
+
+                list.appendChild(li);
+            });
+
+            box.appendChild(list);
+
+            const dismiss = node('button', 'btn btn-sm btn-outline-secondary', 'Entendido, continuar con mi solicitud');
+            dismiss.type = 'button';
+            dismiss.addEventListener('click', function () {
+                dismissedFor = lastQuery;
+                hideBox();
+            });
+            box.appendChild(dismiss);
+            box.classList.remove('d-none');
+        }
+
+        async function check() {
+            const topic = similarTopic.value;
+            const title = similarTitle.value.trim();
+            const description = editorText();
+
+            if (!topic || (title.length < 4 && description.length < 15)) {
+                hideBox();
+                return;
+            }
+
+            const key = new URLSearchParams({ request_type_id: topic, title: title, description: description }).toString();
+            if (key === lastQuery) { return; }
+            lastQuery = key;
+
+            try {
+                const response = await fetch(similarEndpoint + '?' + key, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (!response.ok) { hideBox(); return; }
+
+                const data = await response.json();
+
+                if (key === dismissedFor || !data.results || data.results.length === 0) {
+                    hideBox();
+                    return;
+                }
+
+                render(data.results);
+            } catch (error) {
+                hideBox();
+            }
+        }
+
+        function schedule() {
+            clearTimeout(timer);
+            timer = setTimeout(check, 700);
+        }
+
+        similarTitle.addEventListener('input', schedule);
+        similarTopic.addEventListener('change', schedule);
+        if (typeof quill !== 'undefined') { quill.on('text-change', schedule); }
+    })();    
+
+
     const initialDescription = $('#description').val();
     if (initialDescription) {
         quill.clipboard.dangerouslyPasteHTML(initialDescription);
