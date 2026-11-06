@@ -941,6 +941,12 @@ class AreaAdminController extends Controller
 
             $tickets = $query->latest()->get();
 
+            
+            if ($request->boolean('export') && $tickets->isEmpty()) {
+                return redirect()->route('area-admin.reports.index', $request->except(['export', 'format']))
+                    ->with('error', 'No hay datos para exportar con los filtros aplicados.');
+            }
+
             $statusNames   = [1 => 'Pendiente', 2 => 'En Progreso', 3 => 'Completado', 4 => 'Cancelado'];
             $phaseNames    = ['Analysis' => 'Análisis', 'Design' => 'Diseño', 'Development' => 'Desarrollo', 'Implementation' => 'Implementación', 'Evaluation' => 'Evaluación'];
             $priorityNames = [1 => 'Baja', 2 => 'Media', 3 => 'Alta (Afecta operación)', 4 => 'Urgente (Suspende operación)', 'low' => 'Baja', 'medium' => 'Media', 'high' => 'Alta (Afecta operación)', 'urgent' => 'Urgente (Suspende operación)'];
