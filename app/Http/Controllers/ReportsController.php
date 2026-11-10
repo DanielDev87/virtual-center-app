@@ -12,12 +12,69 @@ use Illuminate\Support\Facades\Response;
 
 class ReportsController extends Controller
 {
+    private const STATUS_NAMES = [
+        1 => 'Pendiente',
+        2 => 'En Progreso',
+        3 => 'Completado',
+        4 => 'Cancelado',
+        5 => 'Realizado por Operario',
+    ];
+
+    private const PRIORITY_ALIASES = [
+        'low' => 1,
+        'medium' => 2,
+        'high' => 3,
+        'urgent' => 4,
+    ];
+
     /**
      * Determinar si la petición solicita previsualización en pantalla.
      */
     private function shouldPreview(Request $request): bool
     {
         return $request->boolean('preview');
+    }
+
+    /**
+     * Nombre legible de un estado (si no se reconoce, se devuelve tal cual).
+     */
+    private function statusLabel($value)
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return self::STATUS_NAMES[(int) $value] ?? $value;
+    }
+
+    /**
+     * El formulario envía low/medium/high/urgent y la base guarda 1 a 4: se aceptan ambos.
+     */
+    private function normalizePriority($value): int
+    {
+        $key = strtolower((string) $value);
+
+        return self::PRIORITY_ALIASES[$key] ?? (int) $value;
+    }
+
+    /**
+     * Si no hay datos, no se genera el archivo: se informa a la persona.
+     */
+    private function noDataRedirect()
+    {
+        return redirect()->route('admin.reports.index')
+            ->with('error', 'No hay datos para exportar con los filtros aplicados. Ajusta los filtros e inténtalo de nuevo.');
+    }
+
+    /**
+     * Quita referencias a evidencias y etiquetas del texto de un avance.
+     */
+    private function cleanProgressText(?string $text): string
+    {
+        $text = preg_replace('/\[attachments:[^\]]*\]/i', '', (string) $text) ?? '';
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags($text)) ?? '');
+
+        return mb_strlen($text) > 300 ? mb_substr($text, 0, 297) . '...' : $text;
     }
 
     /**
@@ -110,7 +167,7 @@ class ReportsController extends Controller
             $query->where('status', $request->status);
         }
         if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
+            $query->where('priority', $this->normalizePriority($request->priority));
         }
         if ($request->filled('current_phase')) {
             $query->where('current_phase', $request->current_phase);
@@ -294,12 +351,16 @@ class ReportsController extends Controller
         $filters = $this->cleanFilters([
             'Fecha inicio' => $request->start_date,
             'Fecha fin' => $request->end_date,
-            'Estado' => $request->status,
+            'Estado' => $this->statusLabel($request->status),
             'Tópico' => $request->filled('request_type_id') ? optional(RequestType::find($request->request_type_id))->type_name : null,
         ]);
 
         if ($this->shouldPreview($request)) {
             return $this->renderPreview('Reporte de Solicitantes Frecuentes', $columns, $rows, $filters);
+        }
+
+        if (empty($rows)) {
+            return $this->noDataRedirect();
         }
 
         $format = $this->resolveExportFormat($request);
@@ -320,7 +381,6 @@ class ReportsController extends Controller
     {
         $filename = 'reporte_tickets_' . date('Y-m-d_His') . '.xls';
 
-        $statusNames = [1 => 'Pendiente', 2 => 'En Progreso', 3 => 'Completado', 4 => 'Cancelado'];
         $phaseNames = [
             'Analysis' => 'Análisis',
             'Design' => 'Diseño',
@@ -350,7 +410,7 @@ class ReportsController extends Controller
                 $ticket->ticket_number,
                 $ticket->title,
                 $ticket->requestType->type_name ?? 'N/A',
-                $statusNames[$ticket->status] ?? 'Desconocido',
+                self::STATUS_NAMES[(int) $ticket->status] ?? 'Desconocido',
                 $priorityNames[(string)($ticket->priority ?? '')] ?? ($ticket->priority ?? 'N/A'),
                 $phaseNames[$ticket->current_phase] ?? ($ticket->current_phase ?? 'N/A'),
                 ($ticket->progress_percentage ?? 0) . '%',
@@ -366,13 +426,17 @@ class ReportsController extends Controller
         $filters = $this->cleanFilters([
             'Fecha inicio' => $request->start_date,
             'Fecha fin' => $request->end_date,
-            'Estado' => $request->filled('status') ? ($statusNames[$request->status] ?? $request->status) : null,
+            'Estado' => $this->statusLabel($request->status),
             'Prioridad' => $request->filled('priority') ? ($priorityNames[(string)$request->priority] ?? $request->priority) : null,
             'Fase ADDIE' => $request->filled('current_phase') ? ($phaseNames[$request->current_phase] ?? $request->current_phase) : null,
         ]);
 
         if ($this->shouldPreview($request)) {
             return $this->renderPreview($title, $columns, $rows, $filters);
+        }
+
+        if (empty($rows)) {
+            return $this->noDataRedirect();
         }
 
         $format = $this->resolveExportFormat($request);
@@ -430,6 +494,10 @@ class ReportsController extends Controller
             return $this->renderPreview('Reporte de Colaboradores', $columns, $rows, $filters);
         }
 
+        if (empty($rows)) {
+            return $this->noDataRedirect();
+        }
+
         $format = $this->resolveExportFormat($request);
         if ($format === 'csv') {
             return $this->exportCsv(
@@ -461,7 +529,7 @@ class ReportsController extends Controller
             $rows[] = [
                 $item->ticket->ticket_number ?? 'N/A',
                 $item->user->user_name ?? 'N/A',
-                $item->progress_description,
+                $this->cleanProgressText($item->progress_description),
                 ($item->progress_percentage ?? 0) . '%',
                 optional($item->created_at)->format('Y-m-d H:i:s') ?? 'N/A',
             ];
@@ -474,6 +542,10 @@ class ReportsController extends Controller
 
         if ($this->shouldPreview($request)) {
             return $this->renderPreview('Reporte de Progreso', $columns, $rows, $filters);
+        }
+
+        if (empty($rows)) {
+            return $this->noDataRedirect();
         }
 
         $format = $this->resolveExportFormat($request);
@@ -500,8 +572,6 @@ class ReportsController extends Controller
     private function exportTopicsToExcel($topicStats, Request $request)
     {
         $filename = 'reporte_topicos_' . date('Y-m-d_His') . '.xls';
-
-        $statusNames = [1 => 'Pendiente', 2 => 'En Progreso', 3 => 'Completado', 4 => 'Cancelado'];
 
         $columns = [
             'Tópico',
@@ -534,7 +604,7 @@ class ReportsController extends Controller
         $filters = $this->cleanFilters([
             'Fecha inicio' => $request->start_date,
             'Fecha fin' => $request->end_date,
-            'Estado' => $request->filled('status') ? ($statusNames[$request->status] ?? $request->status) : null,
+            'Estado' => $this->statusLabel($request->status),
             'Tópico' => $request->filled('request_type_id')
                 ? optional(RequestType::find($request->request_type_id))->type_name
                 : null,
@@ -542,6 +612,10 @@ class ReportsController extends Controller
 
         if ($this->shouldPreview($request)) {
             return $this->renderPreview('Reporte de Solicitudes por Tópico', $columns, $rows, $filters);
+        }
+
+        if (empty($rows)) {
+            return $this->noDataRedirect();
         }
 
         $format = $this->resolveExportFormat($request);
@@ -599,6 +673,7 @@ class ReportsController extends Controller
 
             fputcsv($file, [$title]);
             fputcsv($file, ['Generado', date('Y-m-d H:i:s')]);
+            fputcsv($file, ['Total de registros', count($rows)]);
 
             if (!empty($filters)) {
                 fputcsv($file, ['Filtros aplicados']);
@@ -705,7 +780,7 @@ class ReportsController extends Controller
             @media print { body { margin: 10px; } }
         </style></head><body>
             <div class="title">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</div>
-            <div class="meta"><strong>Generado:</strong> ' . htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8') . '</div>'
+            <div class="meta"><strong>Generado:</strong> ' . htmlspecialchars($generatedAt, ENT_QUOTES, 'UTF-8') . ' | <strong>Total de registros:</strong> ' . count($rows) . '</div>'
             . $filtersHtml .
             '<table><thead><tr>' . $headerCells . '</tr></thead><tbody>' . $bodyRows . '</tbody></table>'
             . $printBlock .
