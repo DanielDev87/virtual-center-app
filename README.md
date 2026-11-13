@@ -18,7 +18,7 @@
 
 ## 📋 Descripción
 
-La **Mesa de Servicio Universidad Católica Luis Amigó** es un sistema moderno diseñado para la gestión integral y colaboración virtual académica. Desarrollado bajo principios de la Ciencia Abierta, este software optimiza el flujo de trabajo resolviendo tickets, gestionando colaboradores mediante Sprints en esquema SCRUM, e impulsando la evaluación continua mediante Fases **ADDIE** (Analysis, Design, Development, Implementation, Evaluation).
+La **Mesa de Servicio ** es un sistema moderno diseñado para la gestión integral y colaboración virtual académica. Desarrollado bajo principios de la Ciencia Abierta, este software optimiza el flujo de trabajo resolviendo tickets, gestionando colaboradores mediante Sprints en esquema SCRUM, e impulsando la evaluación continua mediante Fases **ADDIE** (Analysis, Design, Development, Implementation, Evaluation).
 
 Esta plataforma centraliza requerimientos académicos, de diseño y desarrollo, permitiendo conectar gestores, departamentos e infraestructura TI en un entorno en línea sin fricciones.
 
@@ -166,7 +166,7 @@ cp env.example .env
 Editar el archivo `.env` con tus configuraciones:
 
 ```env
-APP_NAME="Mesa de Servicio Universidad Católica Luis Amigó"
+APP_NAME="Mesa de Servicio"
 APP_ENV=local
 APP_KEY=
 APP_DEBUG=true
